@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.view.Menu;
 
 /**
- * Blabla. Sprawdzam czy to zasrane repo działa
  * @author lukaszSA
  *
  */
