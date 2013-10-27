@@ -4,6 +4,12 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 
+/**
+ * Blabla. Sprawdzam czy to zasrane repo działa
+ * @author lukaszSA
+ *
+ */
+
 public class MainMenuActivity extends Activity {
 
 	@Override
