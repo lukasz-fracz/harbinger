@@ -1,48 +1,65 @@
 package com.project.harbinger;
 
+import org.andengine.engine.Engine;
+import org.andengine.engine.LimitedFPSEngine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
-import org.andengine.engine.options.resolutionpolicy.FillResolutionPolicy;
+import org.andengine.engine.options.WakeLockOptions;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.Background;
-import org.andengine.ui.activity.SimpleBaseGameActivity;
+import org.andengine.ui.activity.BaseGameActivity;
 
-import android.os.Bundle;
-import android.app.Activity;
-import android.view.Menu;
+import com.project.harbinger.manager.ResourcesManager;
 
 /**
- * @author lukaszSA
+ * @author Łukasz Frącz
  *
  */
 
-public class MainMenuActivity extends SimpleBaseGameActivity {
-	
-	private Camera camera;
-	private static final int CAMERA_WIDTH = 480;
-	private static final int CAMERA_HEIGHT = 800;
+public class MainMenuActivity extends BaseGameActivity {
 
+	private Camera camera;
+	private ResourcesManager resourcesManager;
+	
+	public Engine onCreateEngine(EngineOptions pEngineOptions) {
+	    return new LimitedFPSEngine(pEngineOptions, 60);
+	}
+	
 	@Override
 	public EngineOptions onCreateEngineOptions() {
-		camera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-	    EngineOptions engineOptions = new EngineOptions(true, ScreenOrientation.PORTRAIT_FIXED, 
-	    new FillResolutionPolicy(), camera);
-	    return engineOptions;
+		camera = new Camera(0, 0, 480, 800);
+		
+		EngineOptions engineOptions = new EngineOptions(true, 
+				ScreenOrientation.PORTRAIT_FIXED, 
+				new RatioResolutionPolicy(480, 800), camera);
+		engineOptions.getAudioOptions().setNeedsMusic(true).setNeedsSound(true);
+		engineOptions.setWakeLockOptions(WakeLockOptions.SCREEN_ON);
+		
+		return engineOptions;
 	}
 
 	@Override
-	protected void onCreateResources() {
+	public void onCreateResources(
+			OnCreateResourcesCallback pOnCreateResourcesCallback)
+			throws Exception {
+		ResourcesManager.prepareManager(mEngine, this, camera, getVertexBufferObjectManager());
+		resourcesManager = ResourcesManager.getInstance();
+		pOnCreateResourcesCallback.onCreateResourcesFinished();
+	}
+
+	@Override
+	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback)
+			throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected Scene onCreateScene() {
-		 Scene scene = new Scene();
-	     scene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
-	     return scene;
+	public void onPopulateScene(Scene pScene,
+			OnPopulateSceneCallback pOnPopulateSceneCallback) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
-
 
 }
