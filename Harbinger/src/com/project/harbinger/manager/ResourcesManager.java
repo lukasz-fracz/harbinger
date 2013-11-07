@@ -2,7 +2,21 @@ package com.project.harbinger.manager;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
+import org.andengine.opengl.texture.ITexture;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.texture.atlas.bitmap.BuildableBitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
+import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
+import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.util.debug.Debug;
+
+import android.graphics.Color;
 
 import com.project.harbinger.MainMenuActivity;
 
@@ -29,28 +43,91 @@ public class ResourcesManager {
 	private Camera camera;
 	private VertexBufferObjectManager vbom;
 	
+	// splash
+	private ITextureRegion splashRegion;
+	private BitmapTextureAtlas splashTextureAtlas;
+	
+	public void loadSplashScreen() {
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
+		splashTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(),
+				278, 449, TextureOptions.BILINEAR);
+		splashRegion = BitmapTextureAtlasTextureRegionFactory
+				.createFromAsset(splashTextureAtlas, activity, "splash.png",
+				0, 0);
+		splashTextureAtlas.load();
+	}
+	
+	public void unloadSplashScreen() {
+		splashTextureAtlas.unload();
+		splashRegion = null;		
+	}
+	
+	// menu
+	private ITextureRegion menuBackgroundRegion;
+	private ITextureRegion singleButtonRegion;
+	private ITextureRegion multiButtonRegion;
+	private BuildableBitmapTextureAtlas menuTextureAtlas;
+	
+	
 	private void loadMenuGraphics() {
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/menu/");
+		menuTextureAtlas = new BuildableBitmapTextureAtlas(activity.getTextureManager(),
+				1024, 1024, TextureOptions.BILINEAR);
+		menuBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "menu_background.png");
+		singleButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "single_button.png");
+		multiButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "multi_button.png");
+		try {
+			menuTextureAtlas.build(
+					new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+			menuTextureAtlas.load();
+		} catch (TextureAtlasBuilderException e) {
+			Debug.e(e);
+		}
+	}
+	
+	public void unloadMenuTextures() {
+		menuTextureAtlas.unload();
+	}
+	
+	public void loadMenuTextures() {
+		menuTextureAtlas.load();
+	}
+	
+	// loading
+	private Font font;
+	private void loadMenuFonts() {
+		FontFactory.setAssetBasePath("fonts/");
+		ITexture mainFontTexture = new BitmapTextureAtlas(activity.getTextureManager(),
+				256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		
+		font = FontFactory.createStrokeFromAsset(activity.getFontManager(),
+				mainFontTexture, activity.getAssets(), "7TH.ttf", 50, true,
+				Color.WHITE, 2, Color.BLACK);
+		font.load();
+	}
+	
+	public Font getFont() {
+		return font;
 	}
 	
 	private void loadGameGraphics() {
 		
 	}
 	
-	public void loadSplashScreen() {
-		
-	}
-	
-	public void unloadSplashScreen() {
-		
-	}
-	
 	public void loadMenuResources() {
 		loadMenuGraphics();
+		loadMenuFonts();
 	}
 	
 	public void loadGameResources() {
 		loadGameGraphics();
+	}
+	
+	public void unloadGameResources() {
+		
 	}
 	
 	public Engine getEngine() {
@@ -67,5 +144,21 @@ public class ResourcesManager {
 	
 	public VertexBufferObjectManager getVbom() {
 		return vbom;
+	}
+	
+	public ITextureRegion getSplashRegion() {
+		return splashRegion;
+	}
+	
+	public ITextureRegion getMenuBackgroundRegion() {
+		return menuBackgroundRegion;
+	}
+	
+	public ITextureRegion getSingleButtonRegion() {
+		return singleButtonRegion;
+	}
+	
+	public ITextureRegion getMultiButtonRegion() {
+		return multiButtonRegion;
 	}
 }

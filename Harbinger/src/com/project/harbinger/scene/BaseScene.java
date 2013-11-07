@@ -1,4 +1,4 @@
-package com.project.harbinger.base;
+package com.project.harbinger.scene;
 
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
