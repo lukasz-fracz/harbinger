@@ -104,7 +104,7 @@ public class ResourcesManager {
 				256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		
 		font = FontFactory.createStrokeFromAsset(activity.getFontManager(),
-				mainFontTexture, activity.getAssets(), "7TH.ttf", 50, true,
+				mainFontTexture, activity.getAssets(), "7TH.ttf", 30, true,
 				Color.WHITE, 2, Color.BLACK);
 		font.load();
 	}
@@ -113,8 +113,34 @@ public class ResourcesManager {
 		return font;
 	}
 	
+	// game
+	private BuildableBitmapTextureAtlas gameTextureAtlas;
+	private ITextureRegion playerRegion;
+	
+	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
+		return gameTextureAtlas;
+	}
+	
+	public ITextureRegion getPlayerRegion() {
+		return playerRegion;
+	}
+	
 	private void loadGameGraphics() {
-		
+		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
+	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
+	    		activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
+	    
+	    playerRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "player.png");
+	    
+	    try  {
+	        gameTextureAtlas.build(new 
+	        		BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
+	        gameTextureAtlas.load();
+	    } 
+	    catch (TextureAtlasBuilderException e) {
+	        Debug.e(e);
+	    }
 	}
 	
 	public void loadMenuResources() {
