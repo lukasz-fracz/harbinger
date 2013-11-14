@@ -16,9 +16,14 @@ public class Missile extends Sprite {
 	public static final String MISSILE_USER_DATA = "missile";
 	
 	private Body body;
+	private MissileType type;
 	
-	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
+	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
+			MissileType type) {
         super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo);
+        
+        this.type = type;
+        
         createPhysics(camera, physicsWorld);
     }
 	
@@ -29,7 +34,11 @@ public class Missile extends Sprite {
 		body.setUserData(MISSILE_USER_DATA);
 		body.setFixedRotation(true);
 		body.setBullet(true);
-		body.setLinearVelocity(0, -10);
+		if (type == MissileType.PLAYER) {
+			body.setLinearVelocity(0, -10);
+		} else {
+			body.setLinearVelocity(0, 10);
+		}
 		
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false) {
 	        @Override
@@ -38,4 +47,6 @@ public class Missile extends Sprite {
 	        }
 	    });
 	}
+	
+	public enum MissileType { PLAYER, ENEMY };
 }

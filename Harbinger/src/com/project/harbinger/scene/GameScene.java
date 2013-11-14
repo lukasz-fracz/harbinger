@@ -33,6 +33,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
+import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.gameObject.Player;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
@@ -260,7 +261,7 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y) {
-		Sprite missile = new Missile(x, y, vbom, camera, physicsWorld);
+		Sprite missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER);
 		missile.setCullingEnabled(true);
 		this.attachChild(missile);
 	}
