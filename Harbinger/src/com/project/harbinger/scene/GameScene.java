@@ -107,7 +107,6 @@ public class GameScene extends BaseScene {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(+10, 0);
-	            	GameScene.this.creteMissile(100, 100);
 	            } else if (touchEvent.isActionUp() || 
 	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
 	            	player.setVelocity(0, 0);
