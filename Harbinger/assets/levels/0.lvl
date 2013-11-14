@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <level width="1000" height="780">    
     <entity x="10" y="700" type="player"/>
+    <entity x="10" y="10" type="meteor"/>
+    <entity x="100" y="10" type="meteor" />
 </level>

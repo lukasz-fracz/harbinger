@@ -22,8 +22,17 @@ import org.andengine.util.level.LevelLoader;
 import org.andengine.util.level.constants.LevelConstants;
 import org.xml.sax.Attributes;
 
+import android.view.MotionEvent;
+
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Manifold;
+import com.project.harbinger.gameObject.Meteor;
+import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Player;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
@@ -84,9 +93,11 @@ public class GameScene extends BaseScene {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(-10, 0);
-	            } else if (touchEvent.isActionUp()) {
+	            } else if (touchEvent.isActionUp() || 
+	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
 	            	player.setVelocity(0, 0);
-	            }
+	            }	            
+	            
 	            return true;
 	        };
 	    };
@@ -95,7 +106,9 @@ public class GameScene extends BaseScene {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(+10, 0);
-	            } else if (touchEvent.isActionUp()) {
+	            	GameScene.this.creteMissile(100, 100);
+	            } else if (touchEvent.isActionUp() || 
+	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
 	            	player.setVelocity(0, 0);
 	            }
 	            return true;
@@ -106,7 +119,8 @@ public class GameScene extends BaseScene {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(0, -10);
-	            } else if (touchEvent.isActionUp()) {
+	            } else if (touchEvent.isActionUp() || 
+	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
 	            	player.setVelocity(0, 0);
 	            }
 	            return true;
@@ -117,9 +131,16 @@ public class GameScene extends BaseScene {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(0, 10);
-	            } else if (touchEvent.isActionUp()) {
+	            } else if (touchEvent.isActionUp() || 
+	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
 	            	player.setVelocity(0, 0);
 	            }
+	            return true;
+	        };
+	    };
+	    final Rectangle fire = new Rectangle(300, 200, 60, 60, vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            creteMissile(player.getX() + 20, player.getY() - 35);
 	            return true;
 	        };
 	    };
@@ -132,6 +153,8 @@ public class GameScene extends BaseScene {
 	    gameHUD.attachChild(down);
 	    gameHUD.registerTouchArea(up);
 	    gameHUD.registerTouchArea(down);
+	    gameHUD.registerTouchArea(fire);
+	    gameHUD.attachChild(fire);
 	    
 		camera.setHUD(gameHUD);
 	}
@@ -146,6 +169,34 @@ public class GameScene extends BaseScene {
 	private void createPhysics() {
 		physicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
+		physicsWorld.setContactListener(createContactListener());
+	}
+	
+	private ContactListener createContactListener() {
+		ContactListener contactListener = new ContactListener() {
+
+			@Override
+			public void beginContact(Contact contact) {
+				Fixture first = contact.getFixtureA();
+				Fixture second = contact.getFixtureB();
+				if (first.getBody().getUserData().equals("player") && 
+					second.getBody().getUserData().equals("meteor")) {
+					Debug.e("Player z meteorem!");
+				}
+			}
+
+			@Override
+			public void endContact(Contact contact) {}
+
+			@Override
+			public void preSolve(Contact contact, Manifold oldManifold) {}
+
+			@Override
+			public void postSolve(Contact contact, ContactImpulse impulse) {}
+			
+		};
+		
+		return contactListener;		
 	}
 	
 	// level loading
@@ -155,6 +206,7 @@ public class GameScene extends BaseScene {
 	private static final String TAG_ENTITY = "entity";
 	
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
 	
 	private Player player;
 
@@ -188,6 +240,8 @@ public class GameScene extends BaseScene {
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
 	    	                player = new Player(x, y, vbom, camera, physicsWorld);
 	    	                levelObject = player;
+	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
+	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }
@@ -203,6 +257,12 @@ public class GameScene extends BaseScene {
 				} catch (IOException e) {
 					Debug.e(e);
 				}
+	}
+	
+	public void creteMissile(float x, float y) {
+		Sprite missile = new Missile(x, y, vbom, camera, physicsWorld);
+		missile.setCullingEnabled(true);
+		this.attachChild(missile);
 	}
 	
 }
