@@ -1,8 +1,11 @@
 package com.project.harbinger.scene;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.Background;
@@ -10,6 +13,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.input.touch.TouchEvent;
@@ -25,12 +29,14 @@ import org.xml.sax.Attributes;
 import android.view.MotionEvent;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.project.harbinger.gameObject.GameObject;
 import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Missile.MissileType;
@@ -140,7 +146,7 @@ public class GameScene extends BaseScene {
 	    };
 	    final Rectangle fire = new Rectangle(300, 200, 60, 60, vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            creteMissile(player.getX() + 20, player.getY() - 35);
+	            creteMissile(player.getX() + 10, player.getY() - 35);
 	            return true;
 	        };
 	    };
@@ -170,6 +176,24 @@ public class GameScene extends BaseScene {
 		physicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
+		registerUpdateHandler(createIUpdateHandler());
+	}
+	
+	private IUpdateHandler createIUpdateHandler() {
+		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
+
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				deleteObjectForDestroy();
+			}
+
+			@Override
+			public void reset() {
+			}
+			
+		};
+		
+		return iUpdateHandler;
 	}
 	
 	private ContactListener createContactListener() {
@@ -177,11 +201,12 @@ public class GameScene extends BaseScene {
 
 			@Override
 			public void beginContact(Contact contact) {
-				Fixture first = contact.getFixtureA();
-				Fixture second = contact.getFixtureB();
-				if (first.getBody().getUserData().equals("player") && 
-					second.getBody().getUserData().equals("meteor")) {
-					Debug.e("Player z meteorem!");
+				final Fixture first = contact.getFixtureA();
+				final Fixture second = contact.getFixtureB();
+				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
+						second.getBody().getUserData().equals(Missile.MISSILE_USER_DATA)) {
+					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 				}
 			}
 
@@ -199,6 +224,27 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
+	private void deleteObjectForDestroy() {
+		if (physicsWorld != null) {
+			Iterator<GameObject> objects = gameObjects.iterator();
+			
+			while (objects.hasNext()) {
+				GameObject next = objects.next();
+				if (next.getBody() != null && 
+						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
+							findPhysicsConnectorByShape(next);
+					if (physicsConnector != null) {
+						physicsWorld.unregisterPhysicsConnector(physicsConnector);
+						next.getBody().setActive(false);
+						physicsWorld.destroyBody(next.getBody());
+						detachChild(next);
+					}
+				}
+			}
+		}
+	}
+	
 	// level loading
 	private static final String TAG_ENTITY_ATTRIBUTE_X = "x";
 	private static final String TAG_ENTITY_ATTRIBUTE_Y = "y";
@@ -209,8 +255,10 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
 	
 	private Player player;
+	private ArrayList<GameObject> gameObjects;
 
 	private void loadLevel(int levelID) {
+		gameObjects = new ArrayList<GameObject>();
 	    final LevelLoader levelLoader = new LevelLoader("");
 	    
 	    final FixtureDef FIXTURE_DEF = PhysicsFactory.createFixtureDef(0, 0.01f, 0.5f);
@@ -235,7 +283,7 @@ public class GameScene extends BaseScene {
 	    	            final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_Y);
 	    	            final String type = SAXUtils.getAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_TYPE);
 	    	            
-	    	            final Sprite levelObject;
+	    	            final GameObject levelObject;
 	    	            
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
 	    	                player = new Player(x, y, vbom, camera, physicsWorld);
@@ -245,8 +293,11 @@ public class GameScene extends BaseScene {
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }
+	    	            
+	    	            gameObjects.add(levelObject);
 
 	    	            levelObject.setCullingEnabled(true);
+	    	            
 
 	    	            return levelObject;
 	    	        }
@@ -260,9 +311,9 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y) {
-		Sprite missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER);
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER);
 		missile.setCullingEnabled(true);
-		this.attachChild(missile);
+		attachChild(missile);
+		gameObjects.add(missile);
 	}
-	
 }

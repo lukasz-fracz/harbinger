@@ -1,23 +1,19 @@
 package com.project.harbinger.gameObject;
 
 import org.andengine.engine.camera.Camera;
-import org.andengine.entity.sprite.Sprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.scene.GameScene;
 
-public class Player extends Sprite {
+public class Player extends GameObject {
 
 	public static final String PLAYER_USER_DATA = "player";
-	
-	private Body body;
 	
 	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
         super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo);
@@ -43,8 +39,5 @@ public class Player extends Sprite {
 	
 	public void setVelocity(float dx, float dy) {
 		body.setLinearVelocity(dx, dy);
-	}
-	
-	public void fireMissile() {
 	}
 }
