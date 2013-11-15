@@ -32,7 +32,7 @@ public class Player extends GameObject {
 	        public void onUpdate(float pSecondsElapsed) {
 	            super.onUpdate(pSecondsElapsed);
 	            GameScene gameScene = (GameScene) SceneManager.getInstance().getCurrentScene();
-	            gameScene.debugSetPlayerCoordinates(body.getPosition().x, body.getPosition().y);
+	           // gameScene.debugSetPlayerCoordinates(body.getPosition().x, body.getPosition().y);
 	        }
 	    });
 	}

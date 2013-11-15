@@ -30,12 +30,14 @@ import android.view.MotionEvent;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.project.harbinger.gameObject.Bullet;
 import com.project.harbinger.gameObject.GameObject;
 import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
@@ -49,7 +51,8 @@ public class GameScene extends BaseScene {
 	private HUD gameHUD;
 	private Text scoreText;
 	private PhysicsWorld physicsWorld;
-	private Text debugPlayerCoordinates;
+	//private Text debugPlayerCoordinates;
+	private int score;
 	
 	@Override
 	public void createScene() {
@@ -89,12 +92,12 @@ public class GameScene extends BaseScene {
 		scoreText.setText("Score: 0");
 		gameHUD.attachChild(scoreText);
 		
-		debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
+		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
 				"x: 1234567890- y: 1234567890-", new TextOptions(HorizontalAlign.LEFT), vbom);
 		debugPlayerCoordinates.setPosition(0, 700);
 		debugPlayerCoordinates.setText("x: y:");
 		debugPlayerCoordinates.setSize(300, 100);
-		gameHUD.attachChild(debugPlayerCoordinates);
+		gameHUD.attachChild(debugPlayerCoordinates);*/
 		
 		final Rectangle left = new Rectangle(20, 200, 60, 60, vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
@@ -165,11 +168,15 @@ public class GameScene extends BaseScene {
 		camera.setHUD(gameHUD);
 	}
 	
-	public void debugSetPlayerCoordinates(float x, float y) {
+	/*public void debugSetPlayerCoordinates(float x, float y) {
 		String xC = "x: " + String.valueOf(x);
 		String yC = "y: " + String.valueOf(y);
 		
 		debugPlayerCoordinates.setText(xC + "\n" + yC);
+	}*/
+	
+	private void updateScore() {
+		scoreText.setText("Score: " + String.valueOf(score));
 	}
 	
 	private void createPhysics() {
@@ -177,6 +184,27 @@ public class GameScene extends BaseScene {
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
 		registerUpdateHandler(createIUpdateHandler());
+		createBounds();
+	}
+	
+	private void createBounds() {
+		Body body;
+		final Rectangle wall_bottom = new Rectangle(0, 800, 480, 10, vbom);
+		body = PhysicsFactory.createBoxBody(physicsWorld, wall_bottom, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
+	    body.setUserData("wall");
+	    attachChild(wall_bottom);
+	    final Rectangle wall_top = new Rectangle(0, -10, 480, 10, vbom);
+		body = PhysicsFactory.createBoxBody(physicsWorld, wall_top, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
+	    body.setUserData("wall");
+	    attachChild(wall_top);
+	    final Rectangle wall_left = new Rectangle(-10, 0, 10, 800, vbom);
+		body = PhysicsFactory.createBoxBody(physicsWorld, wall_left, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
+	    body.setUserData("wall");
+	    attachChild(wall_left);
+	    final Rectangle wall_right = new Rectangle(480, 0, 10, 800, vbom);
+		body = PhysicsFactory.createBoxBody(physicsWorld, wall_right, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
+	    body.setUserData("wall");
+	    attachChild(wall_right);
 	}
 	
 	private IUpdateHandler createIUpdateHandler() {
@@ -203,6 +231,7 @@ public class GameScene extends BaseScene {
 			public void beginContact(Contact contact) {
 				final Fixture first = contact.getFixtureA();
 				final Fixture second = contact.getFixtureB();
+
 				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
 						second.getBody().getUserData().equals(Missile.MISSILE_USER_DATA)) {
 					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
@@ -235,10 +264,14 @@ public class GameScene extends BaseScene {
 					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
 							findPhysicsConnectorByShape(next);
 					if (physicsConnector != null) {
+						score += next.getScore();
+						updateScore();
+						
 						physicsWorld.unregisterPhysicsConnector(physicsConnector);
 						next.getBody().setActive(false);
 						physicsWorld.destroyBody(next.getBody());
 						detachChild(next);
+						objects.remove();
 					}
 				}
 			}
@@ -253,12 +286,15 @@ public class GameScene extends BaseScene {
 	
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET = "bullet";
 	
 	private Player player;
 	private ArrayList<GameObject> gameObjects;
 
 	private void loadLevel(int levelID) {
 		gameObjects = new ArrayList<GameObject>();
+		score = 0;
+		
 	    final LevelLoader levelLoader = new LevelLoader("");
 	    
 	    final FixtureDef FIXTURE_DEF = PhysicsFactory.createFixtureDef(0, 0.01f, 0.5f);
@@ -290,6 +326,8 @@ public class GameScene extends BaseScene {
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
 	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld);
+	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
+	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }

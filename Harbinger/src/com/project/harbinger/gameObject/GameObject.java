@@ -11,6 +11,7 @@ public class GameObject extends Sprite {
 	public static final String DESTROY_USER_DATA = "destroy";
 	
 	protected Body body;
+	protected int score;
 	
 	public GameObject(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo) {
 		super(pX, pY, region, vbo);
@@ -18,5 +19,9 @@ public class GameObject extends Sprite {
 	
 	public Body getBody() {
 		return body;
+	}
+	
+	public int getScore() {
+		return score;
 	}
 }
