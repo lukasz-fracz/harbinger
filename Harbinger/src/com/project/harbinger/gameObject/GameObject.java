@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 public class GameObject extends Sprite {
 
 	public static final String DESTROY_USER_DATA = "destroy";
+	public static final String DESTROY_BY_WALL_USER_DATA = "destroy1";
 	
 	protected Body body;
 	protected int score;

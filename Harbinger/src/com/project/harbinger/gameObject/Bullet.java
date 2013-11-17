@@ -22,7 +22,7 @@ public class Bullet extends GameObject {
 	
 	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
-				this, BodyType.KinematicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
+				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
 		body.setUserData(BULLET_USER_DATA);
 		body.setFixedRotation(true);

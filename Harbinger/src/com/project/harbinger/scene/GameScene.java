@@ -9,7 +9,6 @@ import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.Background;
-import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
@@ -39,6 +38,8 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.project.harbinger.gameObject.Bullet;
 import com.project.harbinger.gameObject.GameObject;
+import com.project.harbinger.gameObject.LightFighter;
+import com.project.harbinger.gameObject.LightFighter.FighterType;
 import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Missile.MissileType;
@@ -187,23 +188,27 @@ public class GameScene extends BaseScene {
 		createBounds();
 	}
 	
+	private static final String WALL_VERTICAL_USER_DATA = "wallV";
+	private static final String WALL_TOP_USER_DATA = "WALL-E";
+	private static final String WALL_BOTTOM_USER_DATA = "EVA";
+	
 	private void createBounds() {
 		Body body;
 		final Rectangle wall_bottom = new Rectangle(0, 800, 480, 10, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_bottom, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
-	    body.setUserData("wall");
+	    body.setUserData(WALL_BOTTOM_USER_DATA);
 	    attachChild(wall_bottom);
 	    final Rectangle wall_top = new Rectangle(0, -10, 480, 10, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_top, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
-	    body.setUserData("wall");
+	    body.setUserData(WALL_TOP_USER_DATA);
 	    attachChild(wall_top);
-	    final Rectangle wall_left = new Rectangle(-10, 0, 10, 800, vbom);
+	    final Rectangle wall_left = new Rectangle(-10, -3000, 10, 8000, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_left, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
-	    body.setUserData("wall");
+	    body.setUserData(WALL_VERTICAL_USER_DATA);
 	    attachChild(wall_left);
-	    final Rectangle wall_right = new Rectangle(480, 0, 10, 800, vbom);
+	    final Rectangle wall_right = new Rectangle(480, -3000, 10, 8000, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_right, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
-	    body.setUserData("wall");
+	    body.setUserData(WALL_VERTICAL_USER_DATA);
 	    attachChild(wall_right);
 	}
 	
@@ -212,7 +217,7 @@ public class GameScene extends BaseScene {
 
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
-				deleteObjectForDestroy();
+				deleteObjectsForDestroy();
 			}
 
 			@Override
@@ -234,8 +239,26 @@ public class GameScene extends BaseScene {
 
 				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
 						second.getBody().getUserData().equals(Missile.MISSILE_USER_DATA)) {
-					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
+							&& !first.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
+						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					}
+					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
+							&& !second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
+						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					}
+				}
+				
+				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
+						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)) {
+					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
+							!first.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
+					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
+							!second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
 				}
 			}
 
@@ -243,7 +266,22 @@ public class GameScene extends BaseScene {
 			public void endContact(Contact contact) {}
 
 			@Override
-			public void preSolve(Contact contact, Manifold oldManifold) {}
+			public void preSolve(Contact contact, Manifold oldManifold) {
+				final Fixture first = contact.getFixtureA();
+				final Fixture second = contact.getFixtureB();
+				
+				if (first.getBody().getUserData().equals(Player.PLAYER_USER_DATA) || 
+						second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+					return;
+				}
+				
+				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
+						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
+						first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
+						second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
+					contact.setEnabled(false);
+				}
+			}
 
 			@Override
 			public void postSolve(Contact contact, ContactImpulse impulse) {}
@@ -253,19 +291,22 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
-	private void deleteObjectForDestroy() {
+	private void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
 			Iterator<GameObject> objects = gameObjects.iterator();
 			
 			while (objects.hasNext()) {
 				GameObject next = objects.next();
 				if (next.getBody() != null && 
-						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
+						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA)) {
 					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
 							findPhysicsConnectorByShape(next);
 					if (physicsConnector != null) {
-						score += next.getScore();
-						updateScore();
+						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+							score += next.getScore();
+							updateScore();
+						}						
 						
 						physicsWorld.unregisterPhysicsConnector(physicsConnector);
 						next.getBody().setActive(false);
@@ -287,6 +328,8 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET = "bullet";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER = "left-light-fighter";
+	
 	
 	private Player player;
 	private ArrayList<GameObject> gameObjects;
@@ -328,6 +371,8 @@ public class GameScene extends BaseScene {
 	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
 	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld);
+	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, FighterType.LEFT);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }

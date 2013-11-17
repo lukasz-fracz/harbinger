@@ -119,6 +119,7 @@ public class ResourcesManager {
 	private ITextureRegion meteorRegion;
 	private ITextureRegion missileRegion;
 	private ITextureRegion bulletRegion;
+	private ITextureRegion lightFighterRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
@@ -140,6 +141,10 @@ public class ResourcesManager {
 		return bulletRegion;
 	}
 	
+	public ITextureRegion getLightFighterRegion() {
+		return lightFighterRegion;
+	}
+	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -153,6 +158,8 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "missile.png");
 	    bulletRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "bullet.png");
+	    lightFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "fighter_light.png");
 	    
 	    try  {
 	        gameTextureAtlas.build(new 
