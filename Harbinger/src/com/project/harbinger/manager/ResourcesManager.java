@@ -120,6 +120,8 @@ public class ResourcesManager {
 	private ITextureRegion missileRegion;
 	private ITextureRegion bulletRegion;
 	private ITextureRegion lightFighterRegion;
+	private ITextureRegion heavyFighterRegion;
+	private ITextureRegion cruiserRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
@@ -145,6 +147,14 @@ public class ResourcesManager {
 		return lightFighterRegion;
 	}
 	
+	public ITextureRegion getHeavyFighterRegion() {
+		return heavyFighterRegion;
+	}
+	
+	public ITextureRegion getCruiserRegion() {
+		return cruiserRegion;
+	}
+	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -160,6 +170,10 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "bullet.png");
 	    lightFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "fighter_light.png");
+	    heavyFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "fighter_heavy.png");	
+	    cruiserRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "cruiser.png");
 	    
 	    try  {
 	        gameTextureAtlas.build(new 

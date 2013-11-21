@@ -7,4 +7,6 @@
     <entity x="300" y="-1000" type="bullet" />
     <entity x="400" y="-2000" type="bullet" />
     <entity x="300" y="-2000" type="left-light-fighter" />
+    <entity x="300" y="-2500" type="left-heavy-fighter" /> 
+    <entity x="300" y="-3000" type="left-cruiser" /> 
 </level>

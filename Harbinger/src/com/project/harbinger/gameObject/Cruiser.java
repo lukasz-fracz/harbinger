@@ -7,19 +7,22 @@ import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
+import com.project.harbinger.manager.SceneManager;
+import com.project.harbinger.scene.GameScene;
 
-public class Missile extends GameObject {
-	
-	public static final String MISSILE_USER_DATA = "missile";
+public class Cruiser extends ActiveEnemy {
 
-	private MissileType type;
-	
-	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			MissileType type) {
-        super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo);
+	public Cruiser(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
+			ActiveEnemyType type) {
+        super(pX, pY, ResourcesManager.getInstance().getCruiserRegion(), vbo);
         
+        score = 7;
         this.type = type;
+        
+        yVelocity = 3f;
+        xVelocity = 0;
         createPhysics(camera, physicsWorld);
     }
 	
@@ -27,21 +30,25 @@ public class Missile extends GameObject {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
-		body.setUserData(MISSILE_USER_DATA);
+		body.setUserData(ACTIVE_USER_DATA);
 		body.setFixedRotation(true);
-		if (type == MissileType.PLAYER) {
-			body.setLinearVelocity(0, -15);
-		} else {
-			body.setLinearVelocity(0, 15);
-		}
+		body.setLinearVelocity(xVelocity, yVelocity);
 		
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false) {
 	        @Override
 	        public void onUpdate(float pSecondsElapsed) {
 	            super.onUpdate(pSecondsElapsed);
+	            
+	            if (allowToShoot) {
+	            	if (updatesCounter == 30) {
+	            		((GameScene) SceneManager.getInstance().getCurrentScene()).
+	            			creteMissile(getX() + 10, getY() + 90, MissileType.ENEMY);
+	            		updatesCounter = 0;
+	            		return;
+	            	}
+	            	updatesCounter++;
+	            }
 	        }
 	    });
 	}
-	
-	public enum MissileType { PLAYER, ENEMY }
 }

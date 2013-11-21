@@ -9,9 +9,7 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.manager.ResourcesManager;
 
-public class Meteor extends GameObject {
-	
-	public static final String METEOR_USER_DATA = "meteor";
+public class Meteor extends StaticEnemy {
 
 	public Meteor(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
         super(pX, pY, ResourcesManager.getInstance().getMeteorRegion(), vbo);
@@ -23,7 +21,7 @@ public class Meteor extends GameObject {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
-		body.setUserData(METEOR_USER_DATA);
+		body.setUserData(STATIC_USER_DATA);
 		body.setFixedRotation(true);
 		body.setLinearVelocity(0, 2);
 		

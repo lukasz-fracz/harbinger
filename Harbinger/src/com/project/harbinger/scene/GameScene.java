@@ -36,10 +36,13 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.project.harbinger.gameObject.ActiveEnemy;
+import com.project.harbinger.gameObject.ActiveEnemy.ActiveEnemyType;
 import com.project.harbinger.gameObject.Bullet;
+import com.project.harbinger.gameObject.Cruiser;
 import com.project.harbinger.gameObject.GameObject;
+import com.project.harbinger.gameObject.HeavyFighter;
 import com.project.harbinger.gameObject.LightFighter;
-import com.project.harbinger.gameObject.LightFighter.FighterType;
 import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Missile.MissileType;
@@ -150,7 +153,7 @@ public class GameScene extends BaseScene {
 	    };
 	    final Rectangle fire = new Rectangle(300, 200, 60, 60, vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            creteMissile(player.getX() + 10, player.getY() - 35);
+	            creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
 	            return true;
 	        };
 	    };
@@ -218,6 +221,7 @@ public class GameScene extends BaseScene {
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
 				deleteObjectsForDestroy();
+				updateActiveEnemies();
 			}
 
 			@Override
@@ -246,6 +250,28 @@ public class GameScene extends BaseScene {
 					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
 							&& !second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
 						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					}
+				}
+				
+				if ((first.getBody().getUserData().equals(WALL_TOP_USER_DATA) && 
+						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
+						(second.getBody().getUserData().equals(WALL_TOP_USER_DATA) && 
+								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
+					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+					} else {
+						second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+					}
+				}
+				
+				if ((first.getBody().getUserData().equals(WALL_VERTICAL_USER_DATA) && 
+						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
+						(second.getBody().getUserData().equals(WALL_VERTICAL_USER_DATA) && 
+								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
+					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					} else {
+						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
 					}
 				}
 				
@@ -319,6 +345,16 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
+	private void updateActiveEnemies() {
+		for (GameObject object : gameObjects) {
+			if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_START_ME)) {
+				((ActiveEnemy) object).start();
+			} else if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_TURN)) {
+				((ActiveEnemy) object).changeSide();
+			}
+		}
+	}
+	
 	// level loading
 	private static final String TAG_ENTITY_ATTRIBUTE_X = "x";
 	private static final String TAG_ENTITY_ATTRIBUTE_Y = "y";
@@ -329,6 +365,8 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET = "bullet";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER = "left-light-fighter";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER = "left-heavy-fighter";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER = "left-cruiser";
 	
 	
 	private Player player;
@@ -372,7 +410,11 @@ public class GameScene extends BaseScene {
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
 	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, FighterType.LEFT);
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER)) {
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER)) {
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }
@@ -393,8 +435,8 @@ public class GameScene extends BaseScene {
 				}
 	}
 	
-	public void creteMissile(float x, float y) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER);
+	public void creteMissile(float x, float y, MissileType type) {
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);
