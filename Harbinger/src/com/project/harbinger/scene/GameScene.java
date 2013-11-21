@@ -47,6 +47,7 @@ import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.gameObject.Player;
+import com.project.harbinger.gameObject.StaticEnemy;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 
@@ -54,6 +55,7 @@ public class GameScene extends BaseScene {
 
 	private HUD gameHUD;
 	private Text scoreText;
+	private Text gameOverText;
 	private PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
 	private int score;
@@ -94,6 +96,10 @@ public class GameScene extends BaseScene {
 				"Score: 0123456789", new TextOptions(HorizontalAlign.LEFT), vbom);
 		scoreText.setPosition(0, 0);
 		scoreText.setText("Score: 0");
+		gameOverText = new Text(10, 10, resourcesManager.getFont(),
+				"You're dead...", new TextOptions(HorizontalAlign.LEFT), vbom);
+		gameOverText.setPosition(40, 400);
+		gameOverText.setColor(Color.RED);
 		gameHUD.attachChild(scoreText);
 		
 		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
@@ -172,6 +178,11 @@ public class GameScene extends BaseScene {
 		camera.setHUD(gameHUD);
 	}
 	
+	private void showGameOverText() {
+		physicsWorld.clearPhysicsConnectors();
+		gameHUD.attachChild(gameOverText);
+	}
+	
 	/*public void debugSetPlayerCoordinates(float x, float y) {
 		String xC = "x: " + String.valueOf(x);
 		String yC = "y: " + String.valueOf(y);
@@ -240,16 +251,48 @@ public class GameScene extends BaseScene {
 			public void beginContact(Contact contact) {
 				final Fixture first = contact.getFixtureA();
 				final Fixture second = contact.getFixtureB();
+				
+				String firstUserData = (String) first.getBody().getUserData();
+				String secondUserData = (String) second.getBody().getUserData();
+				
+				if (firstUserData.equals(Player.PLAYER_USER_DATA) || secondUserData.equals(Player.PLAYER_USER_DATA)) {
+					if (firstUserData.equals(Player.PLAYER_USER_DATA)) {
+						if (secondUserData.equals(StaticEnemy.STATIC_USER_DATA) || 
+								secondUserData.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							return;
+						}
+					} else {
+						if (firstUserData.equals(StaticEnemy.STATIC_USER_DATA) || 
+								firstUserData.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							return;
+						}
+					}
+				}
 
+				if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA) && 
+						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+					first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					return;
+				}
+				
+				if (first.getBody().getUserData().equals(Player.PLAYER_USER_DATA) ||
+					second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+				}
+				
 				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
 						second.getBody().getUserData().equals(Missile.MISSILE_USER_DATA)) {
 					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
 							&& !first.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
 						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						return;
 					}
 					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
 							&& !second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
 						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						return;
 					}
 				}
 				
@@ -259,8 +302,10 @@ public class GameScene extends BaseScene {
 								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
 					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 						first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+						return;
 					} else {
 						second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+						return;
 					}
 				}
 				
@@ -270,8 +315,10 @@ public class GameScene extends BaseScene {
 								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
 					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						return;
 					} else {
 						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						return;
 					}
 				}
 				
@@ -280,10 +327,12 @@ public class GameScene extends BaseScene {
 					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
 							!first.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
 						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+						return;
 					}
 					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
 							!second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
 						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+						return;
 					}
 				}
 			}
@@ -329,6 +378,9 @@ public class GameScene extends BaseScene {
 					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
 							findPhysicsConnectorByShape(next);
 					if (physicsConnector != null) {
+						if (next instanceof Player) {
+							showGameOverText();
+						}
 						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
 							score += next.getScore();
 							updateScore();
@@ -365,8 +417,11 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET = "bullet";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER = "left-light-fighter";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER = "right-light-fighter";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER = "left-heavy-fighter";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER = "right-heavy-fighter";
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER = "left-cruiser";
+	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER = "right-cruiser";
 	
 	
 	private Player player;
@@ -394,7 +449,7 @@ public class GameScene extends BaseScene {
 	        }
 	    });
 	    
-	    levelLoader.registerEntityLoader("entity", new IEntityLoader() {
+	    levelLoader.registerEntityLoader(TAG_ENTITY, new IEntityLoader() {
 	    	        public IEntity onLoadEntity(final String pEntityName, final Attributes pAttributes) {
 	    	            final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_X);
 	    	            final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_Y);
@@ -411,10 +466,16 @@ public class GameScene extends BaseScene {
 	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
 	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER)) {
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER)) {
 	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER)) {
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER)) {
 	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER)) {
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }

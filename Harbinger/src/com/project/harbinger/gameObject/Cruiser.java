@@ -21,7 +21,7 @@ public class Cruiser extends ActiveEnemy {
         score = 7;
         this.type = type;
         
-        yVelocity = 3f;
+        yVelocity = 5f;
         xVelocity = 0;
         createPhysics(camera, physicsWorld);
     }
