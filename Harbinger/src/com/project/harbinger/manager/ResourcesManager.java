@@ -122,6 +122,11 @@ public class ResourcesManager {
 	private ITextureRegion lightFighterRegion;
 	private ITextureRegion heavyFighterRegion;
 	private ITextureRegion cruiserRegion;
+	private ITextureRegion upButtonRegion;
+	private ITextureRegion downButtonRegion;
+	private ITextureRegion leftButtonRegion;
+	private ITextureRegion rightButtonRegion;
+	private ITextureRegion fireButtonRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
@@ -155,6 +160,25 @@ public class ResourcesManager {
 		return cruiserRegion;
 	}
 	
+	public ITextureRegion getUpButtonRegion() {
+		return upButtonRegion;
+	}
+	
+	public ITextureRegion getDownButtonRegion() {
+		return downButtonRegion;
+	}
+	
+	public ITextureRegion getLeftButtonRegion() {
+		return leftButtonRegion;
+	}
+	
+	public ITextureRegion getRightButtonRegion() {
+		return rightButtonRegion;
+	}
+	public ITextureRegion getFireButtonRegion() {
+		return fireButtonRegion;
+	}
+	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -174,6 +198,16 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "fighter_heavy.png");	
 	    cruiserRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "cruiser.png");
+	    upButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/up.png");
+	    downButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/down.png");
+	    leftButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/left.png");
+	    rightButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/right.png");
+	    fireButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/fire.png");
 	    
 	    try  {
 	        gameTextureAtlas.build(new 

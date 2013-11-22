@@ -9,6 +9,7 @@ import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
@@ -48,6 +49,7 @@ import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.gameObject.Player;
 import com.project.harbinger.gameObject.StaticEnemy;
+import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 
@@ -109,7 +111,7 @@ public class GameScene extends BaseScene {
 		debugPlayerCoordinates.setSize(300, 100);
 		gameHUD.attachChild(debugPlayerCoordinates);*/
 		
-		final Rectangle left = new Rectangle(20, 200, 60, 60, vbom) {
+		final Sprite left = new Sprite(10, 675, ResourcesManager.getInstance().getLeftButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(-10, 0);
@@ -122,7 +124,7 @@ public class GameScene extends BaseScene {
 	        };
 	    };
 		
-	    final Rectangle right = new Rectangle(100, 200, 60, 60, vbom) {
+	    final Sprite right = new Sprite(110, 675, ResourcesManager.getInstance().getRightButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(+10, 0);
@@ -134,7 +136,7 @@ public class GameScene extends BaseScene {
 	        };
 	    };
 	    
-	    final Rectangle up = new Rectangle(100, 100, 60, 60, vbom) {
+	    final Sprite up = new Sprite(60, 625, ResourcesManager.getInstance().getUpButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(0, -10);
@@ -146,7 +148,7 @@ public class GameScene extends BaseScene {
 	        };
 	    };
 	    
-	    final Rectangle down = new Rectangle(100, 300, 60, 60, vbom) {
+	    final Sprite down = new Sprite(60, 725, ResourcesManager.getInstance().getDownButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(0, 10);
@@ -157,7 +159,7 @@ public class GameScene extends BaseScene {
 	            return true;
 	        };
 	    };
-	    final Rectangle fire = new Rectangle(300, 200, 60, 60, vbom) {
+	    final Sprite fire = new Sprite(300, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
 	            return true;
@@ -195,7 +197,7 @@ public class GameScene extends BaseScene {
 	}
 	
 	private void createPhysics() {
-		physicsWorld = new FixedStepPhysicsWorld(30, new Vector2(0, 0), false);
+		physicsWorld = new FixedStepPhysicsWorld(60, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
 		registerUpdateHandler(createIUpdateHandler());
@@ -208,7 +210,7 @@ public class GameScene extends BaseScene {
 	
 	private void createBounds() {
 		Body body;
-		final Rectangle wall_bottom = new Rectangle(0, 800, 480, 10, vbom);
+		final Rectangle wall_bottom = new Rectangle(0, 590, 480, 10, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_bottom, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 	    body.setUserData(WALL_BOTTOM_USER_DATA);
 	    attachChild(wall_bottom);
