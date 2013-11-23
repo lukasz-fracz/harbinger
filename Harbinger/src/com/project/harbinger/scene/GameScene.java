@@ -3,6 +3,7 @@ package com.project.harbinger.scene;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.handler.IUpdateHandler;
@@ -60,10 +61,14 @@ public class GameScene extends BaseScene {
 	private Text gameOverText;
 	private PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
-	private int score;
+	private int score, lifes, currentLevel;
 	
 	@Override
 	public void createScene() {
+		score = 0;
+		currentLevel = 0;
+		lifes = 5;
+		
 		createBackground();
 		createHUD();
 		createPhysics();
@@ -95,13 +100,14 @@ public class GameScene extends BaseScene {
 		gameHUD = new HUD();
 		
 		scoreText = new Text(20, 240, resourcesManager.getFont(),
-				"Score: 0123456789", new TextOptions(HorizontalAlign.LEFT), vbom);
+				"Score: 0123456789\nLifes: 0123456789", new TextOptions(HorizontalAlign.LEFT), vbom);
 		scoreText.setPosition(0, 0);
-		scoreText.setText("Score: 0");
+		scoreText.setText("Score: 0\nLifes: " + String.valueOf(lifes));
 		gameOverText = new Text(10, 10, resourcesManager.getFont(),
 				"You're dead...", new TextOptions(HorizontalAlign.LEFT), vbom);
 		gameOverText.setPosition(40, 400);
 		gameOverText.setColor(Color.RED);
+		
 		gameHUD.attachChild(scoreText);
 		
 		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
@@ -193,7 +199,7 @@ public class GameScene extends BaseScene {
 	}*/
 	
 	private void updateScore() {
-		scoreText.setText("Score: " + String.valueOf(score));
+		scoreText.setText("Score: " + String.valueOf(score) + "\nLifes: " + String.valueOf(lifes));
 	}
 	
 	private void createPhysics() {
@@ -254,20 +260,22 @@ public class GameScene extends BaseScene {
 				final Fixture first = contact.getFixtureA();
 				final Fixture second = contact.getFixtureB();
 				
-				String firstUserData = (String) first.getBody().getUserData();
-				String secondUserData = (String) second.getBody().getUserData();
+				String firstUD = (String) first.getBody().getUserData();
+				String secondUD = (String) second.getBody().getUserData();
 				
-				if (firstUserData.equals(Player.PLAYER_USER_DATA) || secondUserData.equals(Player.PLAYER_USER_DATA)) {
-					if (firstUserData.equals(Player.PLAYER_USER_DATA)) {
-						if (secondUserData.equals(StaticEnemy.STATIC_USER_DATA) || 
-								secondUserData.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
+					if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+								secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 							return;
 						}
 					} else {
-						if (firstUserData.equals(StaticEnemy.STATIC_USER_DATA) || 
-								firstUserData.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+								firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 							return;
 						}
 					}
@@ -282,6 +290,7 @@ public class GameScene extends BaseScene {
 				
 				if (first.getBody().getUserData().equals(Player.PLAYER_USER_DATA) ||
 					second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+					
 				}
 				
 				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
@@ -346,10 +355,22 @@ public class GameScene extends BaseScene {
 			public void preSolve(Contact contact, Manifold oldManifold) {
 				final Fixture first = contact.getFixtureA();
 				final Fixture second = contact.getFixtureB();
-				
-				if (first.getBody().getUserData().equals(Player.PLAYER_USER_DATA) || 
-						second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+				String firstUD = (String) first.getBody().getUserData();
+				String secondUD = (String) second.getBody().getUserData();
+
+				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
 					return;
+					/*Debug.e("TU");
+					if (firstUD.equals(WALL_BOTTOM_USER_DATA) || firstUD.equals(WALL_TOP_USER_DATA) || 
+							firstUD.equals(WALL_VERTICAL_USER_DATA) ||
+							secondUD.equals(WALL_BOTTOM_USER_DATA) || secondUD.equals(WALL_TOP_USER_DATA) || 
+							secondUD.equals(WALL_VERTICAL_USER_DATA)) {
+						return;
+					} else {
+						contact.setEnabled(false);
+						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					}*/
 				}
 				
 				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
@@ -368,6 +389,22 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
+	private void respawnPlayer() {
+		lifes--;
+		updateScore();
+		
+		if (lifes == 0) {
+			showGameOverText();
+			return;
+		}	
+		
+		float width = player.getWidth() / 2;
+        float heigh = player.getHeight() / 2;
+        float angle = player.getBody().getAngle();
+        player.getBody().setTransform((300 + width) / 32, (200 + heigh) / 32, angle);
+        player.setVelocity(0, 0);
+	}
+	
 	private void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
 			Iterator<GameObject> objects = gameObjects.iterator();
@@ -381,7 +418,9 @@ public class GameScene extends BaseScene {
 							findPhysicsConnectorByShape(next);
 					if (physicsConnector != null) {
 						if (next instanceof Player) {
-							showGameOverText();
+							next.getBody().setUserData(Player.PLAYER_USER_DATA);
+							respawnPlayer();
+							return;
 						}
 						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
 							score += next.getScore();
@@ -427,11 +466,10 @@ public class GameScene extends BaseScene {
 	
 	
 	private Player player;
-	private ArrayList<GameObject> gameObjects;
+	private List<GameObject> gameObjects;
 
 	private void loadLevel(int levelID) {
 		gameObjects = new ArrayList<GameObject>();
-		score = 0;
 		
 	    final LevelLoader levelLoader = new LevelLoader("");
 	    
