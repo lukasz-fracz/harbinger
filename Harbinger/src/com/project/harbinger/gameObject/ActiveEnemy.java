@@ -4,7 +4,7 @@ import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 
-public class ActiveEnemy extends GameObject {
+public class ActiveEnemy extends Enemy {
 	
 	public static final String ACTIVE_USER_DATA = "active";
 	public static final String ACTIVE_START_ME = "hmm";

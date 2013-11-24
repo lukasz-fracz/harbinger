@@ -6,6 +6,7 @@ import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
 import com.project.harbinger.scene.BaseScene;
+import com.project.harbinger.scene.GameCompletedScene;
 import com.project.harbinger.scene.GameScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
@@ -25,12 +26,14 @@ public class SceneManager {
 	private BaseScene menuScene;
 	private BaseScene gameScene;
 	private BaseScene loadingScene;
+	private BaseScene gameCompletedScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
 		SCENE_MENU,
 		SCENE_GAME,
 		SCENE_LOADING,
+		SCENE_GAME_COMPLETED,
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -56,6 +59,9 @@ public class SceneManager {
 			break;
 		case SCENE_LOADING:
 			setScene(loadingScene);
+			break;
+		case SCENE_GAME_COMPLETED:
+			setScene(gameCompletedScene);
 			break;
 		default:
 			break;
@@ -93,6 +99,7 @@ public class SceneManager {
 	            mEngine.unregisterUpdateHandler(pTimerHandler);
 	            ResourcesManager.getInstance().loadGameResources();
 	            gameScene = new GameScene();
+	            gameCompletedScene = new GameCompletedScene();
 	            setScene(gameScene);
 	        }
 	    }));
@@ -111,6 +118,12 @@ public class SceneManager {
 	            setScene(menuScene);
 	        }
 	    }));
+	}
+	
+	public void loadGameCompletedScene(final Engine mEngine) {
+		setScene(gameCompletedScene);
+		gameScene.disposeScene();
+		ResourcesManager.getInstance().unloadGameResources();
 	}
 	
 	public BaseScene getCurrentScene() {

@@ -8,8 +8,6 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.manager.ResourcesManager;
-import com.project.harbinger.manager.SceneManager;
-import com.project.harbinger.scene.GameScene;
 
 public class Player extends GameObject {
 
@@ -31,8 +29,6 @@ public class Player extends GameObject {
 	        @Override
 	        public void onUpdate(float pSecondsElapsed) {
 	            super.onUpdate(pSecondsElapsed);
-	            GameScene gameScene = (GameScene) SceneManager.getInstance().getCurrentScene();
-	           // gameScene.debugSetPlayerCoordinates(body.getPosition().x, body.getPosition().y);
 	        }
 	    });
 	}

@@ -9,6 +9,8 @@ import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
@@ -24,7 +26,6 @@ import org.andengine.util.color.Color;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.level.IEntityLoader;
 import org.andengine.util.level.LevelLoader;
-import org.andengine.util.level.constants.LevelConstants;
 import org.xml.sax.Attributes;
 
 import android.view.MotionEvent;
@@ -42,6 +43,7 @@ import com.project.harbinger.gameObject.ActiveEnemy;
 import com.project.harbinger.gameObject.ActiveEnemy.ActiveEnemyType;
 import com.project.harbinger.gameObject.Bullet;
 import com.project.harbinger.gameObject.Cruiser;
+import com.project.harbinger.gameObject.Enemy;
 import com.project.harbinger.gameObject.GameObject;
 import com.project.harbinger.gameObject.HeavyFighter;
 import com.project.harbinger.gameObject.LightFighter;
@@ -57,27 +59,58 @@ import com.project.harbinger.manager.SceneManager.SceneType;
 public class GameScene extends BaseScene {
 
 	private HUD gameHUD;
-	private Text scoreText;
-	private Text gameOverText;
+	private Text scoreText, gameOverText, levelCompletedText, gamePausedText;
 	private PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
-	private int score, lifes, currentLevel;
+	private int score, lifes, currentLevel, enemies;
+	private boolean isPaused;
 	
 	@Override
 	public void createScene() {
 		score = 0;
 		currentLevel = 0;
 		lifes = 5;
+		isPaused = false;
 		
 		createBackground();
 		createHUD();
 		createPhysics();
-		loadLevel(0);
+		try {
+			loadLevel(0);
+		} catch (IOException e) {}
 	}
 
+	private void showPauseMenu() {
+		gameHUD.attachChild(gamePausedText);
+		final Sprite backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            SceneManager.getInstance().loadMenuScene(engine);
+	        	
+	            return true;
+	        };
+	    };
+	    final Sprite resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            gameHUD.detachChild(gamePausedText);
+	            gameHUD.detachChild(backButton);
+	            gameHUD.detachChild(this);
+	            gameHUD.unregisterTouchArea(this);
+	            gameHUD.unregisterTouchArea(backButton);
+	            isPaused = false;
+	            return true;
+	        };
+	    };
+		
+	    gameHUD.registerTouchArea(resumeButton);
+	    gameHUD.registerTouchArea(backButton);
+	    gameHUD.attachChild(backButton);
+	    gameHUD.attachChild(resumeButton);
+	}
+	
 	@Override
 	public void onBackKeyPressed() {
-		SceneManager.getInstance().loadMenuScene(engine);
+		isPaused = true;
+		showPauseMenu();
 	}
 
 	@Override
@@ -96,6 +129,31 @@ public class GameScene extends BaseScene {
 		setBackground(new Background(Color.BLACK));
 	}
 	
+	private void loadNextLevel() {
+		isPaused = true;
+		gameHUD.attachChild(levelCompletedText);
+		setOnSceneTouchListener(new IOnSceneTouchListener() {
+
+			@Override
+			public boolean onSceneTouchEvent(Scene pScene,
+					TouchEvent pSceneTouchEvent) {
+				gameHUD.detachChild(levelCompletedText);
+				isPaused = false;
+				return false;
+			}
+			
+		});
+		
+		detachChild(player);
+		currentLevel++;
+		createPhysics();
+		try {
+			loadLevel(currentLevel);
+		} catch (IOException e) {
+			SceneManager.getInstance().loadGameCompletedScene(engine);
+		}
+	}
+	
 	private void createHUD() {
 		gameHUD = new HUD();
 		
@@ -107,6 +165,17 @@ public class GameScene extends BaseScene {
 				"You're dead...", new TextOptions(HorizontalAlign.LEFT), vbom);
 		gameOverText.setPosition(40, 400);
 		gameOverText.setColor(Color.RED);
+		
+		levelCompletedText = new Text(10, 10, resourcesManager.getFont(),
+				"   Level\ncompleted!", new TextOptions(HorizontalAlign.LEFT), vbom);
+		levelCompletedText.setPosition(40, 300);
+		levelCompletedText.setColor(Color.BLUE);
+		
+		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
+				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
+		gamePausedText.setPosition(40, 200);
+		gamePausedText.setColor(Color.GREEN);
+		
 		
 		gameHUD.attachChild(scoreText);
 		
@@ -187,8 +256,18 @@ public class GameScene extends BaseScene {
 	}
 	
 	private void showGameOverText() {
-		physicsWorld.clearPhysicsConnectors();
+		isPaused = true;
 		gameHUD.attachChild(gameOverText);
+		setOnSceneTouchListener(new IOnSceneTouchListener() {
+
+			@Override
+			public boolean onSceneTouchEvent(Scene pScene,
+					TouchEvent pSceneTouchEvent) {
+				SceneManager.getInstance().loadMenuScene(engine);
+				return false;
+			}
+			
+		});
 	}
 	
 	/*public void debugSetPlayerCoordinates(float x, float y) {
@@ -241,6 +320,9 @@ public class GameScene extends BaseScene {
 			public void onUpdate(float pSecondsElapsed) {
 				deleteObjectsForDestroy();
 				updateActiveEnemies();
+				if (enemies == 0) {
+					loadNextLevel();
+				}
 			}
 
 			@Override
@@ -250,6 +332,14 @@ public class GameScene extends BaseScene {
 		};
 		
 		return iUpdateHandler;
+	}
+	
+	public void onManagedUpdate(float pSecondsElapsed) {
+		if (isPaused) {
+			super.onManagedUpdate(0);
+		} else {
+			super.onManagedUpdate(pSecondsElapsed);
+		}
 	}
 	
 	private ContactListener createContactListener() {
@@ -422,6 +512,9 @@ public class GameScene extends BaseScene {
 							respawnPlayer();
 							return;
 						}
+						if (next instanceof Enemy) {
+							enemies--;
+						}
 						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
 							score += next.getScore();
 							updateScore();
@@ -449,6 +542,7 @@ public class GameScene extends BaseScene {
 	}
 	
 	// level loading
+	private static final String TAG_LEVEL_ATTRIBUTE_ENEMIES = "enemies";
 	private static final String TAG_ENTITY_ATTRIBUTE_X = "x";
 	private static final String TAG_ENTITY_ATTRIBUTE_Y = "y";
 	private static final String TAG_ENTITY_ATTRIBUTE_TYPE = "type";
@@ -468,19 +562,15 @@ public class GameScene extends BaseScene {
 	private Player player;
 	private List<GameObject> gameObjects;
 
-	private void loadLevel(int levelID) {
+	private void loadLevel(int levelID) throws IOException {
 		gameObjects = new ArrayList<GameObject>();
 		
 	    final LevelLoader levelLoader = new LevelLoader("");
 	    
-	    final FixtureDef FIXTURE_DEF = PhysicsFactory.createFixtureDef(0, 0.01f, 0.5f);
-	    
 	    levelLoader.registerEntityLoader("level", new IEntityLoader() {
 	        public IEntity onLoadEntity(final String pEntityName, final Attributes pAttributes) {
-	            final int width = SAXUtils.getIntAttributeOrThrow(
-	            		pAttributes, LevelConstants.TAG_LEVEL_ATTRIBUTE_WIDTH);
-	            final int height = SAXUtils.getIntAttributeOrThrow(
-	            		pAttributes, LevelConstants.TAG_LEVEL_ATTRIBUTE_HEIGHT);
+	            enemies = SAXUtils.getIntAttributeOrThrow(
+	            		pAttributes, TAG_LEVEL_ATTRIBUTE_ENEMIES);
 	            
 	            // TODO later we will specify camera BOUNDS and create invisible walls
 	            // on the beginning and on the end of the level.
@@ -528,12 +618,8 @@ public class GameScene extends BaseScene {
 	    	            return levelObject;
 	    	        }
 	    	    });
-
-	    	    try {
-					levelLoader.loadLevelFromAsset(activity.getAssets(), "levels/" + levelID + ".lvl");
-				} catch (IOException e) {
-					Debug.e(e);
-				}
+	    
+	    levelLoader.loadLevelFromAsset(activity.getAssets(), "levels/" + currentLevel + ".lvl");
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
