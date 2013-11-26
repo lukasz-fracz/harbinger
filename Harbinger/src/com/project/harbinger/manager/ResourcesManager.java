@@ -122,10 +122,8 @@ public class ResourcesManager {
 	private ITextureRegion lightFighterRegion;
 	private ITextureRegion heavyFighterRegion;
 	private ITextureRegion cruiserRegion;
-	private ITextureRegion upButtonRegion;
-	private ITextureRegion downButtonRegion;
-	private ITextureRegion leftButtonRegion;
-	private ITextureRegion rightButtonRegion;
+	private ITextureRegion analogRegion;
+	private ITextureRegion analogBackgroundRegion;
 	private ITextureRegion fireButtonRegion;
 	private ITextureRegion resumeButtonRegion;
 	private ITextureRegion backButtonRegion;
@@ -162,20 +160,12 @@ public class ResourcesManager {
 		return cruiserRegion;
 	}
 	
-	public ITextureRegion getUpButtonRegion() {
-		return upButtonRegion;
+	public ITextureRegion getAnalogRegion() {
+		return analogRegion;
 	}
 	
-	public ITextureRegion getDownButtonRegion() {
-		return downButtonRegion;
-	}
-	
-	public ITextureRegion getLeftButtonRegion() {
-		return leftButtonRegion;
-	}
-	
-	public ITextureRegion getRightButtonRegion() {
-		return rightButtonRegion;
+	public ITextureRegion getAnalogBackgroundRegion() {
+		return analogBackgroundRegion;
 	}
 	
 	public ITextureRegion getFireButtonRegion() {
@@ -209,14 +199,10 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "fighter_heavy.png");	
 	    cruiserRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "cruiser.png");
-	    upButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/up.png");
-	    downButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/down.png");
-	    leftButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/left.png");
-	    rightButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/right.png");
+	    analogRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/analog.png");
+	    analogBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/analogBackground.png");
 	    fireButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "buttons/fire.png");
 	    resumeButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(

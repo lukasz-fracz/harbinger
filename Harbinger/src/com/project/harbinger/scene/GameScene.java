@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
+import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
+import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
@@ -185,8 +188,48 @@ public class GameScene extends BaseScene {
 		debugPlayerCoordinates.setText("x: y:");
 		debugPlayerCoordinates.setSize(300, 100);
 		gameHUD.attachChild(debugPlayerCoordinates);*/
+
+		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(50, 650, camera, 
+				ResourcesManager.getInstance().getAnalogBackgroundRegion(), 
+				ResourcesManager.getInstance().getAnalogRegion(), 0.1f, 200, vbom, 
+				new IAnalogOnScreenControlListener() {
+			@Override
+			public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
+				if (pValueX == 0 && pValueY == 0) {
+					player.setVelocity(0, 0);
+					return;
+				} 
+				/*int dx, dy;
+				if (pValueX < 0) {
+					dx = 5 * pvalue;
+				} else {
+					dx = 5;
+				}
+				
+				if (pValueY < 0) {
+					dy = -5;
+				} else {
+					dy = 5;
+				}*/
+				
+				player.setVelocity(10 * pValueX, 10 * pValueY);
+			}
+
+			@Override
+			public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
+			}
+		});
+		//analogOnScreenControl.getControlBase().setBlendFunction(2, 4);
+		analogOnScreenControl.getControlBase().setAlpha(0.5f);
+		analogOnScreenControl.getControlBase().setScaleCenter(0, 128);
+		analogOnScreenControl.getControlBase().setScale(1.25f);
+		analogOnScreenControl.getControlKnob().setScale(1.25f);
+		analogOnScreenControl.refreshControlKnobPosition();
 		
-		final Sprite left = new Sprite(10, 675, ResourcesManager.getInstance().getLeftButtonRegion(), vbom) {
+		
+		setChildScene(analogOnScreenControl);
+		
+		/*final Sprite left = new Sprite(10, 675, ResourcesManager.getInstance().getLeftButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            if (touchEvent.isActionDown()) {
 	            	player.setVelocity(-10, 0);
@@ -233,7 +276,8 @@ public class GameScene extends BaseScene {
 	            }
 	            return true;
 	        };
-	    };
+	    };*/
+		
 	    final Sprite fire = new Sprite(300, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
@@ -241,14 +285,14 @@ public class GameScene extends BaseScene {
 	        };
 	    };
 	    
-	    gameHUD.attachChild(left);
-	    gameHUD.registerTouchArea(left);
-	    gameHUD.attachChild(right);
-	    gameHUD.registerTouchArea(right);
-	    gameHUD.attachChild(up);
-	    gameHUD.attachChild(down);
-	    gameHUD.registerTouchArea(up);
-	    gameHUD.registerTouchArea(down);
+	   // gameHUD.attachChild(left);
+	   // gameHUD.registerTouchArea(left);
+	   // gameHUD.attachChild(right);
+	   // gameHUD.registerTouchArea(right);
+	   // gameHUD.attachChild(up);
+	   // gameHUD.attachChild(down);
+	    //gameHUD.registerTouchArea(up);
+	    //gameHUD.registerTouchArea(down);
 	    gameHUD.registerTouchArea(fire);
 	    gameHUD.attachChild(fire);
 	    
