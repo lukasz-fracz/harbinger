@@ -67,6 +67,7 @@ public class GameScene extends BaseScene {
 	//private Text debugPlayerCoordinates;
 	private int score, lifes, currentLevel, enemies;
 	private boolean isPaused;
+	private Sprite backButton, resumeButton;
 	
 	@Override
 	public void createScene() {
@@ -85,24 +86,7 @@ public class GameScene extends BaseScene {
 
 	private void showPauseMenu() {
 		gameHUD.attachChild(gamePausedText);
-		final Sprite backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            SceneManager.getInstance().loadMenuScene(engine);
-	        	
-	            return true;
-	        };
-	    };
-	    final Sprite resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            gameHUD.detachChild(gamePausedText);
-	            gameHUD.detachChild(backButton);
-	            gameHUD.detachChild(this);
-	            gameHUD.unregisterTouchArea(this);
-	            gameHUD.unregisterTouchArea(backButton);
-	            isPaused = false;
-	            return true;
-	        };
-	    };
+		
 		
 	    gameHUD.registerTouchArea(resumeButton);
 	    gameHUD.registerTouchArea(backButton);
@@ -112,6 +96,15 @@ public class GameScene extends BaseScene {
 	
 	@Override
 	public void onBackKeyPressed() {
+		if (isPaused) {
+			isPaused = false;
+			gameHUD.detachChild(gamePausedText);
+            gameHUD.detachChild(backButton);
+            gameHUD.detachChild(resumeButton);
+            gameHUD.unregisterTouchArea(resumeButton);
+            gameHUD.unregisterTouchArea(backButton);
+			return;
+		}
 		isPaused = true;
 		showPauseMenu();
 	}
@@ -182,6 +175,25 @@ public class GameScene extends BaseScene {
 		
 		gameHUD.attachChild(scoreText);
 		
+		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            SceneManager.getInstance().loadMenuScene(engine);
+	        	
+	            return true;
+	        };
+	    };
+	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            gameHUD.detachChild(gamePausedText);
+	            gameHUD.detachChild(backButton);
+	            gameHUD.detachChild(this);
+	            gameHUD.unregisterTouchArea(this);
+	            gameHUD.unregisterTouchArea(backButton);
+	            isPaused = false;
+	            return true;
+	        };
+	    };
+		
 		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
 				"x: 1234567890- y: 1234567890-", new TextOptions(HorizontalAlign.LEFT), vbom);
 		debugPlayerCoordinates.setPosition(0, 700);
@@ -195,23 +207,6 @@ public class GameScene extends BaseScene {
 				new IAnalogOnScreenControlListener() {
 			@Override
 			public void onControlChange(final BaseOnScreenControl pBaseOnScreenControl, final float pValueX, final float pValueY) {
-				if (pValueX == 0 && pValueY == 0) {
-					player.setVelocity(0, 0);
-					return;
-				} 
-				/*int dx, dy;
-				if (pValueX < 0) {
-					dx = 5 * pvalue;
-				} else {
-					dx = 5;
-				}
-				
-				if (pValueY < 0) {
-					dy = -5;
-				} else {
-					dy = 5;
-				}*/
-				
 				player.setVelocity(10 * pValueX, 10 * pValueY);
 			}
 
@@ -229,54 +224,6 @@ public class GameScene extends BaseScene {
 		
 		setChildScene(analogOnScreenControl);
 		
-		/*final Sprite left = new Sprite(10, 675, ResourcesManager.getInstance().getLeftButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            if (touchEvent.isActionDown()) {
-	            	player.setVelocity(-10, 0);
-	            } else if (touchEvent.isActionUp() || 
-	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
-	            	player.setVelocity(0, 0);
-	            }	            
-	            
-	            return true;
-	        };
-	    };
-		
-	    final Sprite right = new Sprite(110, 675, ResourcesManager.getInstance().getRightButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            if (touchEvent.isActionDown()) {
-	            	player.setVelocity(+10, 0);
-	            } else if (touchEvent.isActionUp() || 
-	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
-	            	player.setVelocity(0, 0);
-	            }
-	            return true;
-	        };
-	    };
-	    
-	    final Sprite up = new Sprite(60, 625, ResourcesManager.getInstance().getUpButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            if (touchEvent.isActionDown()) {
-	            	player.setVelocity(0, -10);
-	            } else if (touchEvent.isActionUp() || 
-	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
-	            	player.setVelocity(0, 0);
-	            }
-	            return true;
-	        };
-	    };
-	    
-	    final Sprite down = new Sprite(60, 725, ResourcesManager.getInstance().getDownButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            if (touchEvent.isActionDown()) {
-	            	player.setVelocity(0, 10);
-	            } else if (touchEvent.isActionUp() || 
-	            		touchEvent.getMotionEvent().getActionMasked() == MotionEvent.ACTION_MOVE) {
-	            	player.setVelocity(0, 0);
-	            }
-	            return true;
-	        };
-	    };*/
 		
 	    final Sprite fire = new Sprite(300, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
@@ -284,15 +231,7 @@ public class GameScene extends BaseScene {
 	            return true;
 	        };
 	    };
-	    
-	   // gameHUD.attachChild(left);
-	   // gameHUD.registerTouchArea(left);
-	   // gameHUD.attachChild(right);
-	   // gameHUD.registerTouchArea(right);
-	   // gameHUD.attachChild(up);
-	   // gameHUD.attachChild(down);
-	    //gameHUD.registerTouchArea(up);
-	    //gameHUD.registerTouchArea(down);
+	   
 	    gameHUD.registerTouchArea(fire);
 	    gameHUD.attachChild(fire);
 	    

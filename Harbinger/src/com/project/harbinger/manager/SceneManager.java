@@ -10,6 +10,7 @@ import com.project.harbinger.scene.GameCompletedScene;
 import com.project.harbinger.scene.GameScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
+import com.project.harbinger.scene.MultiPlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
 
 public class SceneManager {
@@ -27,6 +28,7 @@ public class SceneManager {
 	private BaseScene gameScene;
 	private BaseScene loadingScene;
 	private BaseScene gameCompletedScene;
+	private BaseScene multiPlayerOptionsScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -34,6 +36,7 @@ public class SceneManager {
 		SCENE_GAME,
 		SCENE_LOADING,
 		SCENE_GAME_COMPLETED,
+		SCENE_MULTIPLAYER_OPTIONS,
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -63,6 +66,8 @@ public class SceneManager {
 		case SCENE_GAME_COMPLETED:
 			setScene(gameCompletedScene);
 			break;
+		case SCENE_MULTIPLAYER_OPTIONS:
+			setScene(multiPlayerOptionsScene);
 		default:
 			break;
 		}
@@ -85,6 +90,7 @@ public class SceneManager {
 		ResourcesManager.getInstance().loadMenuResources();
 		menuScene = new MainMenuScene();
 		loadingScene = new LoadingScene();
+		multiPlayerOptionsScene = new MultiPlayerOptionsScene();
 		setScene(menuScene);
 		disposeSplashScene();
 	}
@@ -124,6 +130,16 @@ public class SceneManager {
 		setScene(gameCompletedScene);
 		gameScene.disposeScene();
 		ResourcesManager.getInstance().unloadGameResources();
+	}
+	
+	public void backToMenu() {
+		setScene(menuScene);
+		//multiPlayerOptionsScene.disposeScene();
+	}
+	
+	public void loadMultiplayerOptionsScene(final Engine mEngine) {
+		setScene(multiPlayerOptionsScene);
+		//menuScene.disposeScene();
 	}
 	
 	public BaseScene getCurrentScene() {
