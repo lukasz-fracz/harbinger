@@ -126,7 +126,8 @@ public class SceneManager {
 	    }));
 	}
 	
-	public void loadGameCompletedScene(final Engine mEngine) {
+	public void loadGameCompletedScene(final Engine mEngine, int score) {
+		((GameCompletedScene) gameCompletedScene).prepareScene(score);
 		setScene(gameCompletedScene);
 		gameScene.disposeScene();
 		ResourcesManager.getInstance().unloadGameResources();

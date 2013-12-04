@@ -146,7 +146,7 @@ public class GameScene extends BaseScene {
 		try {
 			loadLevel(currentLevel);
 		} catch (IOException e) {
-			SceneManager.getInstance().loadGameCompletedScene(engine);
+			SceneManager.getInstance().loadGameCompletedScene(engine, score);
 		}
 	}
 	
