@@ -100,7 +100,7 @@ public class GameCompletedScene extends BaseScene {
 				scores.set(i, scores.get(i) * -1);
 				scoresText[i].setColor(Color.RED);
 			}
-			scoresText[i].setText((i + 1) + "....." + scores.get(i));
+			scoresText[i].setText((i + 1) + "......." + scores.get(i));
 			attachChild(scoresText[i]);
 		}
 	}
