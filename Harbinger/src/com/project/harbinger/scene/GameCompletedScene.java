@@ -82,8 +82,8 @@ public class GameCompletedScene extends BaseScene {
 			
 		});
 		
-		scores.remove(9);
-		
+		scores.remove(10);
+
 		for (int i = 0; i < 10; i++) {
 			if (scores.get(i) == score) {
 				scores.set(i, score * -1);
@@ -103,10 +103,7 @@ public class GameCompletedScene extends BaseScene {
 			scoresText[i].setText((i + 1) + "......." + scores.get(i));
 			attachChild(scoresText[i]);
 		}
-	}
-
-	@Override
-	public void onBackKeyPressed() {
+		
 		try {
 			FileOutputStream fos = activity.getApplicationContext().openFileOutput("scores.har", Context.MODE_PRIVATE);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -115,7 +112,10 @@ public class GameCompletedScene extends BaseScene {
 		} catch (Exception e) {
 			Debug.e(e);
 		}
-		
+	}
+
+	@Override
+	public void onBackKeyPressed() {
 		for (int i = 0; i < 10; i++) {
 			detachChild(scoresText[i]);
 		}

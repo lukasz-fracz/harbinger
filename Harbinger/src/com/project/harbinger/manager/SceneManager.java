@@ -8,9 +8,11 @@ import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 import com.project.harbinger.scene.BaseScene;
 import com.project.harbinger.scene.GameCompletedScene;
 import com.project.harbinger.scene.GameScene;
+import com.project.harbinger.scene.HighScoresScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiPlayerOptionsScene;
+import com.project.harbinger.scene.SinglePlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
 
 public class SceneManager {
@@ -29,6 +31,8 @@ public class SceneManager {
 	private BaseScene loadingScene;
 	private BaseScene gameCompletedScene;
 	private BaseScene multiPlayerOptionsScene;
+	private BaseScene singlePlayerOptionsScene;
+	private BaseScene highScoresScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -37,6 +41,8 @@ public class SceneManager {
 		SCENE_LOADING,
 		SCENE_GAME_COMPLETED,
 		SCENE_MULTIPLAYER_OPTIONS,
+		SCENE_SINGLEPLAYER_OPTIONS,
+		SCENE_HIGH_SCORES
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -68,6 +74,13 @@ public class SceneManager {
 			break;
 		case SCENE_MULTIPLAYER_OPTIONS:
 			setScene(multiPlayerOptionsScene);
+			break;
+		case SCENE_SINGLEPLAYER_OPTIONS:
+			setScene(singlePlayerOptionsScene);
+			break;
+		case SCENE_HIGH_SCORES:
+			setScene(highScoresScene);
+			break;
 		default:
 			break;
 		}
@@ -91,6 +104,8 @@ public class SceneManager {
 		menuScene = new MainMenuScene();
 		loadingScene = new LoadingScene();
 		multiPlayerOptionsScene = new MultiPlayerOptionsScene();
+		singlePlayerOptionsScene = new SinglePlayerOptionsScene();
+		highScoresScene = new HighScoresScene();
 		setScene(menuScene);
 		disposeSplashScene();
 	}
@@ -124,6 +139,14 @@ public class SceneManager {
 	            setScene(menuScene);
 	        }
 	    }));
+	}
+	
+	public void loadSingleplayerOptionsScene(Engine mEngine) {
+		setScene(singlePlayerOptionsScene);
+	}
+	
+	public void loadHighScoresScene(Engine mEngine) {
+		setScene(highScoresScene);
 	}
 	
 	public void loadGameCompletedScene(final Engine mEngine, int score) {

@@ -80,7 +80,8 @@ public class MainMenuScene extends BaseScene implements IOnMenuItemClickListener
 			float pMenuItemLocalX, float pMenuItemLocalY) {
 		switch (pMenuItem.getID()) {
 		case MENU_SINGLE:
-			SceneManager.getInstance().loadGameScene(engine);
+			SceneManager.getInstance().loadSingleplayerOptionsScene(engine);
+			//SceneManager.getInstance().loadGameScene(engine);
 			return true;
 		case MENU_MULTI:
 			SceneManager.getInstance().loadMultiplayerOptionsScene(engine);
