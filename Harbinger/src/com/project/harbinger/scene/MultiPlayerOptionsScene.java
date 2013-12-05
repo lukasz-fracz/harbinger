@@ -39,6 +39,7 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	        	BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 	        	mBluetoothAdapter.cancelDiscovery();
 	            BluetoothClient client = new BluetoothClient(device);
+	            activity.unregisterReceiver(mReceiver);
 	        }
 	    }
 	};

@@ -1,6 +1,8 @@
 package com.project.harbinger.multiplayer;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.UUID;
 
 import org.andengine.util.debug.Debug;
@@ -33,9 +35,33 @@ public class BluetoothServer extends Thread {
 			Debug.e(e);
 		}
 		
+		Debug.e("Serwer połączony");
+		
 		try {
 			socket.getOutputStream().write("Hello Wolrd".getBytes());
 		} catch (IOException e) {
+			Debug.e(e);
+		}
+		byte[] buffer = new byte[20];
+		try {
+			socket.getInputStream().read(buffer);
+		} catch (IOException e) {
+			Debug.e(e);
+		}
+		
+		Debug.e(new String(buffer));
+		Debug.e("Czekabssdsdfsdfsdfdsffm");
+		
+		ObjectInputStream ois = null;
+		try {
+			Debug.e("Tu");
+			BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+			Debug.e("Tam");
+			ois = new ObjectInputStream(bis);
+			Debug.e("Czekabdfm");
+			String my = (String) ois.readObject();
+			Debug.e(my);
+		} catch (Exception e) {
 			Debug.e(e);
 		}
 	}
