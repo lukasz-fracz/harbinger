@@ -12,6 +12,7 @@ import com.project.harbinger.scene.HighScoresScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiPlayerOptionsScene;
+import com.project.harbinger.scene.MultiplayerClientGameScene;
 import com.project.harbinger.scene.SinglePlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
 
@@ -33,6 +34,7 @@ public class SceneManager {
 	private BaseScene multiPlayerOptionsScene;
 	private BaseScene singlePlayerOptionsScene;
 	private BaseScene highScoresScene;
+	private BaseScene multiplayerClientGameScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -42,7 +44,8 @@ public class SceneManager {
 		SCENE_GAME_COMPLETED,
 		SCENE_MULTIPLAYER_OPTIONS,
 		SCENE_SINGLEPLAYER_OPTIONS,
-		SCENE_HIGH_SCORES
+		SCENE_HIGH_SCORES,
+		SCENE_MULTIPLAYER_CILENT_GAME
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -81,6 +84,8 @@ public class SceneManager {
 		case SCENE_HIGH_SCORES:
 			setScene(highScoresScene);
 			break;
+		case SCENE_MULTIPLAYER_CILENT_GAME:
+			setScene(multiplayerClientGameScene);
 		default:
 			break;
 		}
@@ -164,6 +169,21 @@ public class SceneManager {
 	public void loadMultiplayerOptionsScene(final Engine mEngine) {
 		setScene(multiPlayerOptionsScene);
 		//menuScene.disposeScene();
+	}
+	
+	public void loadMultiplayerClientGameScene(final Engine mEngine) {
+		setScene(loadingScene);
+		ResourcesManager.getInstance().unloadMenuTextures();
+		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+	    {
+	        public void onTimePassed(final TimerHandler pTimerHandler) 
+	        {
+	            mEngine.unregisterUpdateHandler(pTimerHandler);
+	            ResourcesManager.getInstance().loadGameResources();
+	            multiplayerClientGameScene = new MultiplayerClientGameScene();
+	            setScene(multiplayerClientGameScene);
+	        }
+	    }));
 	}
 	
 	public BaseScene getCurrentScene() {

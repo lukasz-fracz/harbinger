@@ -86,5 +86,4 @@ public class MainMenuActivity extends BaseGameActivity {
 		
 		return false;
 	}
-
 }
