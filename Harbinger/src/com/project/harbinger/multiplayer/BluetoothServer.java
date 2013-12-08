@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.andengine.engine.Engine;
 import org.andengine.util.debug.Debug;
 
+import com.project.harbinger.gameObject.*;
+import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.multiplayer.GameObjectInformation.ObjectType;
 
 import android.bluetooth.BluetoothAdapter;
@@ -21,8 +24,11 @@ public class BluetoothServer extends Thread {
 
 	private BluetoothServerSocket serverSocket;
 	private BluetoothAdapter bluetoothAdapter;
+	private BluetoothSocket socket;
+	private ObjectInputStream ois;
+	private ObjectOutputStream oos;
 	
-	public BluetoothServer(BluetoothAdapter bluetoothAdapter) {
+	public BluetoothServer(BluetoothAdapter bluetoothAdapter, Engine mEngine) {
 		this.bluetoothAdapter = bluetoothAdapter;
 
 		try {
@@ -30,10 +36,7 @@ public class BluetoothServer extends Thread {
 		} catch (IOException e) {
 			Debug.e(e);
 		}
-	}
-	
-	public void run() {
-		BluetoothSocket socket = null;
+		
 		try {
 			Debug.e("Czekam");
 			socket = serverSocket.accept();
@@ -43,8 +46,8 @@ public class BluetoothServer extends Thread {
 		
 		Debug.e("Serwer połączony");
 		
-		ObjectInputStream ois = null;
-		ObjectOutputStream oos = null;
+		ois = null;
+		oos = null;
 		try {
 			BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
 			ois = new ObjectInputStream(bis);
@@ -55,9 +58,59 @@ public class BluetoothServer extends Thread {
 			Debug.e(e);
 		}
 		
+		SceneManager.getInstance().loadMultiplayerServerGameScene(mEngine, this);
+	}
+	
+	public void sendGameState(List<GameObject> objects) {
+		List<GameObjectInformation> list = new ArrayList<GameObjectInformation>();
+		
+		for (GameObject gobj : objects) {
+			GameObjectInformation next;
+			Debug.e(String.valueOf(gobj.getBody().getPosition().x));
+			// burdel straszny. ObjectType trzeba będzie wpieprzyć do GameObject, żeby nie używać instanceof
+			if (gobj instanceof Bullet) {
+				next = new GameObjectInformation(ObjectType.BULLET, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof Cruiser) {
+				next = new GameObjectInformation(ObjectType.CRUISER, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof HeavyFighter) {
+				next = new GameObjectInformation(ObjectType.HEAVY_FIGHTER, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof LightFighter) {
+				next = new GameObjectInformation(ObjectType.LIGHT_FIGHTER, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof Meteor) {
+				next = new GameObjectInformation(ObjectType.METEOR, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof Missile) {
+				next = new GameObjectInformation(ObjectType.MISSILE, gobj.getX(),
+						gobj.getY());
+			} else if (gobj instanceof Player) {
+				next = new GameObjectInformation(ObjectType.PLAYER1, gobj.getX(),
+						gobj.getY());
+			} else {
+				next = null;
+			}
+			
+			list.add(next);
+		}
+		
+		try {
+			oos.writeObject(list);
+			oos.flush();
+			Debug.e("Poszło");
+		} catch (IOException e) {
+			Debug.e(e);
+		}
+	}
+	
+	public void run() {
+		
+		
 		int i = 0;
 		
-		while (true) {
+		/*while (true) {
 			List<GameObjectInformation> list = new ArrayList<GameObjectInformation>();
 			list.add(new GameObjectInformation(ObjectType.CRUISER, i, 500));
 			
@@ -72,6 +125,6 @@ public class BluetoothServer extends Thread {
 			try {
 				wait(100);
 			} catch (Exception e) {}
-		}
+		}*/
 	}
 }

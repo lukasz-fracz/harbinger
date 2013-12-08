@@ -3,9 +3,9 @@ package com.project.harbinger.multiplayer;
 public class GameObjectInformation implements java.io.Serializable {
 
 	private ObjectType type;
-	private int x, y;
+	private float x, y;
 	
-	public GameObjectInformation(ObjectType type, int x, int y) {
+	public GameObjectInformation(ObjectType type, float x, float y) {
 		this.type = type;
 		this.x = x;
 		this.y = y;
@@ -15,11 +15,11 @@ public class GameObjectInformation implements java.io.Serializable {
 		return type;
 	}
 
-	public int getX() {
+	public float getX() {
 		return x;
 	}
 
-	public int getY() {
+	public float getY() {
 		return y;
 	}
 

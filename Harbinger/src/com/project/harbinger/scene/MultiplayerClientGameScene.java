@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.util.color.Color;
+import org.andengine.util.debug.Debug;
 
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
@@ -14,13 +16,16 @@ import com.project.harbinger.multiplayer.GameObjectInformation;
 
 public class MultiplayerClientGameScene extends BaseScene {
 
-	List<Sprite> objectsToRender;
+	List<Sprite> objectsToRender, objectsToDetach;
 	
 	@Override
 	public void createScene() {
 		createBackground();
 		
 		objectsToRender = new ArrayList<Sprite>();
+		objectsToDetach = new ArrayList<Sprite>();
+		
+		registerUpdateHandler(createServerUpdateHandler());
 	}
 
 	@Override
@@ -40,14 +45,40 @@ public class MultiplayerClientGameScene extends BaseScene {
 		
 	}
 	
-	public void renderObjects(List<GameObjectInformation> objectsInformation) {
-		Iterator<Sprite> it = objectsToRender.iterator();
+	private IUpdateHandler createServerUpdateHandler() {
+		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
+
+			float x = 0;
+			float a = 1f / 25f;
+			
+			@Override
+			public void onUpdate(float pSecondsElapsed) {
+				x += pSecondsElapsed;
+				if (x >= a) {
+					for (Sprite sprite : objectsToDetach) {
+						detachChild(sprite);
+					}
+					
+					objectsToDetach = new ArrayList<Sprite>();
+					x = 0;
+				}	
+			}
+
+			@Override
+			public void reset() {
+			}
+			
+		};
 		
-		while (it.hasNext()) {
-			Sprite next = it.next();
-			detachChild(next);
-			objectsToRender.remove(next);
+		return iUpdateHandler;
+	}
+	
+	public void renderObjects(List<GameObjectInformation> objectsInformation) {
+		for (Sprite sprite : objectsToRender) {
+			objectsToDetach.add(sprite);
 		}
+		
+		objectsToRender = new ArrayList<Sprite>();
 		
 		for (GameObjectInformation goi : objectsInformation) {
 			Sprite next;

@@ -28,7 +28,7 @@ public class BluetoothClient extends Thread {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	
-	public BluetoothClient(BluetoothDevice device, Engine mEngine) {
+	public BluetoothClient(BluetoothDevice device, Engine mEngine) throws IOException {
 		this.device = device;
 		this.mEngine = mEngine;
 		
@@ -41,7 +41,7 @@ public class BluetoothClient extends Thread {
 		try {
 			socket.connect();
 		} catch (IOException e) {
-			Debug.e(e);
+			throw e;
 		}
 		
 		Debug.e("Klient Połączony");

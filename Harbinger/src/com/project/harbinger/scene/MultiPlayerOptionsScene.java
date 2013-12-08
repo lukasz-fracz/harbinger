@@ -1,5 +1,7 @@
 package com.project.harbinger.scene;
 
+import java.io.IOException;
+
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.menu.MenuScene;
 import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
@@ -36,9 +38,14 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 	            // Get the BluetoothDevice object from the Intent
 	        	Debug.e("Mam");
-	        	BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-	        	mBluetoothAdapter.cancelDiscovery();
-	            BluetoothClient client = new BluetoothClient(device, activity.getEngine());
+	        	BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); 	
+	            BluetoothClient client;
+	            try {
+	            	client = new BluetoothClient(device, activity.getEngine());
+	            } catch (IOException e) {
+	            	return;
+	            }
+	            mBluetoothAdapter.cancelDiscovery();
 	            client.start();
 	            activity.unregisterReceiver(mReceiver);
 	            
@@ -126,7 +133,7 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 				@Override
 				public void run() {
 					mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-					BluetoothServer server = new BluetoothServer(mBluetoothAdapter);
+					BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
 					server.start();
 				}
 				

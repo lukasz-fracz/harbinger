@@ -5,6 +5,7 @@ import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
+import com.project.harbinger.multiplayer.BluetoothServer;
 import com.project.harbinger.scene.BaseScene;
 import com.project.harbinger.scene.GameCompletedScene;
 import com.project.harbinger.scene.GameScene;
@@ -13,6 +14,7 @@ import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiPlayerOptionsScene;
 import com.project.harbinger.scene.MultiplayerClientGameScene;
+import com.project.harbinger.scene.MultiplayerServerGameScene;
 import com.project.harbinger.scene.SinglePlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
 
@@ -35,6 +37,7 @@ public class SceneManager {
 	private BaseScene singlePlayerOptionsScene;
 	private BaseScene highScoresScene;
 	private BaseScene multiplayerClientGameScene;
+	private BaseScene multiplayerServerGameScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -45,7 +48,8 @@ public class SceneManager {
 		SCENE_MULTIPLAYER_OPTIONS,
 		SCENE_SINGLEPLAYER_OPTIONS,
 		SCENE_HIGH_SCORES,
-		SCENE_MULTIPLAYER_CILENT_GAME
+		SCENE_MULTIPLAYER_CILENT_GAME,
+		SCENE_MULTIPLAYER_SERVER_GAME
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -86,6 +90,10 @@ public class SceneManager {
 			break;
 		case SCENE_MULTIPLAYER_CILENT_GAME:
 			setScene(multiplayerClientGameScene);
+			break;
+		case SCENE_MULTIPLAYER_SERVER_GAME:
+			setScene(multiplayerServerGameScene);
+			break;
 		default:
 			break;
 		}
@@ -127,6 +135,23 @@ public class SceneManager {
 	            gameScene = new GameScene();
 	            gameCompletedScene = new GameCompletedScene();
 	            setScene(gameScene);
+	            /*multiplayerServerGameScene = new MultiplayerServerGameScene();
+	            setScene(multiplayerServerGameScene);*/
+	        }
+	    }));
+	}
+	
+	public void loadMultiplayerServerGameScene(final Engine mEngine, final BluetoothServer server) {
+		setScene(loadingScene);
+		ResourcesManager.getInstance().unloadMenuTextures();
+		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+	    {
+	        public void onTimePassed(final TimerHandler pTimerHandler) 
+	        {
+	            mEngine.unregisterUpdateHandler(pTimerHandler);
+	            ResourcesManager.getInstance().loadGameResources();
+	            multiplayerServerGameScene = new MultiplayerServerGameScene(server);
+	            setScene(multiplayerServerGameScene);
 	        }
 	    }));
 	}

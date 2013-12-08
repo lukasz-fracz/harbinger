@@ -63,10 +63,10 @@ public class GameScene extends BaseScene {
 
 	private HUD gameHUD;
 	private Text scoreText, gameOverText, levelCompletedText, gamePausedText;
-	private PhysicsWorld physicsWorld;
+	protected PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
-	private int score, lifes, currentLevel, enemies;
-	private boolean isPaused;
+	protected int score, lifes, currentLevel, enemies;
+	protected boolean isPaused;
 	private Sprite backButton, resumeButton;
 	
 	@Override
@@ -78,7 +78,7 @@ public class GameScene extends BaseScene {
 		
 		createBackground();
 		createHUD();
-		createPhysics();
+		createPhysics(60);
 		try {
 			loadLevel(0);
 		} catch (IOException e) {}
@@ -121,7 +121,7 @@ public class GameScene extends BaseScene {
 		camera.setChaseEntity(null);
 	}
 
-	private void createBackground() {
+	protected void createBackground() {
 		setBackground(new Background(Color.BLACK));
 	}
 	
@@ -142,7 +142,7 @@ public class GameScene extends BaseScene {
 		
 		detachChild(player);
 		currentLevel++;
-		createPhysics();
+		createPhysics(60);
 		try {
 			loadLevel(currentLevel);
 		} catch (IOException e) {
@@ -150,7 +150,7 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
-	private void createHUD() {
+	protected void createHUD() {
 		gameHUD = new HUD();
 		
 		scoreText = new Text(20, 240, resourcesManager.getFont(),
@@ -264,8 +264,8 @@ public class GameScene extends BaseScene {
 		scoreText.setText("Score: " + String.valueOf(score) + "\nLifes: " + String.valueOf(lifes));
 	}
 	
-	private void createPhysics() {
-		physicsWorld = new FixedStepPhysicsWorld(60, new Vector2(0, 0), false);
+	protected void createPhysics(int fps) {
+		physicsWorld = new FixedStepPhysicsWorld(fps, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
 		registerUpdateHandler(createIUpdateHandler());
@@ -276,7 +276,7 @@ public class GameScene extends BaseScene {
 	private static final String WALL_TOP_USER_DATA = "WALL-E";
 	private static final String WALL_BOTTOM_USER_DATA = "EVA";
 	
-	private void createBounds() {
+	protected void createBounds() {
 		Body body;
 		final Rectangle wall_bottom = new Rectangle(0, 590, 480, 10, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_bottom, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
@@ -296,7 +296,7 @@ public class GameScene extends BaseScene {
 	    attachChild(wall_right);
 	}
 	
-	private IUpdateHandler createIUpdateHandler() {
+	protected IUpdateHandler createIUpdateHandler() {
 		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
 
 			@Override
@@ -325,7 +325,7 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
-	private ContactListener createContactListener() {
+	protected ContactListener createContactListener() {
 		ContactListener contactListener = new ContactListener() {
 
 			@Override
@@ -543,9 +543,9 @@ public class GameScene extends BaseScene {
 	
 	
 	private Player player;
-	private List<GameObject> gameObjects;
+	protected List<GameObject> gameObjects;
 
-	private void loadLevel(int levelID) throws IOException {
+	protected void loadLevel(int levelID) throws IOException {
 		gameObjects = new ArrayList<GameObject>();
 		
 	    final LevelLoader levelLoader = new LevelLoader("");
