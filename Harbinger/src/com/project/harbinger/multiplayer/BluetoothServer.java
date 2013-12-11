@@ -20,13 +20,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 
-public class BluetoothServer extends Thread {
+public class BluetoothServer extends BluetoothConnection {
 
 	private BluetoothServerSocket serverSocket;
 	private BluetoothAdapter bluetoothAdapter;
 	private BluetoothSocket socket;
-	private ObjectInputStream ois;
-	private ObjectOutputStream oos;
 	
 	public BluetoothServer(BluetoothAdapter bluetoothAdapter, Engine mEngine) {
 		this.bluetoothAdapter = bluetoothAdapter;
@@ -58,10 +56,11 @@ public class BluetoothServer extends Thread {
 			Debug.e(e);
 		}
 		
-		SceneManager.getInstance().loadMultiplayerServerGameScene(mEngine, this);
+		//SceneManager.getInstance().loadMultiplayerServerGameScene(mEngine, this);
+		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this);
 	}
 	
-	public void sendGameState(List<GameObject> objects) {
+	/*public void sendGameState(List<GameObject> objects) {
 		List<GameObjectInformation> list = new ArrayList<GameObjectInformation>();
 		
 		for (GameObject gobj : objects) {
@@ -104,27 +103,9 @@ public class BluetoothServer extends Thread {
 			Debug.e(e);
 		}
 	}
+	*/
 	
 	public void run() {
-		
-		
-		int i = 0;
-		
-		/*while (true) {
-			List<GameObjectInformation> list = new ArrayList<GameObjectInformation>();
-			list.add(new GameObjectInformation(ObjectType.CRUISER, i, 500));
-			
-			try {
-				oos.writeObject(list);
-				oos.flush();
-			} catch (IOException e) {
-				Debug.e(e);
-			}
-			
-			i++;
-			try {
-				wait(100);
-			} catch (Exception e) {}
-		}*/
+		super.run();
 	}
 }

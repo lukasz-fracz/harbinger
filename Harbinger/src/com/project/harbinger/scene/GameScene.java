@@ -61,13 +61,13 @@ import com.project.harbinger.manager.SceneManager.SceneType;
 
 public class GameScene extends BaseScene {
 
-	private HUD gameHUD;
-	private Text scoreText, gameOverText, levelCompletedText, gamePausedText;
+	protected HUD gameHUD;
+	protected Text scoreText, gameOverText, levelCompletedText, gamePausedText;
 	protected PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
 	protected int score, lifes, currentLevel, enemies;
 	protected boolean isPaused;
-	private Sprite backButton, resumeButton;
+	protected Sprite backButton, resumeButton;
 	
 	@Override
 	public void createScene() {
@@ -227,7 +227,10 @@ public class GameScene extends BaseScene {
 		
 	    final Sprite fire = new Sprite(300, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
+	        	if (touchEvent.getAction() == TouchEvent.ACTION_DOWN) {
+	        		player.fire();
+	        	}
+	            //creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
 	            return true;
 	        };
 	    };
@@ -324,6 +327,11 @@ public class GameScene extends BaseScene {
 			super.onManagedUpdate(pSecondsElapsed);
 		}
 	}
+	
+	/*
+	 * TODO
+	 * Całe kolizje trzeba będzie napisać ładnie na nowo. Teraz jest to strasznie zabugowne
+	 */
 	
 	protected ContactListener createContactListener() {
 		ContactListener contactListener = new ContactListener() {
@@ -542,7 +550,7 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER = "right-cruiser";
 	
 	
-	private Player player;
+	protected Player player;
 	protected List<GameObject> gameObjects;
 
 	protected void loadLevel(int levelID) throws IOException {
@@ -571,7 +579,7 @@ public class GameScene extends BaseScene {
 	    	            final GameObject levelObject;
 	    	            
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
-	    	                player = new Player(x, y, vbom, camera, physicsWorld);
+	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this);
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
 	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld);

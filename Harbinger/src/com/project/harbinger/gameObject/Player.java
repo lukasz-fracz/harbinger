@@ -5,17 +5,25 @@ import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.util.debug.Debug;
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
+import com.project.harbinger.scene.GameScene;
 
 public class Player extends GameObject {
 
 	public static final String PLAYER_USER_DATA = "player";
 	
-	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
+	private boolean fire;
+	private GameScene gameScene;
+	
+	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
         super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo);
         createPhysics(camera, physicsWorld);
+        
+        this.gameScene = gameScene;
     }
 	
 	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
@@ -26,14 +34,31 @@ public class Player extends GameObject {
 		body.setFixedRotation(true);
 		
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false) {
-	        @Override
+	        
+			float x = 0;
+			
+			@Override
 	        public void onUpdate(float pSecondsElapsed) {
 	            super.onUpdate(pSecondsElapsed);
+	            
+	            x += pSecondsElapsed;
+	            
+	            if (fire) {
+	            	if (x >= 0.5) {
+	            		x = 0;
+	            		gameScene.creteMissile(getX() + 10, getY() - 35, MissileType.PLAYER);
+	            		fire = false;
+	            	}
+	            }
 	        }
 	    });
 	}
 	
 	public void setVelocity(float dx, float dy) {
 		body.setLinearVelocity(dx, dy);
+	}
+	
+	public void fire() {
+		fire = true;
 	}
 }

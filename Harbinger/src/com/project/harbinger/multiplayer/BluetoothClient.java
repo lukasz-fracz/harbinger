@@ -20,13 +20,12 @@ import com.project.harbinger.scene.MultiplayerClientGameScene;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
-public class BluetoothClient extends Thread {
+public class BluetoothClient extends BluetoothConnection {
 	
 	private BluetoothDevice device;
 	private BluetoothSocket socket;
 	private Engine mEngine;
-	private ObjectOutputStream oos;
-	private ObjectInputStream ois;
+	
 	
 	public BluetoothClient(BluetoothDevice device, Engine mEngine) throws IOException {
 		this.device = device;
@@ -59,27 +58,11 @@ public class BluetoothClient extends Thread {
 			Debug.e(e);
 		}
 		
-		SceneManager.getInstance().loadMultiplayerClientGameScene(mEngine);
+		//SceneManager.getInstance().loadMultiplayerClientGameScene(mEngine);
+		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this);
 	}
 	
 	public void run() {
-		
-		while (SceneManager.getInstance().getCurrentScene().getSceneType() != SceneType.SCENE_MULTIPLAYER_CILENT_GAME) {
-			try {
-				wait(1000);
-			} catch (Exception e) {}
-		}
-		
-		while (true) {
-			List<GameObjectInformation> list = null;
-			
-			try {
-				list = (ArrayList<GameObjectInformation>) ois.readObject();
-			} catch (Exception e) {
-				Debug.e(e);
-			}
-			
-			((MultiplayerClientGameScene) SceneManager.getInstance().getCurrentScene()).renderObjects(list);
-		}
+		super.run();
 	}
 }

@@ -56,7 +56,7 @@ public class MultiplayerServerGameScene extends GameScene {
 				x += pSecondsElapsed;
 				if (x >= a) {
 					Debug.e("Wysła");
-					server.sendGameState(gameObjects);
+				//	server.sendGameState(gameObjects);
 					x = 0;
 				}
 			}

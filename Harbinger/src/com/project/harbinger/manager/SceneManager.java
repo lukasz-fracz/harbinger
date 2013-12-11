@@ -5,6 +5,7 @@ import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.ui.IGameInterface.OnCreateSceneCallback;
 
+import com.project.harbinger.multiplayer.BluetoothConnection;
 import com.project.harbinger.multiplayer.BluetoothServer;
 import com.project.harbinger.scene.BaseScene;
 import com.project.harbinger.scene.GameCompletedScene;
@@ -14,6 +15,7 @@ import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiPlayerOptionsScene;
 import com.project.harbinger.scene.MultiplayerClientGameScene;
+import com.project.harbinger.scene.MultiplayerGameScene;
 import com.project.harbinger.scene.MultiplayerServerGameScene;
 import com.project.harbinger.scene.SinglePlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
@@ -38,6 +40,7 @@ public class SceneManager {
 	private BaseScene highScoresScene;
 	private BaseScene multiplayerClientGameScene;
 	private BaseScene multiplayerServerGameScene;
+	private BaseScene multiplayerGameScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -152,6 +155,21 @@ public class SceneManager {
 	            ResourcesManager.getInstance().loadGameResources();
 	            multiplayerServerGameScene = new MultiplayerServerGameScene(server);
 	            setScene(multiplayerServerGameScene);
+	        }
+	    }));
+	}
+	
+	public void loadMultiplayerGameScene(final Engine mEngine, final BluetoothConnection bluetoothConnection) {
+		setScene(loadingScene);
+		ResourcesManager.getInstance().unloadMenuTextures();
+		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+	    {
+	        public void onTimePassed(final TimerHandler pTimerHandler) 
+	        {
+	            mEngine.unregisterUpdateHandler(pTimerHandler);
+	            ResourcesManager.getInstance().loadGameResources();
+	            multiplayerGameScene = new MultiplayerGameScene(bluetoothConnection);
+	            setScene(multiplayerGameScene);
 	        }
 	    }));
 	}
