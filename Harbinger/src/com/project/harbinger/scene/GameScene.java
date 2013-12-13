@@ -537,6 +537,7 @@ public class GameScene extends BaseScene {
 	private static final String TAG_ENTITY_ATTRIBUTE_X = "x";
 	private static final String TAG_ENTITY_ATTRIBUTE_Y = "y";
 	private static final String TAG_ENTITY_ATTRIBUTE_TYPE = "type";
+	private static final String TAG_ENTITY_ATTRIBUTE_ID = "id";
 	private static final String TAG_ENTITY = "entity";
 	
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";
@@ -574,29 +575,30 @@ public class GameScene extends BaseScene {
 	    	        public IEntity onLoadEntity(final String pEntityName, final Attributes pAttributes) {
 	    	            final int x = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_X);
 	    	            final int y = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_Y);
+	    	            final int id = SAXUtils.getIntAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_ID);
 	    	            final String type = SAXUtils.getAttributeOrThrow(pAttributes, TAG_ENTITY_ATTRIBUTE_TYPE);
 	    	            
 	    	            final GameObject levelObject;
 	    	            
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
-	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this);
+	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this, id);
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
-	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld);
+	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
-	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld);
+	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT);
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT);
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }
@@ -614,7 +616,7 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type);
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, -1);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);

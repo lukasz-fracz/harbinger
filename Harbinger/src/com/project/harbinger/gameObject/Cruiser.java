@@ -15,8 +15,8 @@ import com.project.harbinger.scene.GameScene;
 public class Cruiser extends ActiveEnemy {
 
 	public Cruiser(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			ActiveEnemyType type) {
-        super(pX, pY, ResourcesManager.getInstance().getCruiserRegion(), vbo);
+			ActiveEnemyType type, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getCruiserRegion(), vbo, id);
         
         score = 7;
         this.type = type;

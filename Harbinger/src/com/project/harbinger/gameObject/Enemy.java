@@ -5,7 +5,7 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 public class Enemy extends GameObject {
 	
-	public Enemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo) {
-		super(pX, pY, region, vbo);
+	public Enemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
+		super(pX, pY, region, vbo, id);
 	}
 }

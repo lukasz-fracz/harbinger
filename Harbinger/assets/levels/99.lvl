@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level enemies="10">    
+    <entity x="10" y="550" type="player" id="1" />
+</level>

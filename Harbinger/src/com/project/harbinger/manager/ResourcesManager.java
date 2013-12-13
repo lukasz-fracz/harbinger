@@ -116,8 +116,10 @@ public class ResourcesManager {
 	// game
 	private BuildableBitmapTextureAtlas gameTextureAtlas;
 	private ITextureRegion playerRegion;
+	private ITextureRegion player2Region;
 	private ITextureRegion meteorRegion;
 	private ITextureRegion missileRegion;
+	private ITextureRegion missile2Region;
 	private ITextureRegion bulletRegion;
 	private ITextureRegion lightFighterRegion;
 	private ITextureRegion heavyFighterRegion;
@@ -136,12 +138,20 @@ public class ResourcesManager {
 		return playerRegion;
 	}
 	
+	public ITextureRegion getPlayer2Region() {
+		return player2Region;
+	}
+	
 	public ITextureRegion getMeteorRegion() {
 		return meteorRegion;
 	}
 	
 	public ITextureRegion getMissileRegion() {
 		return missileRegion;
+	}
+	
+	public ITextureRegion getMissile2Region() {
+		return missile2Region;
 	}
 	
 	public ITextureRegion getBulletRegion() {
@@ -187,10 +197,14 @@ public class ResourcesManager {
 	    
 	    playerRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "player.png");
+	    player2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "player2.png");
 	    meteorRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "meteor.png");
 	    missileRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "missile.png");
+	    missile2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "missile2.png");
 	    bulletRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "bullet.png");
 	    lightFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(

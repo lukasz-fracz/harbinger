@@ -11,8 +11,8 @@ import com.project.harbinger.manager.ResourcesManager;
 
 public class Meteor extends StaticEnemy {
 
-	public Meteor(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
-        super(pX, pY, ResourcesManager.getInstance().getMeteorRegion(), vbo);
+	public Meteor(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getMeteorRegion(), vbo, id);
         createPhysics(camera, physicsWorld);
         score = 1;
     }

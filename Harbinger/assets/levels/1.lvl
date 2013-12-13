@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <level enemies="7">    
-    <entity x="10" y="550" type="player"/>
-    <entity x="300" y="-1000" type="bullet" />
-    <entity x="400" y="-2000" type="bullet" />
-    <entity x="300" y="-2000" type="left-light-fighter" />
-    <entity x="300" y="-2500" type="left-heavy-fighter" /> 
-    <entity x="300" y="-3000" type="left-cruiser" /> 
-    <entity x="100" y="-3500" type="left-light-fighter" /> 
-    <entity x="400" y="-3500" type="right-light-fighter" /> 
+    <entity x="10" y="550" type="player" id="1" />
+    <entity x="300" y="-1000" type="bullet" id="2" />
+    <entity x="400" y="-2000" type="bullet" id="3" />
+    <entity x="300" y="-2000" type="left-light-fighter" id="4" />
+    <entity x="300" y="-2500" type="left-heavy-fighter" id="5" /> 
+    <entity x="300" y="-3000" type="left-cruiser" id="6" /> 
+    <entity x="100" y="-3500" type="left-light-fighter" id="7" /> 
+    <entity x="400" y="-3500" type="right-light-fighter" id="8" /> 
 </level>

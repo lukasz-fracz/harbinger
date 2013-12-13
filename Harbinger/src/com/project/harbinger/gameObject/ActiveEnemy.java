@@ -16,8 +16,8 @@ public class ActiveEnemy extends Enemy {
 	protected boolean allowToShoot;
 	protected int updatesCounter;
 
-	public ActiveEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo) {
-		super(pX, pY, region, vbo);
+	public ActiveEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
+		super(pX, pY, region, vbo, id);
 		allowToShoot = false;
 		updatesCounter = 0;
 	}

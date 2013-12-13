@@ -7,7 +7,7 @@ public class StaticEnemy extends Enemy {
 	
 	public static final String STATIC_USER_DATA = "static";
 
-	public StaticEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo) {
-		super(pX, pY, region, vbo);
+	public StaticEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
+		super(pX, pY, region, vbo, id);
 	}	
 }

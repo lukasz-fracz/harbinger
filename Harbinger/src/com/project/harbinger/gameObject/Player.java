@@ -19,8 +19,8 @@ public class Player extends GameObject {
 	private boolean fire;
 	private GameScene gameScene;
 	
-	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
-        super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo);
+	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo, id);
         createPhysics(camera, physicsWorld);
         
         this.gameScene = gameScene;
@@ -46,7 +46,7 @@ public class Player extends GameObject {
 	            if (fire) {
 	            	if (x >= 0.5) {
 	            		x = 0;
-	            		gameScene.creteMissile(getX() + 10, getY() - 35, MissileType.PLAYER);
+	            		gameScene.creteMissile(getX() + 10, getY() - 35, MissileType.PLAYER1);
 	            		fire = false;
 	            	}
 	            }

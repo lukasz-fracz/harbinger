@@ -159,7 +159,8 @@ public class SceneManager {
 	    }));
 	}
 	
-	public void loadMultiplayerGameScene(final Engine mEngine, final BluetoothConnection bluetoothConnection) {
+	public void loadMultiplayerGameScene(final Engine mEngine, final BluetoothConnection bluetoothConnection,
+			final boolean isClient) {
 		setScene(loadingScene);
 		ResourcesManager.getInstance().unloadMenuTextures();
 		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
@@ -168,7 +169,7 @@ public class SceneManager {
 	        {
 	            mEngine.unregisterUpdateHandler(pTimerHandler);
 	            ResourcesManager.getInstance().loadGameResources();
-	            multiplayerGameScene = new MultiplayerGameScene(bluetoothConnection);
+	            multiplayerGameScene = new MultiplayerGameScene(bluetoothConnection, isClient);
 	            setScene(multiplayerGameScene);
 	        }
 	    }));

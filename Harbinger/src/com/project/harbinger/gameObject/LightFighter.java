@@ -12,8 +12,8 @@ import com.project.harbinger.manager.ResourcesManager;
 public class LightFighter extends ActiveEnemy {
 
 	public LightFighter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			ActiveEnemyType type) {
-        super(pX, pY, ResourcesManager.getInstance().getLightFighterRegion(), vbo);
+			ActiveEnemyType type, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getLightFighterRegion(), vbo, id);
         
         score = 3;
         this.type = type;

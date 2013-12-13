@@ -11,8 +11,9 @@ import com.project.harbinger.manager.ResourcesManager;
 
 public class Bullet extends StaticEnemy {
 
-	public Bullet(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld) {
-        super(pX, pY, ResourcesManager.getInstance().getBulletRegion(), vbo);
+	public Bullet(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
+			int id) {
+        super(pX, pY, ResourcesManager.getInstance().getBulletRegion(), vbo, id);
         
         score = 2;
         createPhysics(camera, physicsWorld);

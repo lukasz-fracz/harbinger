@@ -57,7 +57,7 @@ public class BluetoothServer extends BluetoothConnection {
 		}
 		
 		//SceneManager.getInstance().loadMultiplayerServerGameScene(mEngine, this);
-		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this);
+		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, true);
 	}
 	
 	/*public void sendGameState(List<GameObject> objects) {

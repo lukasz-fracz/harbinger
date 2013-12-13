@@ -15,8 +15,8 @@ import com.project.harbinger.scene.GameScene;
 public class HeavyFighter extends ActiveEnemy {
 
 	public HeavyFighter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			ActiveEnemyType type) {
-        super(pX, pY, ResourcesManager.getInstance().getHeavyFighterRegion(), vbo);
+			ActiveEnemyType type, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getHeavyFighterRegion(), vbo, id);
         
         score = 5;
         this.type = type;

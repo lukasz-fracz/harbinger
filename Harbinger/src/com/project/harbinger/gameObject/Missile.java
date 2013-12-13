@@ -12,12 +12,13 @@ import com.project.harbinger.manager.ResourcesManager;
 public class Missile extends GameObject {
 	
 	public static final String MISSILE_USER_DATA = "missile";
+	public static final String MISSILE_PLAYER2_USER_DATA = "missile2";
 
 	private MissileType type;
 	
 	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			MissileType type) {
-        super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo);
+			MissileType type, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo, id);
         
         this.type = type;
         createPhysics(camera, physicsWorld);
@@ -29,7 +30,7 @@ public class Missile extends GameObject {
 		
 		body.setUserData(MISSILE_USER_DATA);
 		body.setFixedRotation(true);
-		if (type == MissileType.PLAYER) {
+		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
 			body.setLinearVelocity(0, -15);
 		} else {
 			body.setLinearVelocity(0, 15);
@@ -43,5 +44,5 @@ public class Missile extends GameObject {
 	    });
 	}
 	
-	public enum MissileType { PLAYER, ENEMY }
+	public enum MissileType { PLAYER1, PLAYER2, ENEMY }
 }

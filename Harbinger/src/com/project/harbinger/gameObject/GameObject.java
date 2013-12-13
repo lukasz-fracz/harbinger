@@ -12,10 +12,12 @@ public class GameObject extends Sprite {
 	public static final String DESTROY_BY_WALL_USER_DATA = "destroy1";
 	
 	protected Body body;
-	protected int score;
+	protected int score, id;
 	
-	public GameObject(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo) {
+	public GameObject(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
 		super(pX, pY, region, vbo);
+		
+		this.id = id;
 	}
 	
 	public Body getBody() {
@@ -24,5 +26,9 @@ public class GameObject extends Sprite {
 	
 	public int getScore() {
 		return score;
+	}
+	
+	public int getId() {
+		return id;
 	}
 }
