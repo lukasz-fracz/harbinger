@@ -26,13 +26,13 @@ public class SinglePlayerOptionsScene extends BaseScene implements IOnMenuItemCl
 		menuChildScene.setPosition(0, 0);
 		
 		IMenuItem startItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
-				MENU_START, resourcesManager.getSingleButtonRegion(), vbom),
+				MENU_START, resourcesManager.getStartButtonRegion(), vbom),
 				1.2f, 1);
 		IMenuItem highScoresItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
-				MENU_HIGH_SCORES, resourcesManager.getMultiButtonRegion(), vbom),
+				MENU_HIGH_SCORES, resourcesManager.getHighScoresButtonRegion(), vbom),
 				1.2f, 1);
 		IMenuItem backItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
-				MENU_BACK, resourcesManager.getSingleButtonRegion(), vbom),
+				MENU_BACK, resourcesManager.getBackMenuButtonRegion(), vbom),
 				1.2f, 1);
 		
 		menuChildScene.addMenuItem(startItem);

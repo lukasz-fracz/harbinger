@@ -59,7 +59,7 @@ public class BluetoothClient extends BluetoothConnection {
 		}
 		
 		//SceneManager.getInstance().loadMultiplayerClientGameScene(mEngine);
-		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, false);
+		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, true);
 	}
 	
 	public void run() {

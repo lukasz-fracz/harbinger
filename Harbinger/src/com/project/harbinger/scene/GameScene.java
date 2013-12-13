@@ -165,34 +165,9 @@ public class GameScene extends BaseScene {
 		levelCompletedText = new Text(10, 10, resourcesManager.getFont(),
 				"   Level\ncompleted!", new TextOptions(HorizontalAlign.LEFT), vbom);
 		levelCompletedText.setPosition(40, 300);
-		levelCompletedText.setColor(Color.BLUE);
-		
-		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
-				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
-		gamePausedText.setPosition(40, 200);
-		gamePausedText.setColor(Color.GREEN);
-		
+		levelCompletedText.setColor(Color.BLUE);		
 		
 		gameHUD.attachChild(scoreText);
-		
-		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            SceneManager.getInstance().loadMenuScene(engine);
-	        	
-	            return true;
-	        };
-	    };
-	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
-	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            gameHUD.detachChild(gamePausedText);
-	            gameHUD.detachChild(backButton);
-	            gameHUD.detachChild(this);
-	            gameHUD.unregisterTouchArea(this);
-	            gameHUD.unregisterTouchArea(backButton);
-	            isPaused = false;
-	            return true;
-	        };
-	    };
 		
 		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
 				"x: 1234567890- y: 1234567890-", new TextOptions(HorizontalAlign.LEFT), vbom);
@@ -239,6 +214,35 @@ public class GameScene extends BaseScene {
 	    gameHUD.attachChild(fire);
 	    
 		camera.setHUD(gameHUD);
+		
+		createPauseMenu();
+	}
+	
+	protected void createPauseMenu() {
+		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
+				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
+		gamePausedText.setPosition(40, 200);
+		gamePausedText.setColor(Color.GREEN);
+		
+
+		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            SceneManager.getInstance().loadMenuScene(engine);
+	        	
+	            return true;
+	        };
+	    };
+	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            gameHUD.detachChild(gamePausedText);
+	            gameHUD.detachChild(backButton);
+	            gameHUD.detachChild(this);
+	            gameHUD.unregisterTouchArea(this);
+	            gameHUD.unregisterTouchArea(backButton);
+	            isPaused = false;
+	            return true;
+	        };
+	    };
 	}
 	
 	private void showGameOverText() {
@@ -275,9 +279,9 @@ public class GameScene extends BaseScene {
 		createBounds();
 	}
 	
-	private static final String WALL_VERTICAL_USER_DATA = "wallV";
-	private static final String WALL_TOP_USER_DATA = "WALL-E";
-	private static final String WALL_BOTTOM_USER_DATA = "EVA";
+	protected static final String WALL_VERTICAL_USER_DATA = "wallV";
+	protected static final String WALL_TOP_USER_DATA = "WALL-E";
+	protected static final String WALL_BOTTOM_USER_DATA = "EVA";
 	
 	protected void createBounds() {
 		Body body;

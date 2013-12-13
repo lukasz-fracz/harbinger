@@ -31,6 +31,8 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	private BluetoothDevice device;
 	private MenuScene menuChildScene;
 	
+	private static final int HOST = 0, JOIN = 1, BACK = 2;
+	
 	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
 	        String action = intent.getAction();
@@ -60,21 +62,26 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		menuChildScene = new MenuScene(camera);
 		menuChildScene.setPosition(0, 0);
 		
-		IMenuItem singleItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
-				0, resourcesManager.getSingleButtonRegion(), vbom),
+		IMenuItem hostItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
+				HOST, resourcesManager.getHostButtonRegion(), vbom),
 				1.2f, 1);
-		IMenuItem multiItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
-				1, resourcesManager.getMultiButtonRegion(), vbom),
+		IMenuItem joinItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
+				JOIN, resourcesManager.getJoinButtonRegion(), vbom),
+				1.2f, 1);
+		IMenuItem backItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
+				BACK, resourcesManager.getBackMenuButtonRegion(), vbom),
 				1.2f, 1);
 		
-		menuChildScene.addMenuItem(singleItem);
-		menuChildScene.addMenuItem(multiItem);
+		menuChildScene.addMenuItem(hostItem);
+		menuChildScene.addMenuItem(joinItem);
+		menuChildScene.addMenuItem(backItem);
 		
 		menuChildScene.buildAnimations();
 		menuChildScene.setBackgroundEnabled(false);
 		
-		singleItem.setPosition(singleItem.getX(), singleItem.getY() + 10);
-		multiItem.setPosition(multiItem.getX(), multiItem.getY() + 10);
+		hostItem.setPosition(hostItem.getX(), hostItem.getY() + 10);
+		joinItem.setPosition(joinItem.getX(), joinItem.getY() + 10);
+		backItem.setPosition(backItem.getX(), backItem.getY() + 30);
 		
 		menuChildScene.setOnMenuItemClickListener(this);
 		
@@ -127,7 +134,7 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
 			float pMenuItemLocalX, float pMenuItemLocalY) {
 		switch (pMenuItem.getID()) {
-		case 0:
+		case HOST:
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
@@ -139,7 +146,7 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 				
 			});
 			return true;
-		case 1:
+		case JOIN:
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
@@ -154,6 +161,9 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			});
 			IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 			activity.registerReceiver(mReceiver, filter);
+			return true;
+		case BACK:
+			SceneManager.getInstance().backToMenu();
 			return true;
 		default:
 			return false;

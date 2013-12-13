@@ -54,21 +54,49 @@ private Sprite player2;
 		
 		this.bluetoothConnection = bluetoothConnection;
 		this.isClient = isClient;
+		createPhysics();
+		try {
+			loadLevel(0);
+		} catch (IOException e) {}
 	}
 	
 	@Override
 	public void createScene() {
 		score = 0;
-		currentLevel = 99;
+		currentLevel = 0;
 		lifes = 5;
 		isPaused = false;
 		
 		createBackground();
 		createHUD();
-		createPhysics();
-		try {
-			loadLevel(0);
-		} catch (IOException e) {}
+	}
+	
+	protected void createPauseMenu() {
+		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
+				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
+		gamePausedText.setPosition(40, 200);
+		gamePausedText.setColor(Color.GREEN);
+		
+
+		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            SceneManager.getInstance().loadMenuScene(engine);
+	        	// TODO wiadomo
+	            return true;
+	        };
+	    };
+	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            gameHUD.detachChild(gamePausedText);
+	            gameHUD.detachChild(backButton);
+	            gameHUD.detachChild(this);
+	            gameHUD.unregisterTouchArea(this);
+	            gameHUD.unregisterTouchArea(backButton);
+	            isPaused = false;
+	            bluetoothConnection.sendMessage(BluetoothConnection.RESUME + BluetoothConnection.DASH);
+	            return true;
+	        };
+	    };
 	}
 	
 	@Override
@@ -121,11 +149,58 @@ private Sprite player2;
 	}
 	
 	protected ContactListener createContactListener() {
+		/*
+		 * TODO
+		 * 
+		 * tu trzeba i tak czy siak napisać na nowo całe kolizje, bo nie można skorzystać z tego co jest w super,
+		 * bo tutaj trzeba będzie rozróżniać który z graczy zestrzelił wroga
+		 */
+		Debug.e(String.valueOf(isClient));
 		if (!isClient) {
 			return super.createContactListener();
 		}
 		
-		return null;
+		ContactListener contactListener = new ContactListener() {
+
+			@Override
+			public void beginContact(Contact contact) {
+				final Fixture first = contact.getFixtureA();
+				final Fixture second = contact.getFixtureB();
+				
+				String firstUD = (String) first.getBody().getUserData();
+				String secondUD = (String) second.getBody().getUserData();
+				
+			}
+
+			@Override
+			public void endContact(Contact contact) {}
+
+			@Override
+			public void preSolve(Contact contact, Manifold oldManifold) {
+				final Fixture first = contact.getFixtureA();
+				final Fixture second = contact.getFixtureB();
+				String firstUD = (String) first.getBody().getUserData();
+				String secondUD = (String) second.getBody().getUserData();
+
+				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
+					return;
+				}
+				
+				
+				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
+						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
+						first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
+						second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
+					contact.setEnabled(false);
+				}
+			}
+
+			@Override
+			public void postSolve(Contact contact, ContactImpulse impulse) {}
+			
+		};
+		
+		return contactListener;		
 	}
 	
 	public void pauseGame() {
@@ -151,10 +226,8 @@ private Sprite player2;
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, -1);
-		missile.setCullingEnabled(true);
-		attachChild(missile);
-		gameObjects.add(missile);
+		super.creteMissile(x, y, type);
+
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
 			bluetoothConnection.sendMessage(BluetoothConnection.MISSILE + BluetoothConnection.DASH + x + 
 					BluetoothConnection.SEMICOLON + y);

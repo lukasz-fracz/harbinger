@@ -66,8 +66,44 @@ public class ResourcesManager {
 	private ITextureRegion menuBackgroundRegion;
 	private ITextureRegion singleButtonRegion;
 	private ITextureRegion multiButtonRegion;
+	private ITextureRegion startButtonRegion;
+	private ITextureRegion backMenuButtonRegion;
+	private ITextureRegion highScoresButtonRegion;
+	private ITextureRegion hostButtonRegion;
+	private ITextureRegion joinButtonRegion;
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
+	public ITextureRegion getMenuBackgroundRegion() {
+		return menuBackgroundRegion;
+	}
+	
+	public ITextureRegion getSingleButtonRegion() {
+		return singleButtonRegion;
+	}
+	
+	public ITextureRegion getMultiButtonRegion() {
+		return multiButtonRegion;
+	}
+	
+	public ITextureRegion getStartButtonRegion() {
+		return startButtonRegion;
+	}
+	
+	public ITextureRegion getBackMenuButtonRegion() {
+		return backMenuButtonRegion;
+	}
+	
+	public ITextureRegion getHighScoresButtonRegion() {
+		return highScoresButtonRegion;
+	}
+	
+	public ITextureRegion getHostButtonRegion() {
+		return hostButtonRegion;
+	}
+	
+	public ITextureRegion getJoinButtonRegion() {
+		return joinButtonRegion;
+	}
 	
 	private void loadMenuGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/menu/");
@@ -79,6 +115,17 @@ public class ResourcesManager {
 				menuTextureAtlas, activity, "single_button.png");
 		multiButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 				menuTextureAtlas, activity, "multi_button.png");
+		startButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "start_button.png");
+		backMenuButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "back_button.png");
+		highScoresButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "high_scores_button.png");
+		hostButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "host_button.png");
+		joinButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "join_button.png");
+		
 		try {
 			menuTextureAtlas.build(
 					new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
@@ -265,17 +312,5 @@ public class ResourcesManager {
 	
 	public ITextureRegion getSplashRegion() {
 		return splashRegion;
-	}
-	
-	public ITextureRegion getMenuBackgroundRegion() {
-		return menuBackgroundRegion;
-	}
-	
-	public ITextureRegion getSingleButtonRegion() {
-		return singleButtonRegion;
-	}
-	
-	public ITextureRegion getMultiButtonRegion() {
-		return multiButtonRegion;
 	}
 }
