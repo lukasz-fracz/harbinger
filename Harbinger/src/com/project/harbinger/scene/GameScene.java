@@ -267,7 +267,7 @@ public class GameScene extends BaseScene {
 		debugPlayerCoordinates.setText(xC + "\n" + yC);
 	}*/
 	
-	private void updateScore() {
+	protected void updateScore() {
 		scoreText.setText("Score: " + String.valueOf(score) + "\nLifes: " + String.valueOf(lifes));
 	}
 	
@@ -474,7 +474,7 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
-	private void respawnPlayer() {
+	protected void respawnPlayer() {
 		lifes--;
 		updateScore();
 		
@@ -490,7 +490,7 @@ public class GameScene extends BaseScene {
         player.setVelocity(0, 0);
 	}
 	
-	private void deleteObjectsForDestroy() {
+	protected void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
 			Iterator<GameObject> objects = gameObjects.iterator();
 			

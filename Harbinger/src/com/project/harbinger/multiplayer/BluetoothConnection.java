@@ -14,14 +14,14 @@ public abstract class BluetoothConnection extends Thread {
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
 	
-	public static final String PAUSE = "pause";
-	public static final String MOVE = "move";
-	public static final String MISSILE = "missile";
-	public static final String DESTROY = "destroy";
-	public static final String RESUME = "resume";
-	public static final String SCORE = "score";
-	public static final String DASH = "-";
-	public static final String SEMICOLON = ";";
+	private static final String PAUSE = "pause";
+	private static final String MOVE = "move";
+	private static final String MISSILE = "missile";
+	private static final String DESTROY = "destroy";
+	private static final String RESUME = "resume";
+	private static final String SCORE = "score";
+	private static final String DASH = "-";
+	private static final String SEMICOLON = ";";
 	
 	public void run() {
 		while (true) { // oczywiście to true kiedyś zniknie
@@ -51,16 +51,39 @@ public abstract class BluetoothConnection extends Thread {
 				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).pauseGame();
 			} else if (action.equals(RESUME)) {
 				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).resumeGame();
+			} else if (action.equals(DESTROY)) {
+				int id = Integer.valueOf(message.substring(dash + 1));
+				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).setToDestroy(id);
 			}
 		}
 	}
 
-	public void sendMessage(String message) {
+	private synchronized void sendMessage(String message) {
 		try {
 			oos.writeObject(message);
 			oos.flush();
 		} catch (IOException e) {
 			Debug.e(e);
 		}
+	}
+	
+	public void sendPause() {
+		sendMessage(PAUSE + DASH);
+	}
+	
+	public void sendResume() {
+		sendMessage(RESUME + DASH);
+	}
+	
+	public void sendMove(float x, float y) {
+		sendMessage(MOVE + DASH + x + SEMICOLON + y);
+	}
+	
+	public void sendMissile(float x, float y) {
+		sendMessage(MISSILE + DASH + x + SEMICOLON + y);
+	}
+	
+	public void sendDestroy(int id) {
+		sendMessage(DESTROY + DASH + id);
 	}
 }

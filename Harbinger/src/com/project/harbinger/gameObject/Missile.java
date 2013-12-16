@@ -28,7 +28,11 @@ public class Missile extends GameObject {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
-		body.setUserData(MISSILE_USER_DATA);
+		if (type == MissileType.PLAYER2) {
+			body.setUserData(MISSILE_PLAYER2_USER_DATA);
+		} else {
+			body.setUserData(MISSILE_USER_DATA);
+		}
 		body.setFixedRotation(true);
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
 			body.setLinearVelocity(0, -15);

@@ -10,6 +10,7 @@ public class GameObject extends Sprite {
 
 	public static final String DESTROY_USER_DATA = "destroy";
 	public static final String DESTROY_BY_WALL_USER_DATA = "destroy1";
+	public static final String DESTROY_BY_SECOND_PLAYER = "destroy2";
 	
 	protected Body body;
 	protected int score, id;

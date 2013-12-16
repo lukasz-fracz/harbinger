@@ -2,6 +2,7 @@ package com.project.harbinger.scene;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.andengine.engine.camera.hud.HUD;
@@ -13,6 +14,7 @@ import org.andengine.entity.IEntity;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.SAXUtils;
@@ -30,6 +32,7 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.project.harbinger.gameObject.ActiveEnemy;
 import com.project.harbinger.gameObject.Bullet;
 import com.project.harbinger.gameObject.Cruiser;
+import com.project.harbinger.gameObject.Enemy;
 import com.project.harbinger.gameObject.GameObject;
 import com.project.harbinger.gameObject.HeavyFighter;
 import com.project.harbinger.gameObject.LightFighter;
@@ -93,7 +96,7 @@ private Sprite player2;
 	            gameHUD.unregisterTouchArea(this);
 	            gameHUD.unregisterTouchArea(backButton);
 	            isPaused = false;
-	            bluetoothConnection.sendMessage(BluetoothConnection.RESUME + BluetoothConnection.DASH);
+	            bluetoothConnection.sendResume();
 	            return true;
 	        };
 	    };
@@ -104,9 +107,9 @@ private Sprite player2;
 		super.onBackKeyPressed();
 		
 		if (isPaused) {
-			bluetoothConnection.sendMessage(BluetoothConnection.PAUSE + BluetoothConnection.DASH);
+			bluetoothConnection.sendPause();
 		} else {
-			bluetoothConnection.sendMessage(BluetoothConnection.RESUME + BluetoothConnection.DASH);
+			bluetoothConnection.sendResume();
 		}
 	}
 	
@@ -130,8 +133,7 @@ private Sprite player2;
 				x += pSecondsElapsed;
 				if (x >= a) {
 					if (!(player.getX() == oldX && player.getY() == oldY)) {
-						bluetoothConnection.sendMessage(BluetoothConnection.MOVE + BluetoothConnection.DASH + player.getX() + 
-								BluetoothConnection.SEMICOLON + player.getY());
+						bluetoothConnection.sendMove(player.getX(), player.getY());
 						oldX = player.getX();
 						oldY = player.getY();
 					}
@@ -170,6 +172,66 @@ private Sprite player2;
 				String firstUD = (String) first.getBody().getUserData();
 				String secondUD = (String) second.getBody().getUserData();
 				
+				
+				// activating active enemies
+				if ((firstUD.equals(WALL_TOP_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
+						(secondUD.equals(WALL_TOP_USER_DATA) && firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA))) {
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+					} else {
+						second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+						return;
+					}
+				}
+				
+				// bouncing active enemies
+				
+				// from walls
+				if ((firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(WALL_VERTICAL_USER_DATA)) ||
+						(secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && firstUD.equals(WALL_VERTICAL_USER_DATA))) {
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					} else {
+						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					}
+					return;
+				}
+				
+				// from another active enemy
+				if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+					first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					return;
+				}
+				
+				// handling player collision with enemies, the player has to respawn, and the client has to inform server
+				
+				if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+					if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						second.getBody().setUserData("COLLISION");
+						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						for (GameObject gobj : gameObjects) {
+							if (gobj.getBody().getUserData().equals("COLLISION")) {
+								gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+								bluetoothConnection.sendDestroy(gobj.getId());
+								return;
+							}
+						}
+					}
+					if (secondUD.equals(Player.PLAYER_USER_DATA)) {
+						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							first.getBody().setUserData("COLLISION");
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							for (GameObject gobj : gameObjects) {
+								if (gobj.getBody().getUserData().equals("COLLISION")) {
+									gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+									bluetoothConnection.sendDestroy(gobj.getId());
+									return;
+								}
+							}
+						}
+					}
+				}
 			}
 
 			@Override
@@ -184,6 +246,20 @@ private Sprite player2;
 
 				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
 					return;
+				}
+				
+				// if there is a collision with missile
+				
+				if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA) || 
+						secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equalsIgnoreCase(Missile.MISSILE_PLAYER2_USER_DATA)) {
+					// set missile to destroy
+					if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
+					if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
+					contact.setEnabled(false);
 				}
 				
 				
@@ -201,6 +277,50 @@ private Sprite player2;
 		};
 		
 		return contactListener;		
+	}
+	
+	protected void deleteObjectsForDestroy() {
+		if (isClient) {
+			super.deleteObjectsForDestroy();
+			return;
+		}
+		
+		if (physicsWorld != null) {
+			Iterator<GameObject> objects = gameObjects.iterator();
+			
+			while (objects.hasNext()) {
+				GameObject next = objects.next();
+				if (next.getBody() != null && 
+						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
+						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA)) {
+					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
+							findPhysicsConnectorByShape(next);
+					if (physicsConnector != null) {
+						if (next instanceof Player) {
+							next.getBody().setUserData(Player.PLAYER_USER_DATA);
+							respawnPlayer();
+							return;
+						}
+						if (!(next instanceof Missile)) {
+							bluetoothConnection.sendDestroy(next.getId());
+						}
+						if (next instanceof Enemy) {
+							enemies--;
+						}
+						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+							score += next.getScore();
+							updateScore();
+						}						
+						
+						physicsWorld.unregisterPhysicsConnector(physicsConnector);
+						next.getBody().setActive(false);
+						physicsWorld.destroyBody(next.getBody());
+						detachChild(next);
+						objects.remove();
+					}
+				}
+			}
+		}
 	}
 	
 	public void pauseGame() {
@@ -225,12 +345,20 @@ private Sprite player2;
 		gameObjects.add(missile);
 	}
 	
+	public void setToDestroy(int id) {
+		for (GameObject gobj : gameObjects) {
+			if (gobj.getId() == id) {
+				gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+				return;
+			}
+		}
+	}
+	
 	public void creteMissile(float x, float y, MissileType type) {
 		super.creteMissile(x, y, type);
 
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
-			bluetoothConnection.sendMessage(BluetoothConnection.MISSILE + BluetoothConnection.DASH + x + 
-					BluetoothConnection.SEMICOLON + y);
+			bluetoothConnection.sendMissile(x, y);
 		}
 	}
 	
