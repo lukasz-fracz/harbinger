@@ -54,6 +54,9 @@ public abstract class BluetoothConnection extends Thread {
 			} else if (action.equals(DESTROY)) {
 				int id = Integer.valueOf(message.substring(dash + 1));
 				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).setToDestroy(id);
+			} else if (action.equals(SCORE)) {
+				int score = Integer.valueOf(message.substring(dash + 1));
+				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).addScore(score);
 			}
 		}
 	}
@@ -85,5 +88,9 @@ public abstract class BluetoothConnection extends Thread {
 	
 	public void sendDestroy(int id) {
 		sendMessage(DESTROY + DASH + id);
+	}
+	
+	public void sendScore(int score) {
+		sendMessage(SCORE + DASH + score);
 	}
 }

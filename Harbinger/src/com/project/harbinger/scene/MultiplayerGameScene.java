@@ -151,77 +151,58 @@ private Sprite player2;
 	}
 	
 	protected ContactListener createContactListener() {
-		/*
-		 * TODO
-		 * 
-		 * tu trzeba i tak czy siak napisać na nowo całe kolizje, bo nie można skorzystać z tego co jest w super,
-		 * bo tutaj trzeba będzie rozróżniać który z graczy zestrzelił wroga
-		 */
-		Debug.e(String.valueOf(isClient));
+		ContactListener contactListener;
 		if (!isClient) {
-			return super.createContactListener();
-		}
-		
-		ContactListener contactListener = new ContactListener() {
+			contactListener = super.createContactListener();
+		} else {
+			contactListener = new ContactListener() {
 
-			@Override
-			public void beginContact(Contact contact) {
-				final Fixture first = contact.getFixtureA();
-				final Fixture second = contact.getFixtureB();
-				
-				String firstUD = (String) first.getBody().getUserData();
-				String secondUD = (String) second.getBody().getUserData();
-				
-				
-				// activating active enemies
-				if ((firstUD.equals(WALL_TOP_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
-						(secondUD.equals(WALL_TOP_USER_DATA) && firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA))) {
-					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-						first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
-					} else {
-						second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
-						return;
-					}
-				}
-				
-				// bouncing active enemies
-				
-				// from walls
-				if ((firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(WALL_VERTICAL_USER_DATA)) ||
-						(secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && firstUD.equals(WALL_VERTICAL_USER_DATA))) {
-					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					} else {
-						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					}
-					return;
-				}
-				
-				// from another active enemy
-				if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-					first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					return;
-				}
-				
-				// handling player collision with enemies, the player has to respawn, and the client has to inform server
-				
-				if (firstUD.equals(Player.PLAYER_USER_DATA)) {
-					if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-						second.getBody().setUserData("COLLISION");
-						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						for (GameObject gobj : gameObjects) {
-							if (gobj.getBody().getUserData().equals("COLLISION")) {
-								gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-								bluetoothConnection.sendDestroy(gobj.getId());
-								return;
-							}
+				@Override
+				public void beginContact(Contact contact) {
+					final Fixture first = contact.getFixtureA();
+					final Fixture second = contact.getFixtureB();
+					
+					String firstUD = (String) first.getBody().getUserData();
+					String secondUD = (String) second.getBody().getUserData();
+					
+					
+					// activating active enemies
+					if ((firstUD.equals(WALL_TOP_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
+							(secondUD.equals(WALL_TOP_USER_DATA) && firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA))) {
+						if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+						} else {
+							second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
+							return;
 						}
 					}
-					if (secondUD.equals(Player.PLAYER_USER_DATA)) {
-						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-							first.getBody().setUserData("COLLISION");
-							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					
+					// bouncing active enemies
+					
+					// from walls
+					if ((firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(WALL_VERTICAL_USER_DATA)) ||
+							(secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && firstUD.equals(WALL_VERTICAL_USER_DATA))) {
+						if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						} else {
+							second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						}
+						return;
+					}
+					
+					// from another active enemy
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+						return;
+					}
+					
+					// handling player collision with enemies, the player has to respawn, and the client has to inform server
+					
+					if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							second.getBody().setUserData("COLLISION");
+							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 							for (GameObject gobj : gameObjects) {
 								if (gobj.getBody().getUserData().equals("COLLISION")) {
 									gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
@@ -230,52 +211,64 @@ private Sprite player2;
 								}
 							}
 						}
+						if (secondUD.equals(Player.PLAYER_USER_DATA)) {
+							if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+								first.getBody().setUserData("COLLISION");
+								second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+								for (GameObject gobj : gameObjects) {
+									if (gobj.getBody().getUserData().equals("COLLISION")) {
+										gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+										bluetoothConnection.sendDestroy(gobj.getId());
+										return;
+									}
+								}
+							}
+						}
 					}
 				}
-			}
-
-			@Override
-			public void endContact(Contact contact) {}
-
-			@Override
-			public void preSolve(Contact contact, Manifold oldManifold) {
-				final Fixture first = contact.getFixtureA();
-				final Fixture second = contact.getFixtureB();
-				String firstUD = (String) first.getBody().getUserData();
-				String secondUD = (String) second.getBody().getUserData();
-
-				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
-					return;
-				}
-				
-				// if there is a collision with missile
-				
-				if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA) || 
-						secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equalsIgnoreCase(Missile.MISSILE_PLAYER2_USER_DATA)) {
-					// set missile to destroy
-					if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
-						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+	
+				@Override
+				public void endContact(Contact contact) {}
+	
+				@Override
+				public void preSolve(Contact contact, Manifold oldManifold) {
+					final Fixture first = contact.getFixtureA();
+					final Fixture second = contact.getFixtureB();
+					String firstUD = (String) first.getBody().getUserData();
+					String secondUD = (String) second.getBody().getUserData();
+	
+					if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
+						return;
 					}
-					if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
-						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					
+					// if there is a collision with missile
+					
+					if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA) || 
+							secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equalsIgnoreCase(Missile.MISSILE_PLAYER2_USER_DATA)) {
+						// set missile to destroy
+						if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+							first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+						}
+						if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+							second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+						}
+						contact.setEnabled(false);
 					}
-					contact.setEnabled(false);
+					
+					
+					if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
+							second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
+							first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
+							second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
+						contact.setEnabled(false);
+					}
 				}
+	
+				@Override
+				public void postSolve(Contact contact, ContactImpulse impulse) {}
 				
-				
-				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
-						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
-						first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
-						second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
-					contact.setEnabled(false);
-				}
-			}
-
-			@Override
-			public void postSolve(Contact contact, ContactImpulse impulse) {}
-			
-		};
-		
+			};
+		}
 		return contactListener;		
 	}
 	
@@ -292,7 +285,8 @@ private Sprite player2;
 				GameObject next = objects.next();
 				if (next.getBody() != null && 
 						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
-						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA)) {
+						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA) ||
+						next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
 					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
 							findPhysicsConnectorByShape(next);
 					if (physicsConnector != null) {
@@ -310,7 +304,9 @@ private Sprite player2;
 						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
 							score += next.getScore();
 							updateScore();
-						}						
+						} else if (next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
+							bluetoothConnection.sendScore(next.getScore());
+						}
 						
 						physicsWorld.unregisterPhysicsConnector(physicsConnector);
 						next.getBody().setActive(false);
@@ -339,7 +335,7 @@ private Sprite player2;
 	}
 	
 	public void addMissile(float x, float y) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, -1);
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);
@@ -354,6 +350,11 @@ private Sprite player2;
 		}
 	}
 	
+	public void addScore(int score) {
+		this.score += score;
+		updateScore();
+	}
+	
 	public void creteMissile(float x, float y, MissileType type) {
 		super.creteMissile(x, y, type);
 
@@ -364,6 +365,10 @@ private Sprite player2;
 	
 	protected void loadLevel(int levelID) throws IOException {
 		super.loadLevel(levelID);
+		
+		try {
+			detachChild(player2);
+		} catch (Exception e) {}
 		
 		player2 = new Sprite(player.getX(), player.getY(), ResourcesManager.getInstance().getPlayer2Region(), vbom);
 		attachChild(player2);

@@ -331,12 +331,7 @@ public class GameScene extends BaseScene {
 			super.onManagedUpdate(pSecondsElapsed);
 		}
 	}
-	
-	/*
-	 * TODO
-	 * Całe kolizje trzeba będzie napisać ładnie na nowo. Teraz jest to strasznie zabugowne
-	 */
-	
+
 	protected ContactListener createContactListener() {
 		ContactListener contactListener = new ContactListener() {
 
@@ -348,88 +343,94 @@ public class GameScene extends BaseScene {
 				String firstUD = (String) first.getBody().getUserData();
 				String secondUD = (String) second.getBody().getUserData();
 				
-				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
-					if (firstUD.equals(Player.PLAYER_USER_DATA)) {
-						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || 
-								secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							return;
-						}
-					} else {
-						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || 
-								firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							return;
-						}
-					}
-				}
-
-				if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA) && 
-						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-					first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-					return;
-				}
 				
-				if (first.getBody().getUserData().equals(Player.PLAYER_USER_DATA) ||
-					second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
-					
-				}
-				
-				if (first.getBody().getUserData().equals(Missile.MISSILE_USER_DATA) || 
-						second.getBody().getUserData().equals(Missile.MISSILE_USER_DATA)) {
-					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
-							&& !first.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
-						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						return;
-					}
-					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)
-							&& !second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
-						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						return;
-					}
-				}
-				
-				if ((first.getBody().getUserData().equals(WALL_TOP_USER_DATA) && 
-						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
-						(second.getBody().getUserData().equals(WALL_TOP_USER_DATA) && 
-								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
-					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+				// activating active enemies
+				if ((firstUD.equals(WALL_TOP_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
+						(secondUD.equals(WALL_TOP_USER_DATA) && firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA))) {
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 						first.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
-						return;
 					} else {
 						second.getBody().setUserData(ActiveEnemy.ACTIVE_START_ME);
 						return;
 					}
 				}
 				
-				if ((first.getBody().getUserData().equals(WALL_VERTICAL_USER_DATA) && 
-						second.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) || 
-						(second.getBody().getUserData().equals(WALL_VERTICAL_USER_DATA) && 
-								first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA))) {
-					if (first.getBody().getUserData().equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+				// bouncing active enemies
+				
+				// from walls
+				if ((firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(WALL_VERTICAL_USER_DATA)) ||
+						(secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && firstUD.equals(WALL_VERTICAL_USER_DATA))) {
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 						first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-						return;
 					} else {
 						second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
-						return;
 					}
+					return;
 				}
 				
-				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
-						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA)) {
-					if (!first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
-							!first.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
-						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-						return;
+				// from another active enemy
+				if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) && secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+					first.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
+					return;
+				}
+				
+				// missile hit something
+				if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+					if (!secondUD.equals(WALL_BOTTOM_USER_DATA) && !secondUD.equals(WALL_TOP_USER_DATA)) {
+						if (firstUD.equals(Missile.MISSILE_USER_DATA)) {
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						} else {
+							second.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
+						}
 					}
-					if (!second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) && 
-							!second.getBody().getUserData().equals(Player.PLAYER_USER_DATA)) {
+					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					return;
+				}
+				
+				if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+					if (!firstUD.equals(WALL_BOTTOM_USER_DATA) && !firstUD.equals(WALL_TOP_USER_DATA)) {
+						if (secondUD.equals(Missile.MISSILE_USER_DATA)) {
+							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						} else {
+							first.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
+						}
+					}
+					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					return;
+				}
+				
+				// handling player collision with enemies, the player has to respawn, and the client has to inform server
+				
+				if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+					if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-						return;
+						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 					}
+					return;
+				}
+				if (secondUD.equals(Player.PLAYER_USER_DATA)) {
+					if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					}
+					return;
+				}			
+				
+				// destroying enemies who touch bottom wall
+				if (firstUD.equals(WALL_BOTTOM_USER_DATA)) {
+					if (secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || secondUD.equals(StaticEnemy.STATIC_USER_DATA) ||
+							secondUD.equals(Missile.MISSILE_USER_DATA)) {
+						second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
+					return;
+				}
+				if (secondUD.equals(WALL_BOTTOM_USER_DATA)) {
+					if (firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || firstUD.equals(StaticEnemy.STATIC_USER_DATA) ||
+							firstUD.equals(Missile.MISSILE_USER_DATA)) {
+						first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					}
+					return;
 				}
 			}
 
@@ -445,17 +446,6 @@ public class GameScene extends BaseScene {
 
 				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
 					return;
-					/*Debug.e("TU");
-					if (firstUD.equals(WALL_BOTTOM_USER_DATA) || firstUD.equals(WALL_TOP_USER_DATA) || 
-							firstUD.equals(WALL_VERTICAL_USER_DATA) ||
-							secondUD.equals(WALL_BOTTOM_USER_DATA) || secondUD.equals(WALL_TOP_USER_DATA) || 
-							secondUD.equals(WALL_VERTICAL_USER_DATA)) {
-						return;
-					} else {
-						contact.setEnabled(false);
-						first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-					}*/
 				}
 				
 				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
@@ -585,7 +575,7 @@ public class GameScene extends BaseScene {
 	    	            final GameObject levelObject;
 	    	            
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
-	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this, id);
+	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this);
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
 	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld, id);
@@ -620,7 +610,7 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, -1);
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);

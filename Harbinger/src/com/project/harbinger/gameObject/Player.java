@@ -19,8 +19,8 @@ public class Player extends GameObject {
 	private boolean fire;
 	private GameScene gameScene;
 	
-	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene, int id) {
-        super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo, id);
+	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
+        super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo, 1);
         createPhysics(camera, physicsWorld);
         
         this.gameScene = gameScene;
