@@ -13,6 +13,7 @@ public abstract class BluetoothConnection extends Thread {
 	
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
+	MultiplayerGameScene gameScene;
 	
 	private static final String PAUSE = "pause";
 	private static final String MOVE = "move";
@@ -22,6 +23,15 @@ public abstract class BluetoothConnection extends Thread {
 	private static final String SCORE = "score";
 	private static final String DASH = "-";
 	private static final String SEMICOLON = ";";
+	private static final String MYSCORE = "finished";
+	private static final String LOADED = "loaded";
+	private static final String DEAD = "dead";
+	private static final String YES = "yes";
+	private static final String NO = "no";
+	
+	public void setGameScene(MultiplayerGameScene gameScene) {
+		this.gameScene = gameScene;
+	}
 	
 	public void run() {
 		while (true) { // oczywiście to true kiedyś zniknie
@@ -40,23 +50,32 @@ public abstract class BluetoothConnection extends Thread {
 				float x = Float.valueOf(message.substring(dash + 1, semicolon));
 				float y = Float.valueOf(message.substring(semicolon + 1));
 				
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).movePlayer2(x, y);
+				gameScene.movePlayer2(x, y);
 			} else if (action.equals(MISSILE)) {
 				int semicolon = message.indexOf(SEMICOLON);
 				float x = Float.valueOf(message.substring(dash + 1, semicolon));
 				float y = Float.valueOf(message.substring(semicolon + 1));
 				
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).addMissile(x, y);
+				gameScene.addMissile(x, y);
 			} else if (action.equals(PAUSE)) {
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).pauseGame();
+				gameScene.pauseGame();
 			} else if (action.equals(RESUME)) {
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).resumeGame();
+				gameScene.resumeGame();
 			} else if (action.equals(DESTROY)) {
 				int id = Integer.valueOf(message.substring(dash + 1));
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).setToDestroy(id);
+				gameScene.setToDestroy(id);
 			} else if (action.equals(SCORE)) {
 				int score = Integer.valueOf(message.substring(dash + 1));
-				((MultiplayerGameScene) SceneManager.getInstance().getCurrentScene()).addScore(score);
+				gameScene.addScore(score);
+			} else if (action.equals(MYSCORE)) {
+				int score = Integer.valueOf(message.substring(dash + 1));
+				gameScene.updateOpponentScore(score);
+			} else if (action.equals(DEAD)) {
+				gameScene.partnerDead();
+			} else if (action.equals(YES)) {
+				gameScene.takeLife();
+			} else if (action.equals(NO)) {
+				gameScene.screwYou();
 			}
 		}
 	}
@@ -92,5 +111,25 @@ public abstract class BluetoothConnection extends Thread {
 	
 	public void sendScore(int score) {
 		sendMessage(SCORE + DASH + score);
+	}
+	
+	public void sendMyscore(int score) {
+		sendMessage(MYSCORE + DASH + score);
+	}
+	
+	public void sendLoaded() {
+		sendMessage(LOADED + DASH);
+	}
+	
+	public void sendDead() {
+		sendMessage(DEAD + DASH);
+	}
+	
+	public void sendYes() {
+		sendMessage(YES + DASH);
+	}
+	
+	public void sendNo() {
+		sendMessage(NO + DASH);
 	}
 }

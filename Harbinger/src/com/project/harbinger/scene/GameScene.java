@@ -146,8 +146,13 @@ public class GameScene extends BaseScene {
 		try {
 			loadLevel(currentLevel);
 		} catch (IOException e) {
-			SceneManager.getInstance().loadGameCompletedScene(engine, score);
+			enemies = -1;
+			gameFinished();
 		}
+	}
+	
+	protected void gameFinished() {
+		SceneManager.getInstance().loadGameCompletedScene(engine, score);
 	}
 	
 	protected void createHUD() {
@@ -245,7 +250,7 @@ public class GameScene extends BaseScene {
 	    };
 	}
 	
-	private void showGameOverText() {
+	protected void showGameOverText() {
 		isPaused = true;
 		gameHUD.attachChild(gameOverText);
 		setOnSceneTouchListener(new IOnSceneTouchListener() {

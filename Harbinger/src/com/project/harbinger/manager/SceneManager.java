@@ -190,6 +190,11 @@ public class SceneManager {
 	    }));
 	}
 	
+	public void loadMultiplayerGameCompletedScene(Engine mEngine, int myScore, int opponentScore) {
+		multiplayerGameScene.disposeScene();
+		ResourcesManager.getInstance().unloadGameResources();
+	}
+	
 	public void loadSingleplayerOptionsScene(Engine mEngine) {
 		setScene(singlePlayerOptionsScene);
 	}

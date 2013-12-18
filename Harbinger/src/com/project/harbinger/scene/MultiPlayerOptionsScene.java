@@ -48,9 +48,7 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	            	return;
 	            }
 	            mBluetoothAdapter.cancelDiscovery();
-	            client.start();
 	            activity.unregisterReceiver(mReceiver);
-	            
 	        }
 	    }
 	};
@@ -141,7 +139,6 @@ public class MultiPlayerOptionsScene extends BaseScene implements IOnMenuItemCli
 				public void run() {
 					mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 					BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
-					server.start();
 				}
 				
 			});

@@ -176,6 +176,8 @@ public class ResourcesManager {
 	private ITextureRegion fireButtonRegion;
 	private ITextureRegion resumeButtonRegion;
 	private ITextureRegion backButtonRegion;
+	private ITextureRegion yesButtonRegion;
+	private ITextureRegion noButtonRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
@@ -237,6 +239,14 @@ public class ResourcesManager {
 		return backButtonRegion;
 	}
 	
+	public ITextureRegion getYesButtonRegion() {
+		return yesButtonRegion;
+	}
+	
+	public ITextureRegion getNoButtonRegion() {
+		return noButtonRegion;
+	}
+	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -270,6 +280,10 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "buttons/resume.png");
 	    backButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "buttons/back.png");
+	    yesButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/yes.png");
+	    noButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/no.png");
 	    
 	    try  {
 	        gameTextureAtlas.build(new 

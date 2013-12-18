@@ -11,6 +11,8 @@ import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
@@ -48,15 +50,22 @@ import com.project.harbinger.multiplayer.BluetoothConnection;
 
 public class MultiplayerGameScene extends GameScene {
 
-private BluetoothConnection bluetoothConnection;
-private boolean isClient;
-private Sprite player2;
+	private BluetoothConnection bluetoothConnection;
+	private boolean isClient;
+	private Sprite player2;
+	private int opponentScore;
+	private Sprite noButton, yesButton;
+	private Text partnerDeadText;
+
 	
 	public MultiplayerGameScene(BluetoothConnection bluetoothConnection, boolean isClient) {
 		super();
 		
 		this.bluetoothConnection = bluetoothConnection;
+		bluetoothConnection.setGameScene(this);
+		bluetoothConnection.start();
 		this.isClient = isClient;
+		opponentScore = 0;
 		createPhysics();
 		try {
 			loadLevel(0);
@@ -72,6 +81,7 @@ private Sprite player2;
 		
 		createBackground();
 		createHUD();
+		createPartnerDeadMenu();
 	}
 	
 	protected void createPauseMenu() {
@@ -100,6 +110,45 @@ private Sprite player2;
 	            return true;
 	        };
 	    };
+	}
+	
+	private void createPartnerDeadMenu() {
+		partnerDeadText = new Text(10, 10, resourcesManager.getFont(),
+				"Partner's dead", new TextOptions(HorizontalAlign.LEFT), vbom);
+		partnerDeadText.setPosition(40, 200);
+		partnerDeadText.setColor(Color.GREEN);
+		
+		yesButton = new Sprite(100, 300, ResourcesManager.getInstance().getYesButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	        	gameHUD.detachChild(partnerDeadText);
+	        	gameHUD.detachChild(yesButton);
+	        	gameHUD.detachChild(noButton);
+	        	gameHUD.unregisterTouchArea(yesButton);
+	    		gameHUD.unregisterTouchArea(noButton);
+	    		
+	            bluetoothConnection.sendYes();
+	            lifes--;
+	            updateScore();
+	            isPaused = false;
+	            return true;
+	        };
+	    };
+	    noButton = new Sprite(100, 400, ResourcesManager.getInstance().getNoButtonRegion(), vbom) {
+	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	            bluetoothConnection.sendNo();
+	            gameFinished();
+	            return true;
+	        };
+	    };
+	}
+	
+	private void showPartnerDeadMenu() {
+		isPaused = true;
+		gameHUD.attachChild(partnerDeadText);
+		gameHUD.attachChild(yesButton);
+		gameHUD.attachChild(noButton);
+		gameHUD.registerTouchArea(yesButton);
+		gameHUD.registerTouchArea(noButton);
 	}
 	
 	@Override
@@ -211,16 +260,16 @@ private Sprite player2;
 								}
 							}
 						}
-						if (secondUD.equals(Player.PLAYER_USER_DATA)) {
-							if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
-								first.getBody().setUserData("COLLISION");
-								second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-								for (GameObject gobj : gameObjects) {
-									if (gobj.getBody().getUserData().equals("COLLISION")) {
-										gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-										bluetoothConnection.sendDestroy(gobj.getId());
-										return;
-									}
+					}
+					if (secondUD.equals(Player.PLAYER_USER_DATA)) {
+						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
+							first.getBody().setUserData("COLLISION");
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							for (GameObject gobj : gameObjects) {
+								if (gobj.getBody().getUserData().equals("COLLISION")) {
+									gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+									bluetoothConnection.sendDestroy(gobj.getId());
+									return;
 								}
 							}
 						}
@@ -306,6 +355,7 @@ private Sprite player2;
 							updateScore();
 						} else if (next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
 							bluetoothConnection.sendScore(next.getScore());
+							opponentScore += next.getScore();
 						}
 						
 						physicsWorld.unregisterPhysicsConnector(physicsConnector);
@@ -317,6 +367,15 @@ private Sprite player2;
 				}
 			}
 		}
+		if (!isClient) {
+			bluetoothConnection.sendMyscore(score);
+		}
+	}
+	
+	protected void showGameOverText() {
+		isPaused = true;
+		gameHUD.attachChild(gameOverText);
+		bluetoothConnection.sendDead();
 	}
 	
 	public void pauseGame() {
@@ -355,6 +414,24 @@ private Sprite player2;
 		updateScore();
 	}
 	
+	public void updateOpponentScore(int opponentScore) {
+		this.opponentScore = opponentScore;
+	}
+	
+	public void partnerDead() {
+		showPartnerDeadMenu();
+	}
+	
+	public void takeLife() {
+		gameHUD.detachChild(gameOverText);
+		lifes++;
+		isPaused = false;
+	}
+	
+	public void screwYou() {
+		gameFinished();
+	}
+	
 	public void creteMissile(float x, float y, MissileType type) {
 		super.creteMissile(x, y, type);
 
@@ -372,5 +449,10 @@ private Sprite player2;
 		
 		player2 = new Sprite(player.getX(), player.getY(), ResourcesManager.getInstance().getPlayer2Region(), vbom);
 		attachChild(player2);
+	}
+	
+	protected void gameFinished() {
+		Debug.e("Koniec. Mój wynik: " + score + " Wynik tego drugiego: " + opponentScore);
+		SceneManager.getInstance().loadMultiplayerGameCompletedScene(engine, score, opponentScore);
 	}
 }
