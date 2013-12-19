@@ -15,6 +15,7 @@ import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiPlayerOptionsScene;
 import com.project.harbinger.scene.MultiplayerClientGameScene;
+import com.project.harbinger.scene.MultiplayerGameCompletedScene;
 import com.project.harbinger.scene.MultiplayerGameScene;
 import com.project.harbinger.scene.MultiplayerServerGameScene;
 import com.project.harbinger.scene.SinglePlayerOptionsScene;
@@ -41,6 +42,7 @@ public class SceneManager {
 	private BaseScene multiplayerClientGameScene;
 	private BaseScene multiplayerServerGameScene;
 	private BaseScene multiplayerGameScene;
+	private BaseScene multiplayerGameCompletedScene;
 	
 	public enum SceneType {
 		SCENE_SPLASH,
@@ -52,7 +54,8 @@ public class SceneManager {
 		SCENE_SINGLEPLAYER_OPTIONS,
 		SCENE_HIGH_SCORES,
 		SCENE_MULTIPLAYER_CILENT_GAME,
-		SCENE_MULTIPLAYER_SERVER_GAME
+		SCENE_MULTIPLAYER_SERVER_GAME,
+		SCENE_MULTIPLAYER_GAME_COMPLETED
 	}
 	
 	private SceneType currentSceneType = SceneType.SCENE_SPLASH;
@@ -96,6 +99,9 @@ public class SceneManager {
 			break;
 		case SCENE_MULTIPLAYER_SERVER_GAME:
 			setScene(multiplayerServerGameScene);
+			break;
+		case SCENE_MULTIPLAYER_GAME_COMPLETED:
+			setScene(multiplayerGameCompletedScene);
 			break;
 		default:
 			break;
@@ -170,6 +176,7 @@ public class SceneManager {
 	            mEngine.unregisterUpdateHandler(pTimerHandler);
 	            ResourcesManager.getInstance().loadGameResources();
 	            multiplayerGameScene = new MultiplayerGameScene(bluetoothConnection, isClient);
+	            multiplayerGameCompletedScene = new MultiplayerGameCompletedScene();
 	            setScene(multiplayerGameScene);
 	        }
 	    }));
@@ -190,8 +197,25 @@ public class SceneManager {
 	    }));
 	}
 	
+	public void loadMenuSceneFromMultiplayer(final Engine mEngine) {
+		setScene(loadingScene);
+		multiplayerGameCompletedScene.disposeScene();
+		ResourcesManager.getInstance().unloadGameResources();
+		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
+	    {
+	        public void onTimePassed(final TimerHandler pTimerHandler) 
+	        {
+	            mEngine.unregisterUpdateHandler(pTimerHandler);
+	            ResourcesManager.getInstance().loadMenuTextures();
+	            setScene(menuScene);
+	        }
+	    }));
+	}
+	
 	public void loadMultiplayerGameCompletedScene(Engine mEngine, int myScore, int opponentScore) {
 		multiplayerGameScene.disposeScene();
+		((MultiplayerGameCompletedScene) multiplayerGameCompletedScene).prepareScene(myScore, opponentScore);
+		setScene(multiplayerGameCompletedScene);
 		ResourcesManager.getInstance().unloadGameResources();
 	}
 	

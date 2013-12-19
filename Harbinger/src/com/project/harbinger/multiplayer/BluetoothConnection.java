@@ -13,7 +13,8 @@ public abstract class BluetoothConnection extends Thread {
 	
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
-	MultiplayerGameScene gameScene;
+	private MultiplayerGameScene gameScene;
+	private boolean status;
 	
 	private static final String PAUSE = "pause";
 	private static final String MOVE = "move";
@@ -34,7 +35,9 @@ public abstract class BluetoothConnection extends Thread {
 	}
 	
 	public void run() {
-		while (true) { // oczywiście to true kiedyś zniknie
+		status = true;
+		
+		while (status) {
 			String message = "";
 			try {
 				message = (String) ois.readObject();
@@ -76,10 +79,23 @@ public abstract class BluetoothConnection extends Thread {
 				gameScene.takeLife();
 			} else if (action.equals(NO)) {
 				gameScene.screwYou();
+			} else if (action.equals(LOADED)) {
+				gameScene.opponentIsReady();
 			}
+		}
+		
+		try {
+			ois.close();
+			oos.close();
+		} catch (IOException e) {
+			Debug.e(e);
 		}
 	}
 
+	public void stopConnection() {
+		status = false;
+	}
+	
 	private synchronized void sendMessage(String message) {
 		try {
 			oos.writeObject(message);

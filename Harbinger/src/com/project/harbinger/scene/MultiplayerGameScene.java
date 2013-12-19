@@ -51,13 +51,12 @@ import com.project.harbinger.multiplayer.BluetoothConnection;
 public class MultiplayerGameScene extends GameScene {
 
 	private BluetoothConnection bluetoothConnection;
-	private boolean isClient;
+	private boolean isClient, opponentReady;
 	private Sprite player2;
 	private int opponentScore;
 	private Sprite noButton, yesButton;
 	private Text partnerDeadText;
 
-	
 	public MultiplayerGameScene(BluetoothConnection bluetoothConnection, boolean isClient) {
 		super();
 		
@@ -151,6 +150,22 @@ public class MultiplayerGameScene extends GameScene {
 		gameHUD.registerTouchArea(noButton);
 	}
 	
+	protected void showLevelCompleted() {
+		gameHUD.attachChild(levelCompletedText);
+		setOnSceneTouchListener(new IOnSceneTouchListener() {
+
+			@Override
+			public boolean onSceneTouchEvent(Scene pScene,
+					TouchEvent pSceneTouchEvent) {
+				bluetoothConnection.sendLoaded();
+				gameHUD.detachChild(levelCompletedText);
+				isPaused = false;
+				return false;
+			}
+			
+		});
+	}
+	
 	@Override
 	public void onBackKeyPressed() {
 		super.onBackKeyPressed();
@@ -179,6 +194,7 @@ public class MultiplayerGameScene extends GameScene {
 			
 			@Override
 			public void onUpdate(float pSecondsElapsed) {
+				
 				x += pSecondsElapsed;
 				if (x >= a) {
 					if (!(player.getX() == oldX && player.getY() == oldY)) {
@@ -440,8 +456,19 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	public void opponentIsReady() {
+		opponentReady = true;
+		isPaused = false;
+		try {
+			gameHUD.detachChild(levelCompletedText);
+		} catch (Exception e) {}
+	}
+	
 	protected void loadLevel(int levelID) throws IOException {
+		opponentReady = false;
 		super.loadLevel(levelID);
+		
+		bluetoothConnection.sendLoaded();
 		
 		try {
 			detachChild(player2);
@@ -452,7 +479,7 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	protected void gameFinished() {
-		Debug.e("Koniec. Mój wynik: " + score + " Wynik tego drugiego: " + opponentScore);
+		bluetoothConnection.stopConnection();
 		SceneManager.getInstance().loadMultiplayerGameCompletedScene(engine, score, opponentScore);
 	}
 }

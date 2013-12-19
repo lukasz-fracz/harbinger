@@ -125,8 +125,21 @@ public class GameScene extends BaseScene {
 		setBackground(new Background(Color.BLACK));
 	}
 	
-	private void loadNextLevel() {
+	private void loadNextLevel(int fps) {
 		isPaused = true;
+		showLevelCompleted();
+		detachChild(player);
+		currentLevel++;
+		createPhysics(fps);
+		try {
+			loadLevel(currentLevel);
+		} catch (IOException e) {
+			enemies = -1;
+			gameFinished();
+		}
+	}
+	
+	protected void showLevelCompleted() {
 		gameHUD.attachChild(levelCompletedText);
 		setOnSceneTouchListener(new IOnSceneTouchListener() {
 
@@ -139,16 +152,6 @@ public class GameScene extends BaseScene {
 			}
 			
 		});
-		
-		detachChild(player);
-		currentLevel++;
-		createPhysics(60);
-		try {
-			loadLevel(currentLevel);
-		} catch (IOException e) {
-			enemies = -1;
-			gameFinished();
-		}
 	}
 	
 	protected void gameFinished() {
@@ -316,7 +319,7 @@ public class GameScene extends BaseScene {
 				deleteObjectsForDestroy();
 				updateActiveEnemies();
 				if (enemies == 0) {
-					loadNextLevel();
+					loadNextLevel(30);
 				}
 			}
 
