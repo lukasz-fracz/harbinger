@@ -51,7 +51,7 @@ import com.project.harbinger.multiplayer.BluetoothConnection;
 public class MultiplayerGameScene extends GameScene {
 
 	private BluetoothConnection bluetoothConnection;
-	private boolean isClient, opponentReady;
+	private boolean isClient, opponentReady, iAmReady;
 	private Sprite player2;
 	private int opponentScore;
 	private Sprite noButton, yesButton;
@@ -64,6 +64,8 @@ public class MultiplayerGameScene extends GameScene {
 		bluetoothConnection.setGameScene(this);
 		bluetoothConnection.start();
 		this.isClient = isClient;
+		opponentReady = iAmReady = false;
+		
 		opponentScore = 0;
 		createPhysics();
 		try {
@@ -301,10 +303,6 @@ public class MultiplayerGameScene extends GameScene {
 					final Fixture second = contact.getFixtureB();
 					String firstUD = (String) first.getBody().getUserData();
 					String secondUD = (String) second.getBody().getUserData();
-	
-					if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
-						return;
-					}
 					
 					// if there is a collision with missile
 					
@@ -313,13 +311,22 @@ public class MultiplayerGameScene extends GameScene {
 						// set missile to destroy
 						if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
 							first.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+							if (secondUD.equals(Player.PLAYER_USER_DATA)) {
+								second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							}
 						}
 						if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
 							second.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+							if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+								first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+							}
 						}
 						contact.setEnabled(false);
 					}
 					
+					if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
+						return;
+					}					
 					
 					if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
 							second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
@@ -458,17 +465,23 @@ public class MultiplayerGameScene extends GameScene {
 	
 	public void opponentIsReady() {
 		opponentReady = true;
-		isPaused = false;
-		try {
-			gameHUD.detachChild(levelCompletedText);
-		} catch (Exception e) {}
 	}
 	
 	protected void loadLevel(int levelID) throws IOException {
-		opponentReady = false;
 		super.loadLevel(levelID);
 		
 		bluetoothConnection.sendLoaded();
+		iAmReady = true;
+
+		try {
+			gameHUD.detachChild(levelCompletedText);
+		} catch (Exception e) {}
+		
+		while (!(opponentReady && iAmReady));
+		
+		opponentReady = false;
+		iAmReady = false;
+		isPaused = false;
 		
 		try {
 			detachChild(player2);

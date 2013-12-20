@@ -565,9 +565,6 @@ public class GameScene extends BaseScene {
 	        public IEntity onLoadEntity(final String pEntityName, final Attributes pAttributes) {
 	            enemies = SAXUtils.getIntAttributeOrThrow(
 	            		pAttributes, TAG_LEVEL_ATTRIBUTE_ENEMIES);
-	            
-	            // TODO later we will specify camera BOUNDS and create invisible walls
-	            // on the beginning and on the end of the level.
 
 	            return GameScene.this;
 	        }
