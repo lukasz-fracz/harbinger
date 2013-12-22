@@ -42,7 +42,7 @@ public class HeavyFighter extends ActiveEnemy {
 	            if (allowToShoot) {
 	            	if (updatesCounter == 50) {
 	            		((GameScene) SceneManager.getInstance().getCurrentScene()).
-	            			creteMissile(getX() + 10, getY() + 45, MissileType.ENEMY);
+	            			creteMissile(getX() + 20, getY() + 75, MissileType.ENEMY);
 	            		updatesCounter = 0;
 	            		return;
 	            	}

@@ -253,23 +253,23 @@ public class ResourcesManager {
 	    		activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
 	    
 	    playerRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "player.png");
+	    		gameTextureAtlas, activity, "player.gif");
 	    player2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "player2.png");
 	    meteorRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "meteor.png");
+	    		gameTextureAtlas, activity, "meteor.gif");
 	    missileRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "missile.png");
+	    		gameTextureAtlas, activity, "missile.gif");
 	    missile2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "missile2.png");
 	    bulletRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "bullet.png");
+	    		gameTextureAtlas, activity, "bullet.gif");
 	    lightFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "fighter_light.png");
+	    		gameTextureAtlas, activity, "fighter_light.gif");
 	    heavyFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "fighter_heavy.png");	
+	    		gameTextureAtlas, activity, "fighter_heavy.gif");	
 	    cruiserRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "cruiser.png");
+	    		gameTextureAtlas, activity, "cruiser.gif");
 	    analogRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "buttons/analog.png");
 	    analogBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(

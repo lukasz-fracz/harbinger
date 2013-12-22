@@ -17,6 +17,7 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
+import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.SAXUtils;
@@ -26,11 +27,13 @@ import org.andengine.util.level.IEntityLoader;
 import org.andengine.util.level.LevelLoader;
 import org.xml.sax.Attributes;
 
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.gameObject.ActiveEnemy;
 import com.project.harbinger.gameObject.Bullet;
 import com.project.harbinger.gameObject.Cruiser;
@@ -345,10 +348,10 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	protected void deleteObjectsForDestroy() {
-		if (isClient) {
+		/*if (isClient) {
 			super.deleteObjectsForDestroy();
 			return;
-		}
+		}*/
 		
 		if (physicsWorld != null) {
 			Iterator<GameObject> objects = gameObjects.iterator();
@@ -367,9 +370,9 @@ public class MultiplayerGameScene extends GameScene {
 							respawnPlayer();
 							return;
 						}
-						if (!(next instanceof Missile)) {
-							bluetoothConnection.sendDestroy(next.getId());
-						}
+						
+						bluetoothConnection.sendDestroy(next.getId());
+						
 						if (next instanceof Enemy) {
 							enemies--;
 						}
@@ -414,10 +417,15 @@ public class MultiplayerGameScene extends GameScene {
 	public void movePlayer2(float x, float y) {
 		player2.setX(x);
 		player2.setY(y);
+		
+		/*float width = player2.getWidth() / 2;
+        float heigh = player2.getHeight() / 2;
+        float angle = body.getAngle();
+        body.setTransform((x + width) / 32, (y + heigh) / 32, angle);*/
 	}
 	
-	public void addMissile(float x, float y) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2);
+	public void addMissile(float x, float y, int id) {
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);
@@ -459,7 +467,7 @@ public class MultiplayerGameScene extends GameScene {
 		super.creteMissile(x, y, type);
 
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
-			bluetoothConnection.sendMissile(x, y);
+			bluetoothConnection.sendMissile(x, y, missileCounter + 1);
 		}
 	}
 	

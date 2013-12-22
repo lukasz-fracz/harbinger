@@ -17,8 +17,8 @@ public class Missile extends GameObject {
 	private MissileType type;
 	
 	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			MissileType type) {
-        super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo, -1);
+			MissileType type, int id) {
+        super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo, id);
         
         this.type = type;
         createPhysics(camera, physicsWorld);

@@ -68,6 +68,7 @@ public class GameScene extends BaseScene {
 	protected int score, lifes, currentLevel, enemies;
 	protected boolean isPaused;
 	protected Sprite backButton, resumeButton;
+	int missileCounter;
 	
 	@Override
 	public void createScene() {
@@ -558,6 +559,7 @@ public class GameScene extends BaseScene {
 
 	protected void loadLevel(int levelID) throws IOException {
 		gameObjects = new ArrayList<GameObject>();
+		missileCounter = -1;
 		
 	    final LevelLoader levelLoader = new LevelLoader("");
 	    
@@ -615,9 +617,10 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type);
+		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, missileCounter);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		gameObjects.add(missile);
+		missileCounter--;
 	}
 }

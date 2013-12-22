@@ -46,7 +46,7 @@ public class Player extends GameObject {
 	            if (fire) {
 	            	if (x >= 0.5) {
 	            		x = 0;
-	            		gameScene.creteMissile(getX() + 10, getY() - 35, MissileType.PLAYER1);
+	            		gameScene.creteMissile(getX() + 20, getY() - 50, MissileType.PLAYER1);
 	            		fire = false;
 	            	}
 	            }

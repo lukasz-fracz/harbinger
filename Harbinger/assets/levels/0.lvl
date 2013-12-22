@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<level enemies="10">    
+<level enemies="9">    
     <entity x="10" y="550" type="player" id="1" />
     <entity x="10" y="10" type="meteor" id="2" />
     <entity x="100" y="10" type="meteor" id="3" />
@@ -9,6 +9,5 @@
     <entity x="300" y="-2000" type="left-light-fighter" id="7" />
     <entity x="300" y="-2500" type="left-heavy-fighter" id="8" /> 
     <entity x="300" y="-3000" type="left-cruiser" id="9" /> 
-    <entity x="100" y="-3500" type="left-light-fighter" id="10" /> 
-    <entity x="400" y="-3500" type="right-light-fighter" id="11" /> 
+    <entity x="100" y="-3500" type="left-heavy-fighter" id="10" /> 
 </level>

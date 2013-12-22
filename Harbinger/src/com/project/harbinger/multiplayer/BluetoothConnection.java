@@ -24,6 +24,7 @@ public abstract class BluetoothConnection extends Thread {
 	private static final String SCORE = "score";
 	private static final String DASH = "-";
 	private static final String SEMICOLON = ";";
+	private static final String AT = "@";
 	private static final String MYSCORE = "finished";
 	private static final String LOADED = "loaded";
 	private static final String DEAD = "dead";
@@ -43,6 +44,8 @@ public abstract class BluetoothConnection extends Thread {
 				message = (String) ois.readObject();
 			} catch (Exception e) {
 				Debug.e(e);
+				status = false;
+				break;
 			}
 			
 			int dash = message.indexOf(DASH);
@@ -56,10 +59,12 @@ public abstract class BluetoothConnection extends Thread {
 				gameScene.movePlayer2(x, y);
 			} else if (action.equals(MISSILE)) {
 				int semicolon = message.indexOf(SEMICOLON);
+				int at = message.indexOf(AT);
 				float x = Float.valueOf(message.substring(dash + 1, semicolon));
-				float y = Float.valueOf(message.substring(semicolon + 1));
+				float y = Float.valueOf(message.substring(semicolon + 1, at));
+				int id = Integer.valueOf(message.substring(at + 1));
 				
-				gameScene.addMissile(x, y);
+				gameScene.addMissile(x, y, id);
 			} else if (action.equals(PAUSE)) {
 				gameScene.pauseGame();
 			} else if (action.equals(RESUME)) {
@@ -117,8 +122,8 @@ public abstract class BluetoothConnection extends Thread {
 		sendMessage(MOVE + DASH + x + SEMICOLON + y);
 	}
 	
-	public void sendMissile(float x, float y) {
-		sendMessage(MISSILE + DASH + x + SEMICOLON + y);
+	public void sendMissile(float x, float y, int id) {
+		sendMessage(MISSILE + DASH + x + SEMICOLON + y + AT + id);
 	}
 	
 	public void sendDestroy(int id) {

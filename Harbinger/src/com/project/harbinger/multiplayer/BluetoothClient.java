@@ -16,6 +16,7 @@ import org.andengine.util.debug.Debug;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.scene.MultiplayerClientGameScene;
+import com.project.harbinger.scene.MultiplayerOptionsScene;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -44,6 +45,7 @@ public class BluetoothClient extends BluetoothConnection {
 		}
 		
 		Debug.e("Klient Połączony");
+		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setText("Klient połączony");
 		
 		oos = null;
 		ois = null;

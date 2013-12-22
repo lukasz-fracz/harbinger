@@ -13,7 +13,7 @@ import com.project.harbinger.scene.GameScene;
 import com.project.harbinger.scene.HighScoresScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
-import com.project.harbinger.scene.MultiPlayerOptionsScene;
+import com.project.harbinger.scene.MultiplayerOptionsScene;
 import com.project.harbinger.scene.MultiplayerClientGameScene;
 import com.project.harbinger.scene.MultiplayerGameCompletedScene;
 import com.project.harbinger.scene.MultiplayerGameScene;
@@ -125,7 +125,7 @@ public class SceneManager {
 		ResourcesManager.getInstance().loadMenuResources();
 		menuScene = new MainMenuScene();
 		loadingScene = new LoadingScene();
-		multiPlayerOptionsScene = new MultiPlayerOptionsScene();
+		multiPlayerOptionsScene = new MultiplayerOptionsScene();
 		singlePlayerOptionsScene = new SinglePlayerOptionsScene();
 		highScoresScene = new HighScoresScene();
 		setScene(menuScene);

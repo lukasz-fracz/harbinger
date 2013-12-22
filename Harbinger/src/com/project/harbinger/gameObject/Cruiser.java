@@ -42,7 +42,7 @@ public class Cruiser extends ActiveEnemy {
 	            if (allowToShoot) {
 	            	if (updatesCounter == 30) {
 	            		((GameScene) SceneManager.getInstance().getCurrentScene()).
-	            			creteMissile(getX() + 10, getY() + 90, MissileType.ENEMY);
+	            			creteMissile(getX() + 50, getY() + 140, MissileType.ENEMY);
 	            		updatesCounter = 0;
 	            		return;
 	            	}
