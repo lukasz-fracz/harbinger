@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 
 import org.andengine.util.debug.Debug;
 
-import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.scene.MultiplayerGameScene;
 
 public abstract class BluetoothConnection extends Thread {
@@ -44,6 +43,7 @@ public abstract class BluetoothConnection extends Thread {
 				message = (String) ois.readObject();
 			} catch (Exception e) {
 				Debug.e(e);
+				gameScene.screwYou();
 				status = false;
 				break;
 			}

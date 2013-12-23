@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <level enemies="10">    
     <entity x="10" y="550" type="player" id="1" />
+    <entity x="300" y="-100" type="left-heavy-fighter" id="2" />
+    <entity x="10" y="-100" type="right-heavy-fighter" id="2" />
 </level>

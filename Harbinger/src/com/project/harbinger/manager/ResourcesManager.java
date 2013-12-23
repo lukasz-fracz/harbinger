@@ -50,7 +50,7 @@ public class ResourcesManager {
 	public void loadSplashScreen() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 		splashTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(),
-				278, 449, TextureOptions.BILINEAR);
+				480, 800, TextureOptions.BILINEAR);
 		splashRegion = BitmapTextureAtlasTextureRegionFactory
 				.createFromAsset(splashTextureAtlas, activity, "splash.png",
 				0, 0);
@@ -59,7 +59,7 @@ public class ResourcesManager {
 	
 	public void unloadSplashScreen() {
 		splashTextureAtlas.unload();
-		splashRegion = null;		
+		splashRegion = null;
 	}
 	
 	// menu
@@ -255,7 +255,7 @@ public class ResourcesManager {
 	    playerRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "player.gif");
 	    player2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "player2.png");
+	    		gameTextureAtlas, activity, "player2.gif");
 	    meteorRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "meteor.gif");
 	    missileRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(

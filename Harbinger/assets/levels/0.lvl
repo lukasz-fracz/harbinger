@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<level enemies="9">    
+<level enemies="8">    
     <entity x="10" y="550" type="player" id="1" />
     <entity x="10" y="10" type="meteor" id="2" />
     <entity x="100" y="10" type="meteor" id="3" />
-    <entity x="300" y="-700" type="meteor" id="4" />
     <entity x="300" y="-1000" type="bullet" id="5" />
     <entity x="400" y="-2000" type="bullet" id="6" />
     <entity x="300" y="-2000" type="left-light-fighter" id="7" />

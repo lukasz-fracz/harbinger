@@ -26,6 +26,10 @@ public abstract class BaseScene extends Scene {
 		createScene();
 	}
 	
+	public void onHomeKeyPressed() {
+		// only one scene will use it, so it doesn't have to be abstract
+	}
+	
 	public abstract void createScene();
 	public abstract void onBackKeyPressed();
 	public abstract SceneType getSceneType();

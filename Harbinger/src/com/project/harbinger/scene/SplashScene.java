@@ -21,7 +21,7 @@ public class SplashScene extends BaseScene {
 		} ;
 		
 		splash.setScale(1.5f);
-		splash.setPosition(100, 150);
+		splash.setPosition(0, 0);
 		attachChild(splash);
 	}
 

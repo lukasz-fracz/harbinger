@@ -11,11 +11,14 @@ import org.andengine.engine.options.WakeLockOptions;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.ui.activity.BaseGameActivity;
+import org.andengine.util.debug.Debug;
 
 import android.view.KeyEvent;
 
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
+import com.project.harbinger.manager.SceneManager.SceneType;
+import com.project.harbinger.scene.GameScene;
 
 /**
  * @author Łukasz Frącz
@@ -72,6 +75,12 @@ public class MainMenuActivity extends BaseGameActivity {
 	            }
 	    }));
 	    pOnPopulateSceneCallback.onPopulateSceneFinished();		
+	}
+	
+	public void onPauseGame() {
+		super.onPauseGame();
+		
+		SceneManager.getInstance().getCurrentScene().onHomeKeyPressed();
 	}
 	
 	public void onDestroy() {

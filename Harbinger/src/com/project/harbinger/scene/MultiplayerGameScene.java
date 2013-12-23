@@ -54,7 +54,7 @@ import com.project.harbinger.multiplayer.BluetoothConnection;
 public class MultiplayerGameScene extends GameScene {
 
 	private BluetoothConnection bluetoothConnection;
-	private boolean isClient, opponentReady, iAmReady;
+	private boolean isClient, opponentReady, iAmReady, pausedBySecondPlayer;
 	private Sprite player2;
 	private int opponentScore;
 	private Sprite noButton, yesButton;
@@ -67,7 +67,7 @@ public class MultiplayerGameScene extends GameScene {
 		bluetoothConnection.setGameScene(this);
 		bluetoothConnection.start();
 		this.isClient = isClient;
-		opponentReady = iAmReady = false;
+		opponentReady = iAmReady = pausedBySecondPlayer = false;
 		
 		opponentScore = 0;
 		createPhysics();
@@ -97,8 +97,9 @@ public class MultiplayerGameScene extends GameScene {
 
 		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            SceneManager.getInstance().loadMenuScene(engine);
-	        	// TODO wiadomo
+	        	bluetoothConnection.sendNo();
+	            gameFinished();
+	        	
 	            return true;
 	        };
 	    };
@@ -173,6 +174,10 @@ public class MultiplayerGameScene extends GameScene {
 	
 	@Override
 	public void onBackKeyPressed() {
+		if (pausedBySecondPlayer) {
+			return;
+		}
+		
 		super.onBackKeyPressed();
 		
 		if (isPaused) {
@@ -183,7 +188,7 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	protected void createPhysics() {
-		super.createPhysics(25);
+		super.createPhysics(30);
 		
 		registerUpdateHandler(createMultiplayerUpdateHandler());
 	}
@@ -273,11 +278,13 @@ public class MultiplayerGameScene extends GameScene {
 						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							second.getBody().setUserData("COLLISION");
 							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							for (GameObject gobj : gameObjects) {
-								if (gobj.getBody().getUserData().equals("COLLISION")) {
-									gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-									bluetoothConnection.sendDestroy(gobj.getId());
-									return;
+							synchronized (gameObjects) {
+								for (GameObject gobj : gameObjects) {
+									if (gobj.getBody().getUserData().equals("COLLISION")) {
+										gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+										bluetoothConnection.sendDestroy(gobj.getId());
+										return;
+									}
 								}
 							}
 						}
@@ -286,11 +293,13 @@ public class MultiplayerGameScene extends GameScene {
 						if (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							first.getBody().setUserData("COLLISION");
 							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-							for (GameObject gobj : gameObjects) {
-								if (gobj.getBody().getUserData().equals("COLLISION")) {
-									gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-									bluetoothConnection.sendDestroy(gobj.getId());
-									return;
+							synchronized (gameObjects) {
+								for (GameObject gobj : gameObjects) {
+									if (gobj.getBody().getUserData().equals("COLLISION")) {
+										gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+										bluetoothConnection.sendDestroy(gobj.getId());
+										return;
+									}
 								}
 							}
 						}
@@ -354,41 +363,43 @@ public class MultiplayerGameScene extends GameScene {
 		}*/
 		
 		if (physicsWorld != null) {
-			Iterator<GameObject> objects = gameObjects.iterator();
-			
-			while (objects.hasNext()) {
-				GameObject next = objects.next();
-				if (next.getBody() != null && 
-						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
-						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA) ||
-						next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
-					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
-							findPhysicsConnectorByShape(next);
-					if (physicsConnector != null) {
-						if (next instanceof Player) {
-							next.getBody().setUserData(Player.PLAYER_USER_DATA);
-							respawnPlayer();
-							return;
+			synchronized (gameObjects) {
+				Iterator<GameObject> objects = gameObjects.iterator();
+				
+				while (objects.hasNext()) {
+					GameObject next = objects.next();
+					if (next.getBody() != null && 
+							next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
+							next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA) ||
+							next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
+						PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
+								findPhysicsConnectorByShape(next);
+						if (physicsConnector != null) {
+							if (next instanceof Player) {
+								next.getBody().setUserData(Player.PLAYER_USER_DATA);
+								respawnPlayer();
+								return;
+							}
+							
+							bluetoothConnection.sendDestroy(next.getId());
+							
+							if (next instanceof Enemy) {
+								enemies--;
+							}
+							if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+								score += next.getScore();
+								updateScore();
+							} else if (next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
+								bluetoothConnection.sendScore(next.getScore());
+								opponentScore += next.getScore();
+							}
+							
+							physicsWorld.unregisterPhysicsConnector(physicsConnector);
+							next.getBody().setActive(false);
+							physicsWorld.destroyBody(next.getBody());
+							detachChild(next);
+							objects.remove();
 						}
-						
-						bluetoothConnection.sendDestroy(next.getId());
-						
-						if (next instanceof Enemy) {
-							enemies--;
-						}
-						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
-							score += next.getScore();
-							updateScore();
-						} else if (next.getBody().getUserData().equals(GameObject.DESTROY_BY_SECOND_PLAYER)) {
-							bluetoothConnection.sendScore(next.getScore());
-							opponentScore += next.getScore();
-						}
-						
-						physicsWorld.unregisterPhysicsConnector(physicsConnector);
-						next.getBody().setActive(false);
-						physicsWorld.destroyBody(next.getBody());
-						detachChild(next);
-						objects.remove();
 					}
 				}
 			}
@@ -406,36 +417,37 @@ public class MultiplayerGameScene extends GameScene {
 	
 	public void pauseGame() {
 		isPaused = true;
+		pausedBySecondPlayer = true;
 		attachChild(gamePausedText);
 	}
 	
 	public void resumeGame() {
 		isPaused = false;
+		pausedBySecondPlayer = false;
 		detachChild(gamePausedText);
 	}
 	
 	public void movePlayer2(float x, float y) {
 		player2.setX(x);
 		player2.setY(y);
-		
-		/*float width = player2.getWidth() / 2;
-        float heigh = player2.getHeight() / 2;
-        float angle = body.getAngle();
-        body.setTransform((x + width) / 32, (y + heigh) / 32, angle);*/
 	}
 	
 	public void addMissile(float x, float y, int id) {
 		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
-		gameObjects.add(missile);
+		synchronized (gameObjects) {
+			gameObjects.add(missile);
+		}
 	}
 	
 	public void setToDestroy(int id) {
-		for (GameObject gobj : gameObjects) {
-			if (gobj.getId() == id) {
-				gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
-				return;
+		synchronized (gameObjects) {
+			for (GameObject gobj : gameObjects) {
+				if (gobj.getId() == id) {
+					gobj.getBody().setUserData(GameObject.DESTROY_BY_WALL_USER_DATA);
+					return;
+				}
 			}
 		}
 	}
@@ -450,7 +462,12 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	public void partnerDead() {
-		showPartnerDeadMenu();
+		if (lifes > 1) {
+			showPartnerDeadMenu();
+		} else {
+			bluetoothConnection.sendNo();
+			gameFinished();
+		}
 	}
 	
 	public void takeLife() {
@@ -464,7 +481,9 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
-		super.creteMissile(x, y, type);
+		synchronized (gameObjects) {
+			super.creteMissile(x, y, type);
+		}
 
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {
 			bluetoothConnection.sendMissile(x, y, missileCounter + 1);

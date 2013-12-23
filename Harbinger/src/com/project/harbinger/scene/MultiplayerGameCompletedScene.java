@@ -51,8 +51,13 @@ public class MultiplayerGameCompletedScene extends BaseScene {
 	public void prepareScene(int myScore, int opponentScore) {
 		myScoreText.setText("Your score: " + myScore);
 		opponentScoreText.setText("Opponent's\nscore: " + opponentScore);
-		attachChild(myScoreText);
-		attachChild(opponentScoreText);
+		
+		try {
+			attachChild(myScoreText);
+			attachChild(opponentScoreText);
+		} catch (Exception e) {
+			return;
+		}
 		
 		if (myScore < opponentScore) {
 			resultText.setText("You loose");

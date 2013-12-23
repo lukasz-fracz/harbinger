@@ -73,7 +73,7 @@ public class GameScene extends BaseScene {
 	@Override
 	public void createScene() {
 		score = 0;
-		currentLevel = 0;
+		currentLevel = 99;
 		lifes = 5;
 		isPaused = false;
 		
@@ -93,6 +93,12 @@ public class GameScene extends BaseScene {
 	    gameHUD.registerTouchArea(backButton);
 	    gameHUD.attachChild(backButton);
 	    gameHUD.attachChild(resumeButton);
+	}
+	
+	public void onHomeKeyPressed() {
+		if (!isPaused) {
+			onBackKeyPressed();
+		}
 	}
 	
 	@Override
@@ -491,34 +497,36 @@ public class GameScene extends BaseScene {
 	
 	protected void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
-			Iterator<GameObject> objects = gameObjects.iterator();
-			
-			while (objects.hasNext()) {
-				GameObject next = objects.next();
-				if (next.getBody() != null && 
-						next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
-						next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA)) {
-					PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
-							findPhysicsConnectorByShape(next);
-					if (physicsConnector != null) {
-						if (next instanceof Player) {
-							next.getBody().setUserData(Player.PLAYER_USER_DATA);
-							respawnPlayer();
-							return;
+			synchronized (gameObjects) {
+				Iterator<GameObject> objects = gameObjects.iterator();
+				
+				while (objects.hasNext()) {
+					GameObject next = objects.next();
+					if (next.getBody() != null && 
+							next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
+							next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA)) {
+						PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
+								findPhysicsConnectorByShape(next);
+						if (physicsConnector != null) {
+							if (next instanceof Player) {
+								next.getBody().setUserData(Player.PLAYER_USER_DATA);
+								respawnPlayer();
+								return;
+							}
+							if (next instanceof Enemy) {
+								enemies--;
+							}
+							if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
+								score += next.getScore();
+								updateScore();
+							}						
+							
+							physicsWorld.unregisterPhysicsConnector(physicsConnector);
+							next.getBody().setActive(false);
+							physicsWorld.destroyBody(next.getBody());
+							detachChild(next);
+							objects.remove();
 						}
-						if (next instanceof Enemy) {
-							enemies--;
-						}
-						if (next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA)) {
-							score += next.getScore();
-							updateScore();
-						}						
-						
-						physicsWorld.unregisterPhysicsConnector(physicsConnector);
-						next.getBody().setActive(false);
-						physicsWorld.destroyBody(next.getBody());
-						detachChild(next);
-						objects.remove();
 					}
 				}
 			}
@@ -526,11 +534,13 @@ public class GameScene extends BaseScene {
 	}
 	
 	private void updateActiveEnemies() {
-		for (GameObject object : gameObjects) {
-			if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_START_ME)) {
-				((ActiveEnemy) object).start();
-			} else if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_TURN)) {
-				((ActiveEnemy) object).changeSide();
+		synchronized (gameObjects) {
+			for (GameObject object : gameObjects) {
+				if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_START_ME)) {
+					((ActiveEnemy) object).start();
+				} else if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_TURN)) {
+					((ActiveEnemy) object).changeSide();
+				}
 			}
 		}
 	}
@@ -620,7 +630,9 @@ public class GameScene extends BaseScene {
 		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, missileCounter);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
-		gameObjects.add(missile);
+		synchronized (gameObjects) {
+			gameObjects.add(missile);
+		}
 		missileCounter--;
 	}
 }
