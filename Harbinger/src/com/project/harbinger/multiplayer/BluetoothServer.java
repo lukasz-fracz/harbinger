@@ -14,7 +14,6 @@ import org.andengine.util.debug.Debug;
 
 import com.project.harbinger.gameObject.*;
 import com.project.harbinger.manager.SceneManager;
-import com.project.harbinger.multiplayer.GameObjectInformation.ObjectType;
 import com.project.harbinger.scene.MultiplayerOptionsScene;
 
 import android.bluetooth.BluetoothAdapter;
@@ -38,14 +37,14 @@ public class BluetoothServer extends BluetoothConnection {
 		
 		try {
 			Debug.e("Czekam");
-			((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setText("Czekam");
+			((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.WAIT);
 			socket = serverSocket.accept();
 		} catch (IOException e) {
 			Debug.e(e);
 		}
 		
 		Debug.e("Serwer połączony");
-		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setText("Serwer połączony");
+		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.FOUND);
 		
 		ois = null;
 		oos = null;

@@ -5,17 +5,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.andengine.engine.Engine;
 import org.andengine.util.debug.Debug;
 
 import com.project.harbinger.manager.SceneManager;
-import com.project.harbinger.manager.SceneManager.SceneType;
-import com.project.harbinger.scene.MultiplayerClientGameScene;
 import com.project.harbinger.scene.MultiplayerOptionsScene;
 
 import android.bluetooth.BluetoothDevice;
@@ -45,7 +40,7 @@ public class BluetoothClient extends BluetoothConnection {
 		}
 		
 		Debug.e("Klient Połączony");
-		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setText("Klient połączony");
+		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.FOUND);
 		
 		oos = null;
 		ois = null;

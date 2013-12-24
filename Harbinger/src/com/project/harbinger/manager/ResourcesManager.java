@@ -71,6 +71,9 @@ public class ResourcesManager {
 	private ITextureRegion highScoresButtonRegion;
 	private ITextureRegion hostButtonRegion;
 	private ITextureRegion joinButtonRegion;
+	private ITextureRegion waitIconRegion;
+	private ITextureRegion haveSomethingIconRegion;
+	private ITextureRegion goIconRegion;
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
 	public ITextureRegion getMenuBackgroundRegion() {
@@ -105,6 +108,18 @@ public class ResourcesManager {
 		return joinButtonRegion;
 	}
 	
+	public ITextureRegion getWaitIconRegion() {
+		return waitIconRegion;
+	}
+	
+	public ITextureRegion getHaveSomethingIconRegion() {
+		return haveSomethingIconRegion;
+	}
+	
+	public ITextureRegion getGoIconRegion() {
+		return goIconRegion;
+	}
+	
 	private void loadMenuGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/menu/");
 		menuTextureAtlas = new BuildableBitmapTextureAtlas(activity.getTextureManager(),
@@ -112,19 +127,25 @@ public class ResourcesManager {
 		menuBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 				menuTextureAtlas, activity, "menu_background.png");
 		singleButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "single_button.png");
+				menuTextureAtlas, activity, "single_button.gif");
 		multiButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "multi_button.png");
+				menuTextureAtlas, activity, "multi_button.gif");
 		startButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "start_button.png");
+				menuTextureAtlas, activity, "start_button.gif");
 		backMenuButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "back_button.png");
+				menuTextureAtlas, activity, "back_button.gif");
 		highScoresButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "high_scores_button.png");
+				menuTextureAtlas, activity, "high_scores_button.gif");
 		hostButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "host_button.png");
+				menuTextureAtlas, activity, "host_button.gif");
 		joinButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-				menuTextureAtlas, activity, "join_button.png");
+				menuTextureAtlas, activity, "join_button.gif");
+		haveSomethingIconRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "have_something_icon.png");
+		waitIconRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "wait_icon.png");
+		goIconRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+				menuTextureAtlas, activity, "go_icon.png");
 		
 		try {
 			menuTextureAtlas.build(
@@ -178,6 +199,7 @@ public class ResourcesManager {
 	private ITextureRegion backButtonRegion;
 	private ITextureRegion yesButtonRegion;
 	private ITextureRegion noButtonRegion;
+	private ITextureRegion gamepadBackgroundRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
@@ -247,6 +269,10 @@ public class ResourcesManager {
 		return noButtonRegion;
 	}
 	
+	public ITextureRegion getGamepadBackgroundRegion() {
+		return gamepadBackgroundRegion;
+	}
+	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -275,15 +301,17 @@ public class ResourcesManager {
 	    analogBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "buttons/analogBackground.png");
 	    fireButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/fire.png");
+	    		gameTextureAtlas, activity, "buttons/fire.gif");
 	    resumeButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/resume.png");
+	    		gameTextureAtlas, activity, "buttons/resume.gif");
 	    backButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/back.png");
+	    		gameTextureAtlas, activity, "buttons/back.gif");
 	    yesButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/yes.png");
+	    		gameTextureAtlas, activity, "buttons/yes.gif");
 	    noButtonRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "buttons/no.png");
+	    		gameTextureAtlas, activity, "buttons/no.gif");
+	    gamepadBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
+	    		gameTextureAtlas, activity, "buttons/gamepad.png");
 	    
 	    try  {
 	        gameTextureAtlas.build(new 

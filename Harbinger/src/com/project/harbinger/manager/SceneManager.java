@@ -14,10 +14,8 @@ import com.project.harbinger.scene.HighScoresScene;
 import com.project.harbinger.scene.LoadingScene;
 import com.project.harbinger.scene.MainMenuScene;
 import com.project.harbinger.scene.MultiplayerOptionsScene;
-import com.project.harbinger.scene.MultiplayerClientGameScene;
 import com.project.harbinger.scene.MultiplayerGameCompletedScene;
 import com.project.harbinger.scene.MultiplayerGameScene;
-import com.project.harbinger.scene.MultiplayerServerGameScene;
 import com.project.harbinger.scene.SinglePlayerOptionsScene;
 import com.project.harbinger.scene.SplashScene;
 
@@ -150,24 +148,10 @@ public class SceneManager {
 	    }));
 	}
 	
-	public void loadMultiplayerServerGameScene(final Engine mEngine, final BluetoothServer server) {
-		setScene(loadingScene);
-		ResourcesManager.getInstance().unloadMenuTextures();
-		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
-	    {
-	        public void onTimePassed(final TimerHandler pTimerHandler) 
-	        {
-	            mEngine.unregisterUpdateHandler(pTimerHandler);
-	            ResourcesManager.getInstance().loadGameResources();
-	            multiplayerServerGameScene = new MultiplayerServerGameScene(server);
-	            setScene(multiplayerServerGameScene);
-	        }
-	    }));
-	}
-	
 	public void loadMultiplayerGameScene(final Engine mEngine, final BluetoothConnection bluetoothConnection,
 			final boolean isClient) {
 		setScene(loadingScene);
+		((MultiplayerOptionsScene) multiPlayerOptionsScene).onStop();
 		ResourcesManager.getInstance().unloadMenuTextures();
 		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
 	    {
@@ -213,6 +197,7 @@ public class SceneManager {
 	}
 	
 	public void loadMultiplayerGameCompletedScene(Engine mEngine, int myScore, int opponentScore) {
+		((MultiplayerOptionsScene) multiPlayerOptionsScene).disableBluetooth();
 		multiplayerGameScene.disposeScene();
 		((MultiplayerGameCompletedScene) multiplayerGameCompletedScene).prepareScene(myScore, opponentScore);
 		setScene(multiplayerGameCompletedScene);
@@ -241,22 +226,8 @@ public class SceneManager {
 	
 	public void loadMultiplayerOptionsScene(final Engine mEngine) {
 		setScene(multiPlayerOptionsScene);
+		((MultiplayerOptionsScene) multiPlayerOptionsScene).onStart();
 		//menuScene.disposeScene();
-	}
-	
-	public void loadMultiplayerClientGameScene(final Engine mEngine) {
-		setScene(loadingScene);
-		ResourcesManager.getInstance().unloadMenuTextures();
-		mEngine.registerUpdateHandler(new TimerHandler(0.1f, new ITimerCallback() 
-	    {
-	        public void onTimePassed(final TimerHandler pTimerHandler) 
-	        {
-	            mEngine.unregisterUpdateHandler(pTimerHandler);
-	            ResourcesManager.getInstance().loadGameResources();
-	            multiplayerClientGameScene = new MultiplayerClientGameScene();
-	            setScene(multiplayerClientGameScene);
-	        }
-	    }));
 	}
 	
 	public BaseScene getCurrentScene() {

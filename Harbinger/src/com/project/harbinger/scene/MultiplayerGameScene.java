@@ -91,11 +91,11 @@ public class MultiplayerGameScene extends GameScene {
 	protected void createPauseMenu() {
 		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
 				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
-		gamePausedText.setPosition(40, 200);
+		gamePausedText.setPosition(60, 200);
 		gamePausedText.setColor(Color.GREEN);
 		
 
-		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+		backButton = new Sprite(90, 370, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	        	bluetoothConnection.sendNo();
 	            gameFinished();
@@ -103,7 +103,7 @@ public class MultiplayerGameScene extends GameScene {
 	            return true;
 	        };
 	    };
-	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	    resumeButton = new Sprite(90, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            gameHUD.detachChild(gamePausedText);
 	            gameHUD.detachChild(backButton);
@@ -357,6 +357,7 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	protected void deleteObjectsForDestroy() {
+		// TODO wywalić to do runOnUpdateThread!!!!!!!!!!!!!!!!!!!
 		/*if (isClient) {
 			super.deleteObjectsForDestroy();
 			return;

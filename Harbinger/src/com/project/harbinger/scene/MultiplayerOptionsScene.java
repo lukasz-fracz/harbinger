@@ -8,6 +8,7 @@ import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.andengine.entity.scene.menu.item.IMenuItem;
 import org.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.andengine.entity.scene.menu.item.decorator.ScaleMenuItemDecorator;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 
@@ -23,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.multiplayer.BluetoothClient;
@@ -33,10 +35,11 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	private BluetoothAdapter mBluetoothAdapter;
 	private BluetoothDevice device;
 	private MenuScene menuChildScene;
-	private Text statusText;
 	private IMenuItem hostItem, joinItem, backItem;
+	private Sprite statusIcon;
 	
-	private static final int HOST = 0, JOIN = 1, BACK = 2;
+	private static final short HOST = 0, JOIN = 1, BACK = 2;
+	public static final short WAIT = 3, FOUND_SOMETHING = 4, FOUND = 5;
 	
 	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
@@ -44,12 +47,13 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	        // When discovery finds a device
 	        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 	            // Get the BluetoothDevice object from the Intent
-	        	statusText.setText("Coś mam");
+	        	setStatus(FOUND_SOMETHING);
 	        	device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); 	
 	            BluetoothClient client;
 	            try {
 	            	client = new BluetoothClient(device, activity.getEngine());
 	            } catch (IOException e) {
+	            	setStatus(WAIT);
 	            	return;
 	            }
 	            mBluetoothAdapter.cancelDiscovery();
@@ -62,6 +66,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	@Override
 	public void createScene() {
 		createBackground();
+		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		menuChildScene = new MenuScene(camera);
 		menuChildScene.setPosition(0, 0);
 		
@@ -89,16 +94,8 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		menuChildScene.setOnMenuItemClickListener(this);
 		
 		setChildScene(menuChildScene);
-		Intent discoverableIntent = new
-				Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-		discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-		activity.startActivity(discoverableIntent);
 		
-		statusText = new Text(10, 10, resourcesManager.getFont(),
-				".......................................................", new TextOptions(HorizontalAlign.LEFT), vbom);
-		statusText.setPosition(40, 30);
-		statusText.setColor(Color.RED);
-		attachChild(statusText);
+		statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getWaitIconRegion(), vbom);
 	}
 
 	@Override
@@ -118,7 +115,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	}
 	
 	private void createBackground() {
-		setBackground(new Background(Color.YELLOW));
+		setBackground(new Background(Color.BLACK));
 	}
 
 	@Override
@@ -135,7 +132,6 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 					menuChildScene.unregisterTouchArea(hostItem);
 					menuChildScene.unregisterTouchArea(joinItem);
 					
-					mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 					BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
 				}
 				
@@ -151,9 +147,8 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 					menuChildScene.unregisterTouchArea(hostItem);
 					menuChildScene.unregisterTouchArea(joinItem);
 					
-					mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 					//Debug.e(String.valueOf(mBluetoothAdapter.startDiscovery()));
-					setText(String.valueOf(mBluetoothAdapter.startDiscovery()));
+					setStatus(WAIT);
 					mBluetoothAdapter.startDiscovery();
 					/*BluetoothServer server = new BluetoothServer(mBluetoothAdapter);
 					server.start();*/
@@ -163,6 +158,20 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			activity.registerReceiver(mReceiver, filter);
 			return true;
 		case BACK:
+			try {
+				detachChild(statusIcon);
+				menuChildScene.attachChild(hostItem);
+				menuChildScene.attachChild(joinItem);
+				menuChildScene.registerTouchArea(hostItem);
+				menuChildScene.registerTouchArea(joinItem);
+			} catch (Exception e) {}
+			
+			try {
+				mBluetoothAdapter.cancelDiscovery();
+            	activity.unregisterReceiver(mReceiver);
+			} catch (Exception e) {}
+			
+			mBluetoothAdapter.disable();
 			SceneManager.getInstance().backToMenu();
 			return true;
 		default:
@@ -170,7 +179,59 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		}
 	} 
 	
-	public void setText(String message) {
-		statusText.setText(message);
+	public void setStatus(short status) {
+		switch (status) {
+		case WAIT:
+			try {
+				detachChild(statusIcon);
+			} catch (Exception e) {}
+			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getWaitIconRegion(), vbom);
+			attachChild(statusIcon);
+			break;
+		case FOUND_SOMETHING:
+			try {
+				detachChild(statusIcon);
+			} catch (Exception e) {}
+			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getHaveSomethingIconRegion(), vbom);
+			attachChild(statusIcon);
+			break;
+		case FOUND:
+			try {
+				detachChild(statusIcon);
+			} catch (Exception e) {}
+			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getGoIconRegion(), vbom);
+			attachChild(statusIcon);
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void onStart() {
+		Intent discoverableIntent = new
+				Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+		//discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+		activity.startActivity(discoverableIntent);
+		
+		mBluetoothAdapter.enable();
+	}
+	
+	public void onStop() {
+		try {
+			detachChild(statusIcon);
+			menuChildScene.attachChild(hostItem);
+			menuChildScene.attachChild(joinItem);
+			menuChildScene.registerTouchArea(hostItem);
+			menuChildScene.registerTouchArea(joinItem);
+		} catch (Exception e) {}
+		
+		/*try {
+			mBluetoothAdapter.cancelDiscovery();
+        	activity.unregisterReceiver(mReceiver);
+		} catch (Exception e) {}*/
+	}
+	
+	public void disableBluetooth() {
+		mBluetoothAdapter.disable();
 	}
 }

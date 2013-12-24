@@ -73,7 +73,7 @@ public class GameScene extends BaseScene {
 	@Override
 	public void createScene() {
 		score = 0;
-		currentLevel = 99;
+		currentLevel = 0;
 		lifes = 5;
 		isPaused = false;
 		
@@ -165,7 +165,7 @@ public class GameScene extends BaseScene {
 		SceneManager.getInstance().loadGameCompletedScene(engine, score);
 	}
 	
-	protected void createHUD() {
+	void createHUD() {
 		gameHUD = new HUD();
 		
 		scoreText = new Text(20, 240, resourcesManager.getFont(),
@@ -190,6 +190,8 @@ public class GameScene extends BaseScene {
 		debugPlayerCoordinates.setText("x: y:");
 		debugPlayerCoordinates.setSize(300, 100);
 		gameHUD.attachChild(debugPlayerCoordinates);*/
+		
+		attachChild(new Sprite(0, 590, ResourcesManager.getInstance().getGamepadBackgroundRegion(), vbom));
 
 		final AnalogOnScreenControl analogOnScreenControl = new AnalogOnScreenControl(50, 650, camera, 
 				ResourcesManager.getInstance().getAnalogBackgroundRegion(), 
@@ -211,11 +213,10 @@ public class GameScene extends BaseScene {
 		analogOnScreenControl.getControlKnob().setScale(1.25f);
 		analogOnScreenControl.refreshControlKnobPosition();
 		
-		
 		setChildScene(analogOnScreenControl);
 		
 		
-	    final Sprite fire = new Sprite(300, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
+	    final Sprite fire = new Sprite(360, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	        	if (touchEvent.getAction() == TouchEvent.ACTION_DOWN) {
 	        		player.fire();
@@ -233,21 +234,21 @@ public class GameScene extends BaseScene {
 		createPauseMenu();
 	}
 	
-	protected void createPauseMenu() {
+	void createPauseMenu() {
 		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
 				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
-		gamePausedText.setPosition(40, 200);
+		gamePausedText.setPosition(60, 200);
 		gamePausedText.setColor(Color.GREEN);
 		
 
-		backButton = new Sprite(100, 400, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
+		backButton = new Sprite(90, 370, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            SceneManager.getInstance().loadMenuScene(engine);
 	        	
 	            return true;
 	        };
 	    };
-	    resumeButton = new Sprite(100, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
+	    resumeButton = new Sprite(90, 300, ResourcesManager.getInstance().getResumeButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            gameHUD.detachChild(gamePausedText);
 	            gameHUD.detachChild(backButton);
