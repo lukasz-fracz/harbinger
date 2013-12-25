@@ -32,15 +32,15 @@ public class GameCompletedScene extends BaseScene {
 		createBackground();
 		gameCompletedText = new Text(10, 10, resourcesManager.getFont(),
 				"   Game\ncompleted!", new TextOptions(HorizontalAlign.LEFT), vbom);
-		gameCompletedText.setPosition(40, 300);
-		gameCompletedText.setColor(Color.BLUE);
+		gameCompletedText.setPosition(80, 80);
+		gameCompletedText.setColor(Color.YELLOW);
 		attachChild(gameCompletedText);
 		
 		scoresText = new Text[10];
 		for (int i = 0; i < 10; i++) {
 			scoresText[i] = new Text(10, 10, resourcesManager.getFont(),
 					"1234567890.......1234567890", new TextOptions(HorizontalAlign.LEFT), vbom);
-			scoresText[i].setPosition(10, i * 50 + 50);
+			scoresText[i].setPosition(140, i * 50 + 200);
 			scoresText[i].setColor(Color.WHITE);
 		}
 		
@@ -93,7 +93,6 @@ public class GameCompletedScene extends BaseScene {
 	}
 	
 	public void showHighScores() {
-		detachChild(gameCompletedText);
 		for (int i = 0; i < 10; i++) {
 			scoresText[i].setColor(Color.WHITE);
 			if (scores.get(i) < 0) {

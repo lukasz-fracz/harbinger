@@ -15,8 +15,9 @@ import com.project.harbinger.scene.GameScene;
 public class Player extends GameObject {
 
 	public static final String PLAYER_USER_DATA = "player";
+	public static final String PLAYER_IMMORTAL_DATA = "haha";
 	
-	private boolean fire;
+	private boolean fire, killed;
 	private GameScene gameScene;
 	
 	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
@@ -24,6 +25,8 @@ public class Player extends GameObject {
         createPhysics(camera, physicsWorld);
         
         this.gameScene = gameScene;
+        
+        fire = killed = false;
     }
 	
 	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
@@ -35,7 +38,7 @@ public class Player extends GameObject {
 		
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false) {
 	        
-			float x = 0;
+			float x = 0, y = 0;
 			
 			@Override
 	        public void onUpdate(float pSecondsElapsed) {
@@ -50,15 +53,34 @@ public class Player extends GameObject {
 	            		fire = false;
 	            	}
 	            }
+	            if (killed) {
+	            	y += pSecondsElapsed;
+		            if (y >= 1.0) {
+		            	setVisible(true);
+		            	body.setUserData(PLAYER_USER_DATA);
+		            	killed = false;
+		            	y = 0;
+		            }		            
+	            }
 	        }
 	    });
 	}
 	
 	public void setVelocity(float dx, float dy) {
+		if (killed) {
+			return;
+		}
 		body.setLinearVelocity(dx, dy);
 	}
 	
 	public void fire() {
 		fire = true;
+	}
+	
+	public void setToImmortal() {
+		body.setUserData(PLAYER_IMMORTAL_DATA);
+		setVisible(false);
+		killed = true;
+		body.setLinearVelocity(0, 0);
 	}
 }

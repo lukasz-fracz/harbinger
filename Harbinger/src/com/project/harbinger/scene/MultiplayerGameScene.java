@@ -2,6 +2,7 @@ package com.project.harbinger.scene;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,6 +75,22 @@ public class MultiplayerGameScene extends GameScene {
 		try {
 			loadLevel(0);
 		} catch (IOException e) {}
+		
+		missilesToadd = Collections.synchronizedList(new ArrayList<Missile>());
+	}
+	
+	public void onManagedUpdate(float pSecondsElapsed) {
+		if (isPaused) {
+			super.onManagedUpdate(0);
+		} else {
+			super.onManagedUpdate(pSecondsElapsed);
+			addMissiles();
+			deleteObjectsForDestroy();
+			updateActiveEnemies();
+			if (enemies == 0) {
+				loadNextLevel(30);
+			}
+		}
 	}
 	
 	@Override
@@ -274,7 +291,7 @@ public class MultiplayerGameScene extends GameScene {
 					
 					// handling player collision with enemies, the player has to respawn, and the client has to inform server
 					
-					if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+					/*if (firstUD.equals(Player.PLAYER_USER_DATA)) {
 						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							second.getBody().setUserData("COLLISION");
 							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
@@ -303,7 +320,7 @@ public class MultiplayerGameScene extends GameScene {
 								}
 							}
 						}
-					}
+					}*/
 				}
 	
 				@Override
@@ -338,7 +355,21 @@ public class MultiplayerGameScene extends GameScene {
 					
 					if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
 						return;
-					}					
+					}			
+					
+					if (firstUD.equals(Player.PLAYER_IMMORTAL_DATA) && (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+							secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || secondUD.equals(Missile.MISSILE_USER_DATA) ||
+							secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA))) {
+						contact.setEnabled(false);
+						return;
+					}
+					
+					if (secondUD.equals(Player.PLAYER_IMMORTAL_DATA) && (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+							firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || firstUD.equals(Missile.MISSILE_USER_DATA) ||
+							firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA))) {
+						contact.setEnabled(false);
+						return;
+					}
 					
 					if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
 							second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
@@ -357,7 +388,6 @@ public class MultiplayerGameScene extends GameScene {
 	}
 	
 	protected void deleteObjectsForDestroy() {
-		// TODO wywalić to do runOnUpdateThread!!!!!!!!!!!!!!!!!!!
 		/*if (isClient) {
 			super.deleteObjectsForDestroy();
 			return;
@@ -432,14 +462,34 @@ public class MultiplayerGameScene extends GameScene {
 		player2.setX(x);
 		player2.setY(y);
 	}
+
+	private void addMissiles() {
+		synchronized (missilesToadd) {
+			for (Missile m : missilesToadd) {
+				m.setCullingEnabled(true);
+				attachChild(m);
+				synchronized (gameObjects) {
+					gameObjects.add(m);
+				}
+			}
+			
+			missilesToadd.clear();
+		}
+	}
+	
+	List<Missile> missilesToadd;
 	
 	public void addMissile(float x, float y, int id) {
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
+		synchronized (missilesToadd) {
+			missilesToadd.add(new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id));
+		}
+		
+		/*GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		synchronized (gameObjects) {
 			gameObjects.add(missile);
-		}
+		}*/
 	}
 	
 	public void setToDestroy(int id) {
@@ -484,6 +534,10 @@ public class MultiplayerGameScene extends GameScene {
 	public void creteMissile(float x, float y, MissileType type) {
 		synchronized (gameObjects) {
 			super.creteMissile(x, y, type);
+		}
+		
+		if (isPaused) {
+			return;
 		}
 
 		if (type == MissileType.PLAYER1 || type == MissileType.PLAYER2) {

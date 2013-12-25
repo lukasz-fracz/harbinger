@@ -26,86 +26,27 @@ public class BluetoothServer extends BluetoothConnection {
 	private BluetoothAdapter bluetoothAdapter;
 	private BluetoothSocket socket;
 	
-	public BluetoothServer(BluetoothAdapter bluetoothAdapter, Engine mEngine) {
+	public BluetoothServer(BluetoothAdapter bluetoothAdapter, Engine mEngine) throws IOException {
 		this.bluetoothAdapter = bluetoothAdapter;
 
-		try {
-			serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord(getName(), UUID.fromString("6D2DF50E-06EF-C21C-7DB0-345099A5F64E"));
-		} catch (IOException e) {
-			Debug.e(e);
-		}
+		serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord(getName(), UUID.fromString("6D2DF50E-06EF-C21C-7DB0-345099A5F64E"));
 		
-		try {
-			Debug.e("Czekam");
-			((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.WAIT);
-			socket = serverSocket.accept();
-		} catch (IOException e) {
-			Debug.e(e);
-		}
+		Debug.e("Czekam");
+		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.WAIT);
+		socket = serverSocket.accept();
 		
 		Debug.e("Serwer połączony");
 		((MultiplayerOptionsScene) SceneManager.getInstance().getCurrentScene()).setStatus(MultiplayerOptionsScene.FOUND);
 		
-		ois = null;
-		oos = null;
-		try {
-			BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-			ois = new ObjectInputStream(bis);
-			BufferedOutputStream obs = new BufferedOutputStream(socket.getOutputStream());
-			oos = new ObjectOutputStream(obs);
-			oos.flush();
-		} catch (Exception e) {
-			Debug.e(e);
-		}
+		BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
+		ois = new ObjectInputStream(bis);
+		BufferedOutputStream obs = new BufferedOutputStream(socket.getOutputStream());
+		oos = new ObjectOutputStream(obs);
+		oos.flush();
 		
 		//SceneManager.getInstance().loadMultiplayerServerGameScene(mEngine, this);
 		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, false);
 	}
-	
-	/*public void sendGameState(List<GameObject> objects) {
-		List<GameObjectInformation> list = new ArrayList<GameObjectInformation>();
-		
-		for (GameObject gobj : objects) {
-			GameObjectInformation next;
-			Debug.e(String.valueOf(gobj.getBody().getPosition().x));
-			// burdel straszny. ObjectType trzeba będzie wpieprzyć do GameObject, żeby nie używać instanceof
-			if (gobj instanceof Bullet) {
-				next = new GameObjectInformation(ObjectType.BULLET, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof Cruiser) {
-				next = new GameObjectInformation(ObjectType.CRUISER, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof HeavyFighter) {
-				next = new GameObjectInformation(ObjectType.HEAVY_FIGHTER, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof LightFighter) {
-				next = new GameObjectInformation(ObjectType.LIGHT_FIGHTER, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof Meteor) {
-				next = new GameObjectInformation(ObjectType.METEOR, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof Missile) {
-				next = new GameObjectInformation(ObjectType.MISSILE, gobj.getX(),
-						gobj.getY());
-			} else if (gobj instanceof Player) {
-				next = new GameObjectInformation(ObjectType.PLAYER1, gobj.getX(),
-						gobj.getY());
-			} else {
-				next = null;
-			}
-			
-			list.add(next);
-		}
-		
-		try {
-			oos.writeObject(list);
-			oos.flush();
-			Debug.e("Poszło");
-		} catch (IOException e) {
-			Debug.e(e);
-		}
-	}
-	*/
 	
 	public void run() {
 		super.run();

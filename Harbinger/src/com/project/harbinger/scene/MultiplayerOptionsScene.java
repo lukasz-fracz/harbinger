@@ -23,6 +23,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Looper;
+import android.widget.Toast;
 
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
@@ -132,7 +134,25 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 					menuChildScene.unregisterTouchArea(hostItem);
 					menuChildScene.unregisterTouchArea(joinItem);
 					
-					BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
+					try {
+						BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
+					} catch (IOException e) {
+						try {
+							detachChild(statusIcon);
+							menuChildScene.attachChild(hostItem);
+							menuChildScene.attachChild(joinItem);
+							menuChildScene.registerTouchArea(hostItem);
+							menuChildScene.registerTouchArea(joinItem);
+						} catch (Exception ex) {}
+						
+						try {
+							mBluetoothAdapter.cancelDiscovery();
+			            	activity.unregisterReceiver(mReceiver);
+						} catch (Exception ex) {}
+						
+						mBluetoothAdapter.disable();
+						SceneManager.getInstance().backToMenu();
+					}
 				}
 				
 			}).start();
@@ -147,11 +167,8 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 					menuChildScene.unregisterTouchArea(hostItem);
 					menuChildScene.unregisterTouchArea(joinItem);
 					
-					//Debug.e(String.valueOf(mBluetoothAdapter.startDiscovery()));
 					setStatus(WAIT);
 					mBluetoothAdapter.startDiscovery();
-					/*BluetoothServer server = new BluetoothServer(mBluetoothAdapter);
-					server.start();*/
 				}				
 			});
 			IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);

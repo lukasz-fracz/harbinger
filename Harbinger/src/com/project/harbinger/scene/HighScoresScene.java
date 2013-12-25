@@ -18,16 +18,23 @@ import com.project.harbinger.manager.SceneManager.SceneType;
 public class HighScoresScene extends BaseScene {
 
 	private Text[] scoresText;
+	private Text highScoresText;
 	
 	@Override
 	public void createScene() {
 		createBackground();
 		
+		highScoresText = new Text(10, 10, resourcesManager.getFont(),
+				"High scores:", new TextOptions(HorizontalAlign.LEFT), vbom);
+		highScoresText.setPosition(80, 80);
+		highScoresText.setColor(Color.BLUE);
+		attachChild(highScoresText);
+		
 		scoresText = new Text[10];
 		for (int i = 0; i < 10; i++) {
 			scoresText[i] = new Text(10, 10, resourcesManager.getFont(),
 					"1234567890.......1234567890", new TextOptions(HorizontalAlign.LEFT), vbom);
-			scoresText[i].setPosition(10, i * 50 + 50);
+			scoresText[i].setPosition(140, i * 50 + 200);
 			scoresText[i].setColor(Color.WHITE);
 			attachChild(scoresText[i]);
 		}

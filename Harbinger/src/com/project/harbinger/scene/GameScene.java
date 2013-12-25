@@ -2,6 +2,7 @@ package com.project.harbinger.scene;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -104,6 +105,9 @@ public class GameScene extends BaseScene {
 	@Override
 	public void onBackKeyPressed() {
 		if (isPaused) {
+			if (lifes == 0) {
+				return;
+			}
 			isPaused = false;
 			gameHUD.detachChild(gamePausedText);
             gameHUD.detachChild(backButton);
@@ -132,7 +136,7 @@ public class GameScene extends BaseScene {
 		setBackground(new Background(Color.BLACK));
 	}
 	
-	private void loadNextLevel(int fps) {
+	void loadNextLevel(int fps) {
 		isPaused = true;
 		showLevelCompleted();
 		detachChild(player);
@@ -218,6 +222,9 @@ public class GameScene extends BaseScene {
 		
 	    final Sprite fire = new Sprite(360, 670, ResourcesManager.getInstance().getFireButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
+	        	if (isPaused) {
+	        		return true;
+	        	}
 	        	if (touchEvent.getAction() == TouchEvent.ACTION_DOWN) {
 	        		player.fire();
 	        	}
@@ -291,7 +298,7 @@ public class GameScene extends BaseScene {
 		physicsWorld = new FixedStepPhysicsWorld(fps, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
-		registerUpdateHandler(createIUpdateHandler());
+		//registerUpdateHandler(createIUpdateHandler());
 		createBounds();
 	}
 	
@@ -345,6 +352,11 @@ public class GameScene extends BaseScene {
 			super.onManagedUpdate(0);
 		} else {
 			super.onManagedUpdate(pSecondsElapsed);
+			deleteObjectsForDestroy();
+			updateActiveEnemies();
+			if (enemies == 0) {
+				loadNextLevel(30);
+			}
 		}
 	}
 
@@ -464,6 +476,20 @@ public class GameScene extends BaseScene {
 					return;
 				}
 				
+				if (firstUD.equals(Player.PLAYER_IMMORTAL_DATA) && (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+						secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || secondUD.equals(Missile.MISSILE_USER_DATA) ||
+						secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA))) {
+					contact.setEnabled(false);
+					return;
+				}
+				
+				if (secondUD.equals(Player.PLAYER_IMMORTAL_DATA) && (firstUD.equals(StaticEnemy.STATIC_USER_DATA) || 
+						firstUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || firstUD.equals(Missile.MISSILE_USER_DATA) ||
+						firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA))) {
+					contact.setEnabled(false);
+					return;
+				}
+				
 				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
 						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
 						first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
@@ -492,7 +518,8 @@ public class GameScene extends BaseScene {
 		float width = player.getWidth() / 2;
         float heigh = player.getHeight() / 2;
         float angle = player.getBody().getAngle();
-        player.getBody().setTransform((300 + width) / 32, (200 + heigh) / 32, angle);
+        player.getBody().setTransform((startX + width) / 32, (startY + heigh) / 32, angle);
+		player.setToImmortal();
         player.setVelocity(0, 0);
 	}
 	
@@ -534,7 +561,7 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
-	private void updateActiveEnemies() {
+	void updateActiveEnemies() {
 		synchronized (gameObjects) {
 			for (GameObject object : gameObjects) {
 				if (object.getBody().getUserData().equals(ActiveEnemy.ACTIVE_START_ME)) {
@@ -565,11 +592,13 @@ public class GameScene extends BaseScene {
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER = "right-cruiser";
 	
 	
-	protected Player player;
-	protected List<GameObject> gameObjects;
-
+	Player player;
+	List<GameObject> gameObjects;
+	private int startX, startY;
+	
 	protected void loadLevel(int levelID) throws IOException {
-		gameObjects = new ArrayList<GameObject>();
+		//gameObjects = new ArrayList<GameObject>();
+		gameObjects = Collections.synchronizedList(new ArrayList<GameObject>());
 		missileCounter = -1;
 		
 	    final LevelLoader levelLoader = new LevelLoader("");
@@ -593,6 +622,8 @@ public class GameScene extends BaseScene {
 	    	            final GameObject levelObject;
 	    	            
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
+	    	            	startX = x;
+	    	            	startY = y;
 	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this);
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
@@ -628,6 +659,9 @@ public class GameScene extends BaseScene {
 	}
 	
 	public void creteMissile(float x, float y, MissileType type) {
+		if (isPaused) {
+			return;
+		}
 		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, missileCounter);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
