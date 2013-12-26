@@ -59,7 +59,7 @@ public class MultiplayerGameScene extends GameScene {
 	private Sprite player2;
 	private int opponentScore;
 	private Sprite noButton, yesButton;
-	private Text partnerDeadText;
+	private Text partnerDeadText, questionText;
 
 	public MultiplayerGameScene(BluetoothConnection bluetoothConnection, boolean isClient) {
 		super();
@@ -77,6 +77,7 @@ public class MultiplayerGameScene extends GameScene {
 		} catch (IOException e) {}
 		
 		missilesToadd = Collections.synchronizedList(new ArrayList<Missile>());
+		preMissiles = Collections.synchronizedList(new ArrayList<PreMissile>());
 	}
 	
 	public void onManagedUpdate(float pSecondsElapsed) {
@@ -84,12 +85,25 @@ public class MultiplayerGameScene extends GameScene {
 			super.onManagedUpdate(0);
 		} else {
 			super.onManagedUpdate(pSecondsElapsed);
-			addMissiles();
+			activity.runOnUpdateThread(new Runnable() {
+
+				@Override
+				public void run() {
+					addMissiles();
+					deleteObjectsForDestroy();
+					updateActiveEnemies();
+					if (enemies == 0) {
+						loadNextLevel(30);
+					}
+				}
+				
+			});
+			/*addMissiles();
 			deleteObjectsForDestroy();
 			updateActiveEnemies();
 			if (enemies == 0) {
 				loadNextLevel(30);
-			}
+			}*/
 		}
 	}
 	
@@ -137,10 +151,16 @@ public class MultiplayerGameScene extends GameScene {
 	private void createPartnerDeadMenu() {
 		partnerDeadText = new Text(10, 10, resourcesManager.getFont(),
 				"Partner's dead", new TextOptions(HorizontalAlign.LEFT), vbom);
-		partnerDeadText.setPosition(40, 200);
+		partnerDeadText.setPosition(30, 150);
 		partnerDeadText.setColor(Color.GREEN);
 		
-		yesButton = new Sprite(100, 300, ResourcesManager.getInstance().getYesButtonRegion(), vbom) {
+		questionText = new Text(10, 10, resourcesManager.getFont(),
+				"Give him one life?", new TextOptions(HorizontalAlign.LEFT), vbom);
+		questionText.setPosition(10, 200);
+		questionText.setScale(0.7f);
+		questionText.setColor(Color.WHITE);
+		
+		yesButton = new Sprite(80, 300, ResourcesManager.getInstance().getYesButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	        	gameHUD.detachChild(partnerDeadText);
 	        	gameHUD.detachChild(yesButton);
@@ -152,10 +172,11 @@ public class MultiplayerGameScene extends GameScene {
 	            lifes--;
 	            updateScore();
 	            isPaused = false;
+	            pausedBySecondPlayer = false;
 	            return true;
 	        };
 	    };
-	    noButton = new Sprite(100, 400, ResourcesManager.getInstance().getNoButtonRegion(), vbom) {
+	    noButton = new Sprite(80, 400, ResourcesManager.getInstance().getNoButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
 	            bluetoothConnection.sendNo();
 	            gameFinished();
@@ -166,7 +187,9 @@ public class MultiplayerGameScene extends GameScene {
 	
 	private void showPartnerDeadMenu() {
 		isPaused = true;
+		pausedBySecondPlayer = true;
 		gameHUD.attachChild(partnerDeadText);
+		gameHUD.attachChild(questionText);
 		gameHUD.attachChild(yesButton);
 		gameHUD.attachChild(noButton);
 		gameHUD.registerTouchArea(yesButton);
@@ -196,6 +219,10 @@ public class MultiplayerGameScene extends GameScene {
 		}
 		
 		super.onBackKeyPressed();
+		
+		if (lifes == 0) {
+			return;
+		}
 		
 		if (isPaused) {
 			bluetoothConnection.sendPause();
@@ -291,7 +318,7 @@ public class MultiplayerGameScene extends GameScene {
 					
 					// handling player collision with enemies, the player has to respawn, and the client has to inform server
 					
-					/*if (firstUD.equals(Player.PLAYER_USER_DATA)) {
+					if (firstUD.equals(Player.PLAYER_USER_DATA)) {
 						if (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA)) {
 							second.getBody().setUserData("COLLISION");
 							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
@@ -320,7 +347,7 @@ public class MultiplayerGameScene extends GameScene {
 								}
 							}
 						}
-					}*/
+					}
 				}
 	
 				@Override
@@ -398,7 +425,7 @@ public class MultiplayerGameScene extends GameScene {
 				Iterator<GameObject> objects = gameObjects.iterator();
 				
 				while (objects.hasNext()) {
-					GameObject next = objects.next();
+					final GameObject next = objects.next();
 					if (next.getBody() != null && 
 							next.getBody().getUserData().equals(GameObject.DESTROY_USER_DATA) || 
 							next.getBody().getUserData().equals(GameObject.DESTROY_BY_WALL_USER_DATA) ||
@@ -428,6 +455,14 @@ public class MultiplayerGameScene extends GameScene {
 							physicsWorld.unregisterPhysicsConnector(physicsConnector);
 							next.getBody().setActive(false);
 							physicsWorld.destroyBody(next.getBody());
+							/*activity.runOnUpdateThread(new Runnable() {
+
+								@Override
+								public void run() {
+									detachChild(next);	
+								}
+								
+							});	*/
 							detachChild(next);
 							objects.remove();
 						}
@@ -444,6 +479,24 @@ public class MultiplayerGameScene extends GameScene {
 		isPaused = true;
 		gameHUD.attachChild(gameOverText);
 		bluetoothConnection.sendDead();
+	}
+	
+	private void showWaitForOtherPlayer() {
+		//gameHUD.attachChild(levelCompletedText);
+		/*setOnSceneTouchListener(new IOnSceneTouchListener() {
+
+			@Override
+			public boolean onSceneTouchEvent(Scene pScene,
+					TouchEvent pSceneTouchEvent) {
+				if (opponentReady) {
+					isPaused = false;
+					opponentReady = false;
+				}
+				
+				return true;
+			}
+			
+		});*/
 	}
 	
 	public void pauseGame() {
@@ -464,8 +517,9 @@ public class MultiplayerGameScene extends GameScene {
 	}
 
 	private void addMissiles() {
-		synchronized (missilesToadd) {
-			for (Missile m : missilesToadd) {
+		synchronized (preMissiles) {
+			for (PreMissile pm : preMissiles) {
+				Missile m = new Missile(pm.x, pm.y, vbom, camera, physicsWorld, MissileType.PLAYER2, pm.id);
 				m.setCullingEnabled(true);
 				attachChild(m);
 				synchronized (gameObjects) {
@@ -473,15 +527,18 @@ public class MultiplayerGameScene extends GameScene {
 				}
 			}
 			
-			missilesToadd.clear();
+			//missilesToadd.clear();
+			preMissiles.clear();
 		}
 	}
 	
 	List<Missile> missilesToadd;
+	List<PreMissile> preMissiles;
 	
 	public void addMissile(float x, float y, int id) {
 		synchronized (missilesToadd) {
-			missilesToadd.add(new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id));
+			//missilesToadd.add(new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id));
+			preMissiles.add(new PreMissile(x, y, id));
 		}
 		
 		/*GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
@@ -524,6 +581,7 @@ public class MultiplayerGameScene extends GameScene {
 	public void takeLife() {
 		gameHUD.detachChild(gameOverText);
 		lifes++;
+		updateScore();
 		isPaused = false;
 	}
 	
@@ -547,6 +605,9 @@ public class MultiplayerGameScene extends GameScene {
 	
 	public void opponentIsReady() {
 		opponentReady = true;
+		if (iAmReady) {
+			isPaused = false;
+		}
 	}
 	
 	protected void loadLevel(int levelID) throws IOException {
@@ -554,16 +615,19 @@ public class MultiplayerGameScene extends GameScene {
 		
 		bluetoothConnection.sendLoaded();
 		iAmReady = true;
+		isPaused = true;
+		
+		if (!opponentReady) {
+			showWaitForOtherPlayer();
+		} else {
+			opponentReady = false;
+			isPaused = false;
+			iAmReady = false;
+		}
 
 		try {
 			gameHUD.detachChild(levelCompletedText);
 		} catch (Exception e) {}
-		
-		while (!(opponentReady && iAmReady));
-		
-		opponentReady = false;
-		iAmReady = false;
-		isPaused = false;
 		
 		try {
 			detachChild(player2);
@@ -576,5 +640,16 @@ public class MultiplayerGameScene extends GameScene {
 	protected void gameFinished() {
 		bluetoothConnection.stopConnection();
 		SceneManager.getInstance().loadMultiplayerGameCompletedScene(engine, score, opponentScore);
+	}
+	
+	private class PreMissile {
+		private float x, y;
+		private int id;
+		
+		private PreMissile(float x, float y, int id) {
+			this.x = x;
+			this.y = y;
+			this.id = id;
+		}
 	}
 }

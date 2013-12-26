@@ -166,6 +166,8 @@ public class ResourcesManager {
 	
 	// loading
 	private Font font;
+	private Font fontSmall;
+	
 	private void loadMenuFonts() {
 		FontFactory.setAssetBasePath("fonts/");
 		ITexture mainFontTexture = new BitmapTextureAtlas(activity.getTextureManager(),
@@ -175,10 +177,19 @@ public class ResourcesManager {
 				mainFontTexture, activity.getAssets(), "7TH.ttf", 30, true,
 				Color.WHITE, 2, Color.BLACK);
 		font.load();
+		
+		fontSmall = FontFactory.createStrokeFromAsset(activity.getFontManager(),
+				mainFontTexture, activity.getAssets(), "7TH.ttf", 40, true,
+				Color.WHITE, 2, Color.BLACK);
+		fontSmall.load();
 	}
 	
 	public Font getFont() {
 		return font;
+	}
+	
+	public Font getFontSmall() {
+		return fontSmall;
 	}
 	
 	// game

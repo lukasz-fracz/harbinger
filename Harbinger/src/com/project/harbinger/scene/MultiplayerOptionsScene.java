@@ -23,8 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Looper;
-import android.widget.Toast;
 
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
@@ -39,6 +37,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	private MenuScene menuChildScene;
 	private IMenuItem hostItem, joinItem, backItem;
 	private Sprite statusIcon;
+	private Text actionText;
 	
 	private static final short HOST = 0, JOIN = 1, BACK = 2;
 	public static final short WAIT = 3, FOUND_SOMETHING = 4, FOUND = 5;
@@ -64,13 +63,18 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	    }
 	};
 
-	
 	@Override
 	public void createScene() {
 		createBackground();
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		menuChildScene = new MenuScene(camera);
 		menuChildScene.setPosition(0, 0);
+		
+		actionText = new Text(10, 10, resourcesManager.getFont(),
+				"Looking for player game...", new TextOptions(HorizontalAlign.LEFT), vbom);
+		actionText.setPosition(-30, 80);
+		actionText.setScale(0.7f);
+		actionText.setColor(Color.WHITE);
 		
 		hostItem = new ScaleMenuItemDecorator(new SpriteMenuItem(
 				HOST, resourcesManager.getHostButtonRegion(), vbom),
@@ -102,6 +106,21 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 
 	@Override
 	public void onBackKeyPressed() {
+		try {
+			detachChild(statusIcon);
+			menuChildScene.attachChild(hostItem);
+			menuChildScene.attachChild(joinItem);
+			menuChildScene.registerTouchArea(hostItem);
+			menuChildScene.registerTouchArea(joinItem);
+			detachChild(actionText);
+		} catch (Exception e) {}
+		
+		try {
+			mBluetoothAdapter.cancelDiscovery();
+        	activity.unregisterReceiver(mReceiver);
+		} catch (Exception e) {}
+		
+		mBluetoothAdapter.disable();
 		SceneManager.getInstance().backToMenu();
 	}
 
@@ -125,6 +144,8 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			float pMenuItemLocalX, float pMenuItemLocalY) {
 		switch (pMenuItem.getID()) {
 		case HOST:
+			actionText.setText("Looking for player...");
+			attachChild(actionText);
 			(new Thread() {
 
 				@Override
@@ -143,6 +164,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 							menuChildScene.attachChild(joinItem);
 							menuChildScene.registerTouchArea(hostItem);
 							menuChildScene.registerTouchArea(joinItem);
+							detachChild(actionText);
 						} catch (Exception ex) {}
 						
 						try {
@@ -158,6 +180,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			}).start();
 			return true;
 		case JOIN:
+			actionText.setText("Looking for game...");
+			attachChild(actionText);
+			
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
@@ -175,21 +200,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			activity.registerReceiver(mReceiver, filter);
 			return true;
 		case BACK:
-			try {
-				detachChild(statusIcon);
-				menuChildScene.attachChild(hostItem);
-				menuChildScene.attachChild(joinItem);
-				menuChildScene.registerTouchArea(hostItem);
-				menuChildScene.registerTouchArea(joinItem);
-			} catch (Exception e) {}
-			
-			try {
-				mBluetoothAdapter.cancelDiscovery();
-            	activity.unregisterReceiver(mReceiver);
-			} catch (Exception e) {}
-			
-			mBluetoothAdapter.disable();
-			SceneManager.getInstance().backToMenu();
+			onBackKeyPressed();
 			return true;
 		default:
 			return false;
@@ -240,6 +251,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			menuChildScene.attachChild(joinItem);
 			menuChildScene.registerTouchArea(hostItem);
 			menuChildScene.registerTouchArea(joinItem);
+			detachChild(actionText);
 		} catch (Exception e) {}
 		
 		/*try {

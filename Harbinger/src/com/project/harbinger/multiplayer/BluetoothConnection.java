@@ -107,6 +107,8 @@ public abstract class BluetoothConnection extends Thread {
 			oos.flush();
 		} catch (IOException e) {
 			Debug.e(e);
+			gameScene.screwYou();
+			status = false;
 		}
 	}
 	
