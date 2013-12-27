@@ -17,7 +17,7 @@ public class Player extends GameObject {
 	public static final String PLAYER_USER_DATA = "player";
 	public static final String PLAYER_IMMORTAL_DATA = "haha";
 	
-	private boolean fire, killed;
+	private boolean fire, killed, canShoot;
 	private GameScene gameScene;
 	
 	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
@@ -27,6 +27,7 @@ public class Player extends GameObject {
         this.gameScene = gameScene;
         
         fire = killed = false;
+        canShoot = true;
     }
 	
 	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
@@ -49,7 +50,9 @@ public class Player extends GameObject {
 	            if (fire) {
 	            	if (x >= 0.5) {
 	            		x = 0;
-	            		gameScene.creteMissile(getX() + 20, getY() - 50, MissileType.PLAYER1);
+	            		if (canShoot) {
+	            			gameScene.creteMissile(getX() + 20, getY() - 50, MissileType.PLAYER1);
+	            		}
 	            		fire = false;
 	            	}
 	            }
@@ -60,6 +63,7 @@ public class Player extends GameObject {
 		            	body.setUserData(PLAYER_USER_DATA);
 		            	killed = false;
 		            	y = 0;
+		            	canShoot = true;
 		            }		            
 	            }
 	        }
@@ -81,6 +85,7 @@ public class Player extends GameObject {
 		body.setUserData(PLAYER_IMMORTAL_DATA);
 		setVisible(false);
 		killed = true;
+		canShoot = false;
 		body.setLinearVelocity(0, 0);
 	}
 }

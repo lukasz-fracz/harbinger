@@ -38,6 +38,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	private IMenuItem hostItem, joinItem, backItem;
 	private Sprite statusIcon;
 	private Text actionText;
+	private Intent discoverableIntent;
 	
 	private static final short HOST = 0, JOIN = 1, BACK = 2;
 	public static final short WAIT = 3, FOUND_SOMETHING = 4, FOUND = 5;
@@ -58,7 +59,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	            	return;
 	            }
 	            mBluetoothAdapter.cancelDiscovery();
-	            activity.unregisterReceiver(mReceiver);
+	            try {
+	            	activity.unregisterReceiver(mReceiver);
+	            } catch (Exception e) {}
 	        }
 	    }
 	};
@@ -106,14 +109,22 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 
 	@Override
 	public void onBackKeyPressed() {
-		try {
-			detachChild(statusIcon);
-			menuChildScene.attachChild(hostItem);
-			menuChildScene.attachChild(joinItem);
-			menuChildScene.registerTouchArea(hostItem);
-			menuChildScene.registerTouchArea(joinItem);
-			detachChild(actionText);
-		} catch (Exception e) {}
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					detachChild(statusIcon);
+					menuChildScene.attachChild(hostItem);
+					menuChildScene.attachChild(joinItem);
+					menuChildScene.registerTouchArea(hostItem);
+					menuChildScene.registerTouchArea(joinItem);
+					detachChild(actionText);
+					activity.stopService(discoverableIntent);
+				} catch (Exception e) {}
+			}
+			
+		});		
 		
 		try {
 			mBluetoothAdapter.cancelDiscovery();
@@ -210,25 +221,46 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	public void setStatus(short status) {
 		switch (status) {
 		case WAIT:
-			try {
-				detachChild(statusIcon);
-			} catch (Exception e) {}
-			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getWaitIconRegion(), vbom);
-			attachChild(statusIcon);
+			activity.runOnUpdateThread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						detachChild(statusIcon);
+					} catch (Exception e) {}
+					statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getWaitIconRegion(), vbom);
+					attachChild(statusIcon);
+				}
+				
+			});
 			break;
 		case FOUND_SOMETHING:
-			try {
-				detachChild(statusIcon);
-			} catch (Exception e) {}
-			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getHaveSomethingIconRegion(), vbom);
-			attachChild(statusIcon);
+			activity.runOnUpdateThread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						detachChild(statusIcon);
+					} catch (Exception e) {}
+					statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getHaveSomethingIconRegion(), vbom);
+					attachChild(statusIcon);
+				}
+				
+			});
 			break;
 		case FOUND:
-			try {
-				detachChild(statusIcon);
-			} catch (Exception e) {}
-			statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getGoIconRegion(), vbom);
-			attachChild(statusIcon);
+			activity.runOnUpdateThread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						detachChild(statusIcon);
+					} catch (Exception e) {}
+					statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getGoIconRegion(), vbom);
+					attachChild(statusIcon);
+				}				
+			});
+			
 			break;
 		default:
 			break;
@@ -236,7 +268,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	}
 	
 	public void onStart() {
-		Intent discoverableIntent = new
+		discoverableIntent = new
 				Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 		//discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
 		activity.startActivity(discoverableIntent);
@@ -245,14 +277,22 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	}
 	
 	public void onStop() {
-		try {
-			detachChild(statusIcon);
-			menuChildScene.attachChild(hostItem);
-			menuChildScene.attachChild(joinItem);
-			menuChildScene.registerTouchArea(hostItem);
-			menuChildScene.registerTouchArea(joinItem);
-			detachChild(actionText);
-		} catch (Exception e) {}
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					detachChild(statusIcon);
+					menuChildScene.attachChild(hostItem);
+					menuChildScene.attachChild(joinItem);
+					menuChildScene.registerTouchArea(hostItem);
+					menuChildScene.registerTouchArea(joinItem);
+					detachChild(actionText);
+					activity.stopService(discoverableIntent);
+				} catch (Exception e) {}
+			}
+			
+		});
 		
 		/*try {
 			mBluetoothAdapter.cancelDiscovery();

@@ -93,6 +93,7 @@ public class MultiplayerGameScene extends GameScene {
 					deleteObjectsForDestroy();
 					updateActiveEnemies();
 					if (enemies == 0) {
+						deleteEverything();
 						loadNextLevel(30);
 					}
 				}
@@ -119,7 +120,7 @@ public class MultiplayerGameScene extends GameScene {
 		createPartnerDeadMenu();
 	}
 	
-	protected void createPauseMenu() {
+	void createPauseMenu() {
 		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
 				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
 		gamePausedText.setPosition(60, 200);
@@ -162,12 +163,19 @@ public class MultiplayerGameScene extends GameScene {
 		
 		yesButton = new Sprite(80, 300, ResourcesManager.getInstance().getYesButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	        	gameHUD.detachChild(partnerDeadText);
-	        	gameHUD.detachChild(yesButton);
-	        	gameHUD.detachChild(noButton);
-	        	gameHUD.unregisterTouchArea(yesButton);
-	    		gameHUD.unregisterTouchArea(noButton);
-	    		
+	        	activity.runOnUpdateThread(new Runnable() {
+
+					@Override
+					public void run() {
+						gameHUD.detachChild(partnerDeadText);
+						gameHUD.detachChild(questionText);
+			        	gameHUD.detachChild(yesButton);
+			        	gameHUD.detachChild(noButton);
+			        	gameHUD.unregisterTouchArea(yesButton);
+			    		gameHUD.unregisterTouchArea(noButton);
+					}
+	        		
+	        	});
 	            bluetoothConnection.sendYes();
 	            lifes--;
 	            updateScore();
@@ -188,24 +196,34 @@ public class MultiplayerGameScene extends GameScene {
 	private void showPartnerDeadMenu() {
 		isPaused = true;
 		pausedBySecondPlayer = true;
-		gameHUD.attachChild(partnerDeadText);
-		gameHUD.attachChild(questionText);
-		gameHUD.attachChild(yesButton);
-		gameHUD.attachChild(noButton);
-		gameHUD.registerTouchArea(yesButton);
-		gameHUD.registerTouchArea(noButton);
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				gameHUD.attachChild(partnerDeadText);
+				gameHUD.attachChild(questionText);
+				gameHUD.attachChild(yesButton);
+				gameHUD.attachChild(noButton);
+				gameHUD.registerTouchArea(yesButton);
+				gameHUD.registerTouchArea(noButton);
+			}
+			
+		});
 	}
 	
-	protected void showLevelCompleted() {
+	void showLevelCompleted() {
 		gameHUD.attachChild(levelCompletedText);
 		setOnSceneTouchListener(new IOnSceneTouchListener() {
 
 			@Override
 			public boolean onSceneTouchEvent(Scene pScene,
 					TouchEvent pSceneTouchEvent) {
-				bluetoothConnection.sendLoaded();
+				//bluetoothConnection.sendLoaded();
 				gameHUD.detachChild(levelCompletedText);
 				isPaused = false;
+				
+				setOnSceneTouchListener(null);
+				
 				return false;
 			}
 			
@@ -231,13 +249,13 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
-	protected void createPhysics() {
+	void createPhysics() {
 		super.createPhysics(30);
 		
 		registerUpdateHandler(createMultiplayerUpdateHandler());
 	}
 	
-	protected IUpdateHandler createMultiplayerUpdateHandler() {
+	IUpdateHandler createMultiplayerUpdateHandler() {
 		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
 
 			float x = 0;
@@ -269,7 +287,7 @@ public class MultiplayerGameScene extends GameScene {
 		return iUpdateHandler;
 	}
 	
-	protected ContactListener createContactListener() {
+	ContactListener createContactListener() {
 		ContactListener contactListener;
 		if (!isClient) {
 			contactListener = super.createContactListener();
@@ -414,11 +432,11 @@ public class MultiplayerGameScene extends GameScene {
 		return contactListener;		
 	}
 	
-	protected void deleteObjectsForDestroy() {
-		/*if (isClient) {
+	void deleteObjectsForDestroy() {
+		if (isClient) {
 			super.deleteObjectsForDestroy();
 			return;
-		}*/
+		}
 		
 		if (physicsWorld != null) {
 			synchronized (gameObjects) {
@@ -475,7 +493,7 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
-	protected void showGameOverText() {
+	void showGameOverText() {
 		isPaused = true;
 		gameHUD.attachChild(gameOverText);
 		bluetoothConnection.sendDead();
@@ -581,6 +599,12 @@ public class MultiplayerGameScene extends GameScene {
 	public void takeLife() {
 		gameHUD.detachChild(gameOverText);
 		lifes++;
+		float width = player.getWidth() / 2;
+        float heigh = player.getHeight() / 2;
+        float angle = player.getBody().getAngle();
+        player.getBody().setTransform((startX + width) / 32, (startY + heigh) / 32, angle);
+		player.setToImmortal();
+        player.setVelocity(0, 0);
 		updateScore();
 		isPaused = false;
 	}
@@ -610,7 +634,7 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
-	protected void loadLevel(int levelID) throws IOException {
+	void loadLevel(int levelID) throws IOException {
 		super.loadLevel(levelID);
 		
 		bluetoothConnection.sendLoaded();
@@ -637,7 +661,7 @@ public class MultiplayerGameScene extends GameScene {
 		attachChild(player2);
 	}
 	
-	protected void gameFinished() {
+	void gameFinished() {
 		bluetoothConnection.stopConnection();
 		SceneManager.getInstance().loadMultiplayerGameCompletedScene(engine, score, opponentScore);
 	}

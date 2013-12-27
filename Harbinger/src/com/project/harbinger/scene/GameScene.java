@@ -62,13 +62,13 @@ import com.project.harbinger.manager.SceneManager.SceneType;
 
 public class GameScene extends BaseScene {
 
-	protected HUD gameHUD;
-	protected Text scoreText, gameOverText, levelCompletedText, gamePausedText;
-	protected PhysicsWorld physicsWorld;
+	HUD gameHUD;
+	Text scoreText, gameOverText, levelCompletedText, gamePausedText;
+	PhysicsWorld physicsWorld;
 	//private Text debugPlayerCoordinates;
-	protected int score, lifes, currentLevel, enemies;
-	protected boolean isPaused;
-	protected Sprite backButton, resumeButton;
+	int score, lifes, currentLevel, enemies;
+	boolean isPaused;
+	Sprite backButton, resumeButton;
 	int missileCounter;
 	
 	@Override
@@ -87,13 +87,19 @@ public class GameScene extends BaseScene {
 	}
 
 	private void showPauseMenu() {
-		gameHUD.attachChild(gamePausedText);
-		
-		
-	    gameHUD.registerTouchArea(resumeButton);
-	    gameHUD.registerTouchArea(backButton);
-	    gameHUD.attachChild(backButton);
-	    gameHUD.attachChild(resumeButton);
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				gameHUD.attachChild(gamePausedText);
+				
+			    gameHUD.registerTouchArea(resumeButton);
+			    gameHUD.registerTouchArea(backButton);
+			    gameHUD.attachChild(backButton);
+			    gameHUD.attachChild(resumeButton);
+			}
+			
+		});
 	}
 	
 	public void onHomeKeyPressed() {
@@ -109,11 +115,18 @@ public class GameScene extends BaseScene {
 				return;
 			}
 			isPaused = false;
-			gameHUD.detachChild(gamePausedText);
-            gameHUD.detachChild(backButton);
-            gameHUD.detachChild(resumeButton);
-            gameHUD.unregisterTouchArea(resumeButton);
-            gameHUD.unregisterTouchArea(backButton);
+			activity.runOnUpdateThread(new Runnable() {
+
+				@Override
+				public void run() {
+					gameHUD.detachChild(gamePausedText);
+		            gameHUD.detachChild(backButton);
+		            gameHUD.detachChild(resumeButton);
+		            gameHUD.unregisterTouchArea(resumeButton);
+		            gameHUD.unregisterTouchArea(backButton);
+				}
+			});
+		
 			return;
 		}
 		isPaused = true;
@@ -132,7 +145,7 @@ public class GameScene extends BaseScene {
 		camera.setChaseEntity(null);
 	}
 
-	protected void createBackground() {
+	void createBackground() {
 		setBackground(new Background(Color.BLACK));
 	}
 	
@@ -150,8 +163,9 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
-	protected void showLevelCompleted() {
+	void showLevelCompleted() {
 		gameHUD.attachChild(levelCompletedText);
+
 		setOnSceneTouchListener(new IOnSceneTouchListener() {
 
 			@Override
@@ -159,13 +173,16 @@ public class GameScene extends BaseScene {
 					TouchEvent pSceneTouchEvent) {
 				gameHUD.detachChild(levelCompletedText);
 				isPaused = false;
+				
+				setOnSceneTouchListener(null);
+				
 				return false;
 			}
 			
 		});
 	}
 	
-	protected void gameFinished() {
+	void gameFinished() {
 		SceneManager.getInstance().loadGameCompletedScene(engine, score);
 	}
 	
@@ -268,7 +285,7 @@ public class GameScene extends BaseScene {
 	    };
 	}
 	
-	protected void showGameOverText() {
+	void showGameOverText() {
 		isPaused = true;
 		gameHUD.attachChild(gameOverText);
 		setOnSceneTouchListener(new IOnSceneTouchListener() {
@@ -290,11 +307,11 @@ public class GameScene extends BaseScene {
 		debugPlayerCoordinates.setText(xC + "\n" + yC);
 	}*/
 	
-	protected void updateScore() {
+	void updateScore() {
 		scoreText.setText("Score: " + String.valueOf(score) + "\nLifes: " + String.valueOf(lifes));
 	}
 	
-	protected void createPhysics(int fps) {
+	void createPhysics(int fps) {
 		physicsWorld = new FixedStepPhysicsWorld(fps, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
@@ -302,11 +319,11 @@ public class GameScene extends BaseScene {
 		createBounds();
 	}
 	
-	protected static final String WALL_VERTICAL_USER_DATA = "wallV";
-	protected static final String WALL_TOP_USER_DATA = "WALL-E";
-	protected static final String WALL_BOTTOM_USER_DATA = "EVA";
+	static final String WALL_VERTICAL_USER_DATA = "wallV";
+	static final String WALL_TOP_USER_DATA = "WALL-E";
+	static final String WALL_BOTTOM_USER_DATA = "EVA";
 	
-	protected void createBounds() {
+	void createBounds() {
 		Body body;
 		final Rectangle wall_bottom = new Rectangle(0, 590, 480, 10, vbom);
 		body = PhysicsFactory.createBoxBody(physicsWorld, wall_bottom, BodyType.StaticBody, PhysicsFactory.createFixtureDef(0, 0, 0));
@@ -326,7 +343,7 @@ public class GameScene extends BaseScene {
 	    attachChild(wall_right);
 	}
 	
-	protected IUpdateHandler createIUpdateHandler() {
+	IUpdateHandler createIUpdateHandler() {
 		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
 
 			@Override
@@ -334,6 +351,7 @@ public class GameScene extends BaseScene {
 				deleteObjectsForDestroy();
 				updateActiveEnemies();
 				if (enemies == 0) {
+					deleteEverything();
 					loadNextLevel(30);
 				}
 			}
@@ -355,12 +373,13 @@ public class GameScene extends BaseScene {
 			deleteObjectsForDestroy();
 			updateActiveEnemies();
 			if (enemies == 0) {
+				deleteEverything();
 				loadNextLevel(30);
 			}
 		}
 	}
 
-	protected ContactListener createContactListener() {
+	ContactListener createContactListener() {
 		ContactListener contactListener = new ContactListener() {
 
 			@Override
@@ -506,7 +525,7 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
-	protected void respawnPlayer() {
+	void respawnPlayer() {
 		lifes--;
 		updateScore();
 		
@@ -523,7 +542,7 @@ public class GameScene extends BaseScene {
         player.setVelocity(0, 0);
 	}
 	
-	protected void deleteObjectsForDestroy() {
+	void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
 			synchronized (gameObjects) {
 				Iterator<GameObject> objects = gameObjects.iterator();
@@ -561,6 +580,20 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
+	void deleteEverything() {
+		synchronized (gameObjects) {
+			for (GameObject gobj : gameObjects) {
+				PhysicsConnector physicsConnector = physicsWorld.getPhysicsConnectorManager().
+						findPhysicsConnectorByShape(gobj);
+				physicsWorld.unregisterPhysicsConnector(physicsConnector);
+				gobj.getBody().setActive(false);
+				physicsWorld.destroyBody(gobj.getBody());
+				detachChild(gobj);				
+			}
+			gameObjects.clear();
+		}
+	}
+	
 	void updateActiveEnemies() {
 		synchronized (gameObjects) {
 			for (GameObject object : gameObjects) {
@@ -594,9 +627,9 @@ public class GameScene extends BaseScene {
 	
 	Player player;
 	List<GameObject> gameObjects;
-	private int startX, startY;
+	int startX, startY;
 	
-	protected void loadLevel(int levelID) throws IOException {
+	void loadLevel(int levelID) throws IOException {
 		//gameObjects = new ArrayList<GameObject>();
 		gameObjects = Collections.synchronizedList(new ArrayList<GameObject>());
 		missileCounter = -1;
