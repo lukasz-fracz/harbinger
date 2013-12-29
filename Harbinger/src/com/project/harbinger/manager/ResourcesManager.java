@@ -13,6 +13,7 @@ import org.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSourc
 import org.andengine.opengl.texture.atlas.buildable.builder.BlackPawnTextureAtlasBuilder;
 import org.andengine.opengl.texture.atlas.buildable.builder.ITextureAtlasBuilder.TextureAtlasBuilderException;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.debug.Debug;
 
@@ -212,6 +213,9 @@ public class ResourcesManager {
 	private ITextureRegion noButtonRegion;
 	private ITextureRegion gamepadBackgroundRegion;
 	
+	private BitmapTextureAtlas backgroundAtlas;
+	private TiledTextureRegion backgroundRegion;
+	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
 	}
@@ -283,11 +287,15 @@ public class ResourcesManager {
 	public ITextureRegion getGamepadBackgroundRegion() {
 		return gamepadBackgroundRegion;
 	}
+
+	public TiledTextureRegion getBackgroundRegion() {
+		return backgroundRegion;
+	}
 	
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
-	    		activity.getTextureManager(), 1024, 1024, TextureOptions.BILINEAR);
+	    		activity.getTextureManager(), 2048, 2048, TextureOptions.BILINEAR);
 	    
 	    playerRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "player.gif");
@@ -324,10 +332,15 @@ public class ResourcesManager {
 	    gamepadBackgroundRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "buttons/gamepad.png");
 	    
+	    backgroundAtlas = new BitmapTextureAtlas(activity.getTextureManager(), 960, 800, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	    backgroundRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(backgroundAtlas, activity.getAssets(),
+	    	    "background.jpg", 0, 0, 2, 1);
+	    
 	    try  {
 	        gameTextureAtlas.build(new 
 	        		BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(0, 1, 0));
 	        gameTextureAtlas.load();
+	        backgroundAtlas.load();
 	    } 
 	    catch (TextureAtlasBuilderException e) {
 	        Debug.e(e);

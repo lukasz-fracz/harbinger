@@ -76,8 +76,7 @@ public class MultiplayerGameScene extends GameScene {
 			loadLevel(0);
 		} catch (IOException e) {}
 		
-		missilesToadd = Collections.synchronizedList(new ArrayList<Missile>());
-		preMissiles = Collections.synchronizedList(new ArrayList<PreMissile>());
+		missilesToAdd = Collections.synchronizedList(new ArrayList<PreMissile>());
 	}
 	
 	public void onManagedUpdate(float pSecondsElapsed) {
@@ -535,8 +534,8 @@ public class MultiplayerGameScene extends GameScene {
 	}
 
 	private void addMissiles() {
-		synchronized (preMissiles) {
-			for (PreMissile pm : preMissiles) {
+		synchronized (missilesToAdd) {
+			for (PreMissile pm : missilesToAdd) {
 				Missile m = new Missile(pm.x, pm.y, vbom, camera, physicsWorld, MissileType.PLAYER2, pm.id);
 				m.setCullingEnabled(true);
 				attachChild(m);
@@ -546,17 +545,16 @@ public class MultiplayerGameScene extends GameScene {
 			}
 			
 			//missilesToadd.clear();
-			preMissiles.clear();
+			missilesToAdd.clear();
 		}
 	}
 	
-	List<Missile> missilesToadd;
-	List<PreMissile> preMissiles;
+	List<PreMissile> missilesToAdd;
 	
 	public void addMissile(float x, float y, int id) {
-		synchronized (missilesToadd) {
+		synchronized (missilesToAdd) {
 			//missilesToadd.add(new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id));
-			preMissiles.add(new PreMissile(x, y, id));
+			missilesToAdd.add(new PreMissile(x, y, id));
 		}
 		
 		/*GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);

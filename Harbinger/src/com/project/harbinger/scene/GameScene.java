@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
@@ -16,6 +17,7 @@ import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
@@ -24,6 +26,7 @@ import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.util.GLState;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.SAXUtils;
 import org.andengine.util.color.Color;
@@ -146,7 +149,10 @@ public class GameScene extends BaseScene {
 	}
 
 	void createBackground() {
-		setBackground(new Background(Color.BLACK));
+		//setBackground(new Background(Color.BLACK));
+		AnimatedSprite background = new AnimatedSprite(0, 0, resourcesManager.getBackgroundRegion(), vbom);
+		attachChild(background);
+		background.animate(1000);
 	}
 	
 	void loadNextLevel(int fps) {
@@ -192,7 +198,7 @@ public class GameScene extends BaseScene {
 		scoreText = new Text(20, 240, resourcesManager.getFont(),
 				"Score: 0123456789\nLifes: 0123456789", new TextOptions(HorizontalAlign.LEFT), vbom);
 		scoreText.setPosition(0, 0);
-		scoreText.setText("Score: 0\nLifes: " + String.valueOf(lifes));
+		scoreText.setText("Score: 0\nLife: " + String.valueOf(lifes));
 		gameOverText = new Text(10, 10, resourcesManager.getFont(),
 				"You're dead...", new TextOptions(HorizontalAlign.LEFT), vbom);
 		gameOverText.setPosition(40, 400);
@@ -308,7 +314,7 @@ public class GameScene extends BaseScene {
 	}*/
 	
 	void updateScore() {
-		scoreText.setText("Score: " + String.valueOf(score) + "\nLifes: " + String.valueOf(lifes));
+		scoreText.setText("Score: " + String.valueOf(score) + "\nLife: " + String.valueOf(lifes));
 	}
 	
 	void createPhysics(int fps) {
