@@ -127,6 +127,11 @@ public class GameScene extends BaseScene {
 		            gameHUD.detachChild(resumeButton);
 		            gameHUD.unregisterTouchArea(resumeButton);
 		            gameHUD.unregisterTouchArea(backButton);
+		            
+		            try {
+		            	gameHUD.detachChild(levelCompletedText);
+		            	setOnSceneTouchListener(null);
+		            } catch (Exception e) {}
 				}
 			});
 		
@@ -429,7 +434,7 @@ public class GameScene extends BaseScene {
 				}
 				
 				// missile hit something
-				if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+				/*if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
 					if (!secondUD.equals(WALL_BOTTOM_USER_DATA) && !secondUD.equals(WALL_TOP_USER_DATA)) {
 						if (firstUD.equals(Missile.MISSILE_USER_DATA)) {
 							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
@@ -451,7 +456,7 @@ public class GameScene extends BaseScene {
 					}
 					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
 					return;
-				}
+				}*/
 				
 				// handling player collision with enemies, the player has to respawn, and the client has to inform server
 				
@@ -496,10 +501,6 @@ public class GameScene extends BaseScene {
 				final Fixture second = contact.getFixtureB();
 				String firstUD = (String) first.getBody().getUserData();
 				String secondUD = (String) second.getBody().getUserData();
-
-				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
-					return;
-				}
 				
 				if (firstUD.equals(Player.PLAYER_IMMORTAL_DATA) && (secondUD.equals(StaticEnemy.STATIC_USER_DATA) || 
 						secondUD.equals(ActiveEnemy.ACTIVE_USER_DATA) || secondUD.equals(Missile.MISSILE_USER_DATA) ||
@@ -515,12 +516,43 @@ public class GameScene extends BaseScene {
 					return;
 				}
 				
+				if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+					if (!secondUD.equals(WALL_BOTTOM_USER_DATA) && !secondUD.equals(WALL_TOP_USER_DATA)) {
+						if (firstUD.equals(Missile.MISSILE_USER_DATA)) {
+							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						} else {
+							second.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
+						}
+					}
+					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					contact.setEnabled(false);
+					return;
+				}
+				
+				if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
+					if (!firstUD.equals(WALL_BOTTOM_USER_DATA) && !firstUD.equals(WALL_TOP_USER_DATA)) {
+						if (secondUD.equals(Missile.MISSILE_USER_DATA)) {
+							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+						} else {
+							first.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
+						}
+					}
+					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
+					contact.setEnabled(false);
+					return;
+				}
+
+				if (firstUD.equals(Player.PLAYER_USER_DATA) || secondUD.equals(Player.PLAYER_USER_DATA)) {
+					return;
+				}
+				
 				if (first.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) || 
 						second.getBody().getUserData().equals(WALL_BOTTOM_USER_DATA) ||
 						first.getBody().getUserData().equals(WALL_TOP_USER_DATA) || 
 						second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
 					contact.setEnabled(false);
 				}
+				
 			}
 
 			@Override
@@ -670,17 +702,17 @@ public class GameScene extends BaseScene {
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
 	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
+	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id);
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id);
+	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }

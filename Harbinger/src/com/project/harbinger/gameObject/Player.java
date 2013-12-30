@@ -58,6 +58,7 @@ public class Player extends GameObject {
 	            }
 	            if (killed) {
 	            	y += pSecondsElapsed;
+	            	body.setLinearVelocity(0, 0);
 		            if (y >= 1.0) {
 		            	setVisible(true);
 		            	body.setUserData(PLAYER_USER_DATA);

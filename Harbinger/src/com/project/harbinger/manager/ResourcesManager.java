@@ -357,7 +357,8 @@ public class ResourcesManager {
 	}
 	
 	public void unloadGameResources() {
-		
+		gameTextureAtlas.unload();
+        backgroundAtlas.unload();
 	}
 	
 	public Engine getEngine() {

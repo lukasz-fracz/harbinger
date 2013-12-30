@@ -15,8 +15,8 @@ import com.project.harbinger.scene.GameScene;
 public class HeavyFighter extends ActiveEnemy {
 
 	public HeavyFighter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			ActiveEnemyType type, int id) {
-        super(pX, pY, ResourcesManager.getInstance().getHeavyFighterRegion(), vbo, id);
+			ActiveEnemyType type, int id, GameScene gameScene) {
+        super(pX, pY, ResourcesManager.getInstance().getHeavyFighterRegion(), vbo, id, gameScene);
         
         score = 5;
         this.type = type;
@@ -41,8 +41,7 @@ public class HeavyFighter extends ActiveEnemy {
 	            
 	            if (allowToShoot) {
 	            	if (updatesCounter == 50) {
-	            		((GameScene) SceneManager.getInstance().getCurrentScene()).
-	            			creteMissile(getX() + 20, getY() + 75, MissileType.ENEMY);
+	            		gameScene.creteMissile(getX() + 20, getY() + 75, MissileType.ENEMY);
 	            		updatesCounter = 0;
 	            		return;
 	            	}

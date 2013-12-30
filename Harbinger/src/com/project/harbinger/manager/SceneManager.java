@@ -37,8 +37,6 @@ public class SceneManager {
 	private BaseScene multiPlayerOptionsScene;
 	private BaseScene singlePlayerOptionsScene;
 	private BaseScene highScoresScene;
-	private BaseScene multiplayerClientGameScene;
-	private BaseScene multiplayerServerGameScene;
 	private BaseScene multiplayerGameScene;
 	private BaseScene multiplayerGameCompletedScene;
 	
@@ -51,8 +49,7 @@ public class SceneManager {
 		SCENE_MULTIPLAYER_OPTIONS,
 		SCENE_SINGLEPLAYER_OPTIONS,
 		SCENE_HIGH_SCORES,
-		SCENE_MULTIPLAYER_CILENT_GAME,
-		SCENE_MULTIPLAYER_SERVER_GAME,
+		SCENE_MULTIPLAYER_GAME,
 		SCENE_MULTIPLAYER_GAME_COMPLETED
 	}
 	
@@ -92,11 +89,8 @@ public class SceneManager {
 		case SCENE_HIGH_SCORES:
 			setScene(highScoresScene);
 			break;
-		case SCENE_MULTIPLAYER_CILENT_GAME:
-			setScene(multiplayerClientGameScene);
-			break;
-		case SCENE_MULTIPLAYER_SERVER_GAME:
-			setScene(multiplayerServerGameScene);
+		case SCENE_MULTIPLAYER_GAME:
+			setScene(multiplayerGameScene);
 			break;
 		case SCENE_MULTIPLAYER_GAME_COMPLETED:
 			setScene(multiplayerGameCompletedScene);

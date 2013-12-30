@@ -23,7 +23,7 @@ public class Meteor extends StaticEnemy {
 		
 		body.setUserData(STATIC_USER_DATA);
 		body.setFixedRotation(true);
-		body.setLinearVelocity(0, 2);
+		body.setLinearVelocity(0, 4);
 		
 		physicsWorld.registerPhysicsConnector(new PhysicsConnector(this, body, true, false) {
 	        @Override

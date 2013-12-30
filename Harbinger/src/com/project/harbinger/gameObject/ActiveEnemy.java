@@ -3,6 +3,8 @@ package com.project.harbinger.gameObject;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
+import com.project.harbinger.scene.GameScene;
+
 
 public class ActiveEnemy extends Enemy {
 	
@@ -10,16 +12,19 @@ public class ActiveEnemy extends Enemy {
 	public static final String ACTIVE_START_ME = "hmm";
 	public static final String ACTIVE_TURN = "turn!";
 	
-	protected float xVelocity;
-	protected float yVelocity;
-	protected ActiveEnemyType type;
-	protected boolean allowToShoot;
-	protected int updatesCounter;
+	float xVelocity;
+	float yVelocity;
+	ActiveEnemyType type;
+	boolean allowToShoot;
+	int updatesCounter;
+	GameScene gameScene;
 
-	public ActiveEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
+	public ActiveEnemy(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id, GameScene gameScene) {
 		super(pX, pY, region, vbo, id);
 		allowToShoot = false;
 		updatesCounter = 0;
+		
+		this.gameScene = gameScene;
 	}
 	
 	public void changeSide() {

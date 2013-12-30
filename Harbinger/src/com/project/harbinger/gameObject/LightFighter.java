@@ -8,12 +8,13 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.manager.ResourcesManager;
+import com.project.harbinger.scene.GameScene;
 
 public class LightFighter extends ActiveEnemy {
 
 	public LightFighter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
-			ActiveEnemyType type, int id) {
-        super(pX, pY, ResourcesManager.getInstance().getLightFighterRegion(), vbo, id);
+			ActiveEnemyType type, int id, GameScene gameScene) {
+        super(pX, pY, ResourcesManager.getInstance().getLightFighterRegion(), vbo, id, gameScene);
         
         score = 3;
         this.type = type;

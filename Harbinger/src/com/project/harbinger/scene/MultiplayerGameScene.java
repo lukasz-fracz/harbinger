@@ -50,6 +50,7 @@ import com.project.harbinger.gameObject.ActiveEnemy.ActiveEnemyType;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
+import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.multiplayer.BluetoothConnection;
 
 public class MultiplayerGameScene extends GameScene {
@@ -117,6 +118,11 @@ public class MultiplayerGameScene extends GameScene {
 		createBackground();
 		createHUD();
 		createPartnerDeadMenu();
+	}
+	
+	@Override
+	public SceneType getSceneType() {
+		return SceneType.SCENE_MULTIPLAYER_GAME;
 	}
 	
 	void createPauseMenu() {
@@ -634,6 +640,8 @@ public class MultiplayerGameScene extends GameScene {
 	
 	void loadLevel(int levelID) throws IOException {
 		super.loadLevel(levelID);
+		
+		setOnSceneTouchListener(null);
 		
 		bluetoothConnection.sendLoaded();
 		iAmReady = true;

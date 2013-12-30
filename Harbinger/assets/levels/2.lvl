@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level enemies="7">    
+    <entity x="200" y="500" type="player" id="1" />
+    <entity x="10" y="-500" type="left-light-fighter" id="2" />
+    <entity x="10" y="-600" type="right-light-fighter" id="3" />
+    <entity x="10" y="-700" type="left-light-fighter" id="4" />
+    <entity x="10" y="-800" type="left-light-fighter" id="5" />
+    <entity x="410" y="-800" type="right-light-fighter" id="6" />
+    <entity x="10" y="-1200" type="left-heavy-fighter" id="7" />
+    <entity x="410" y="-1200" type="right-heavy-fighter" id="8" />
+</level> 

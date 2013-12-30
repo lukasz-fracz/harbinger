@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<level enemies="7">    
-    <entity x="10" y="550" type="player" id="1" />
-    <entity x="300" y="-1000" type="bullet" id="2" />
-    <entity x="400" y="-2000" type="bullet" id="3" />
-    <entity x="300" y="-2000" type="left-light-fighter" id="4" />
-    <entity x="300" y="-2500" type="left-heavy-fighter" id="5" /> 
-    <entity x="300" y="-3000" type="left-cruiser" id="6" /> 
-    <entity x="100" y="-3500" type="left-light-fighter" id="7" /> 
-    <entity x="400" y="-3500" type="right-light-fighter" id="8" /> 
+<level enemies="13">    
+    <entity x="200" y="500" type="player" id="1" />
+    <entity x="50" y="-1000" type="bullet" id="2" />
+    <entity x="100" y="-1000" type="bullet" id="3" />
+    <entity x="300" y="-1000" type="bullet" id="4" />
+    <entity x="350" y="-1000" type="bullet" id="5" />
+    <entity x="400" y="-1500" type="right-light-fighter" id="6" /> 
+    <entity x="10" y="-1500" type="left-heavy-fighter" id="7" />
+    <entity x="10" y="-2500" type="left-cruiser" id="8" />
+    <entity x="410" y="-2500" type="right-cruiser" id="9" />
+    <entity x="50" y="-2550" type="meteor" id="10" />
+    <entity x="100" y="-2550" type="meteor" id="11" />
+    <entity x="300" y="-2550" type="meteor" id="12" />
+    <entity x="350" y="-2550" type="meteor" id="13" />
+    <entity x="200" y="-6700" type="bullet" id="14" />
 </level>
