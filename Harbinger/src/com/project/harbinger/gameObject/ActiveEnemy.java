@@ -6,10 +6,19 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import com.project.harbinger.scene.GameScene;
 
 
+/**
+ * Class that represent active enemies. Active enemies are those enemies, that can shoot or turn.
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class ActiveEnemy extends Enemy {
 	
+	/**User data that identifies an active enemy*/
 	public static final String ACTIVE_USER_DATA = "active";
+	/**Active enemy needs to be activate. Activation means, it will start shooting and/or moving left/right*/
 	public static final String ACTIVE_START_ME = "hmm";
+	/**Enemy needs to turn. Use after colliding with wall or other enemy.*/
 	public static final String ACTIVE_TURN = "turn!";
 	
 	float xVelocity;

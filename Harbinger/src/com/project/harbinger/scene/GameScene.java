@@ -552,11 +552,11 @@ public class GameScene extends BaseScene {
 						second.getBody().getUserData().equals(WALL_TOP_USER_DATA)) {
 					contact.setEnabled(false);
 				}
-				
 			}
 
 			@Override
-			public void postSolve(Contact contact, ContactImpulse impulse) {}
+			public void postSolve(Contact contact, ContactImpulse impulse) {
+			}
 			
 		};
 		

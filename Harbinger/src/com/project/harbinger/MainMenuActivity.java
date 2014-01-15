@@ -20,18 +20,22 @@ import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.scene.GameScene;
 
-/**
- * @author Łukasz Frącz
+/**Game activity class.
+ * 
+ * @author lukaszSA
  *
  */
-
 public class MainMenuActivity extends BaseGameActivity {
 
+	/**Camera object. It decides what is visible on screen*/
 	private Camera camera;
-	private ResourcesManager resourcesManager;
 	
+	/* 
+	 * 
+	 * @return Game's Engine object
+	 */
 	public Engine onCreateEngine(EngineOptions pEngineOptions) {
-	    return new LimitedFPSEngine(pEngineOptions, 60);
+	    return new LimitedFPSEngine(pEngineOptions, 30);
 	}
 	
 	@Override
@@ -53,7 +57,6 @@ public class MainMenuActivity extends BaseGameActivity {
 			OnCreateResourcesCallback pOnCreateResourcesCallback)
 			throws Exception {
 		ResourcesManager.prepareManager(mEngine, this, camera, getVertexBufferObjectManager());
-		resourcesManager = ResourcesManager.getInstance();
 		pOnCreateResourcesCallback.onCreateResourcesFinished();
 	}
 

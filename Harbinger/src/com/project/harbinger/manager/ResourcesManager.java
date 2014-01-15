@@ -21,14 +21,32 @@ import android.graphics.Color;
 
 import com.project.harbinger.MainMenuActivity;
 
+/**
+ * A class that contains all of game's resources (grphics in this case).
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class ResourcesManager {
 
+	/**An instance of class. */
 	private static final ResourcesManager INSTANCE = new ResourcesManager();
 	
+	/**
+	 * @return Instance of class
+	 */
 	public static ResourcesManager getInstance() {
 		return INSTANCE;
 	}
 	
+	/**
+	 * Method that prepre object, so it can be use later.
+	 * 
+	 * @param engine Game's engine
+	 * @param activity Main activity
+	 * @param camera Game's camera
+	 * @param vbom 
+	 */
 	public static void prepareManager(Engine engine, MainMenuActivity activity, 
 			Camera camera, VertexBufferObjectManager vbom) {
         getInstance().engine = engine;
