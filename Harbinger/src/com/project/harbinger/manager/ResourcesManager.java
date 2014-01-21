@@ -217,7 +217,6 @@ public class ResourcesManager {
 	private ITextureRegion player2Region;
 	private ITextureRegion meteorRegion;
 	private ITextureRegion missileRegion;
-	private ITextureRegion missile2Region;
 	private ITextureRegion bulletRegion;
 	private ITextureRegion lightFighterRegion;
 	private ITextureRegion heavyFighterRegion;
@@ -252,10 +251,6 @@ public class ResourcesManager {
 	
 	public ITextureRegion getMissileRegion() {
 		return missileRegion;
-	}
-	
-	public ITextureRegion getMissile2Region() {
-		return missile2Region;
 	}
 	
 	public ITextureRegion getBulletRegion() {
@@ -323,8 +318,6 @@ public class ResourcesManager {
 	    		gameTextureAtlas, activity, "meteor.gif");
 	    missileRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "missile.gif");
-	    missile2Region = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
-	    		gameTextureAtlas, activity, "missile2.png");
 	    bulletRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(
 	    		gameTextureAtlas, activity, "bullet.gif");
 	    lightFighterRegion = BitmapTextureAtlasTextureRegionFactory.createFromAsset(

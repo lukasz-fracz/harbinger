@@ -183,7 +183,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			            	activity.unregisterReceiver(mReceiver);
 						} catch (Exception ex) {}
 						
-						mBluetoothAdapter.disable();
+						try {
+							mBluetoothAdapter.disable();
+						} catch (Exception exx) {}
 						SceneManager.getInstance().backToMenu();
 					}
 				}
