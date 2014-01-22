@@ -211,7 +211,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 						@Override
 						public void run() {
 							actionText.setText("Looking for player...");
-							attachChild(actionText);
+							try {
+								attachChild(actionText);
+							} catch (Exception e) {}
 							menuChildScene.detachChild(hostItem);
 							menuChildScene.detachChild(joinItem);
 							menuChildScene.unregisterTouchArea(hostItem);
