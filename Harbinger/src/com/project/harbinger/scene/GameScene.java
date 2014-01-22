@@ -695,24 +695,24 @@ public class GameScene extends BaseScene {
 	    	            if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER)) {
 	    	            	startX = x;
 	    	            	startY = y;
-	    	                player = new Player(x, y, vbom, camera, physicsWorld, GameScene.this);
+	    	                player = new Player(x, y, vbom, physicsWorld, GameScene.this);
 	    	                levelObject = player;
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR)) {
-	    	            	levelObject = new Meteor(x, y, vbom, camera, physicsWorld, id);
+	    	            	levelObject = new Meteor(x, y, vbom, physicsWorld, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET)) {
-	    	            	levelObject = new Bullet(x, y, vbom, camera, physicsWorld, id);
+	    	            	levelObject = new Bullet(x, y, vbom, physicsWorld, id);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
+	    	            	levelObject = new LightFighter(x, y, vbom, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER)) {
-	    	            	levelObject = new LightFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
+	    	            	levelObject = new LightFighter(x, y, vbom, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else if (type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER)) {
-	    	            	levelObject = new HeavyFighter(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
+	    	            	levelObject = new HeavyFighter(x, y, vbom, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
+	    	            	levelObject = new Cruiser(x, y, vbom, physicsWorld, ActiveEnemyType.LEFT, id, GameScene.this);
 	    	            } else if(type.equals(TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER)) {
-	    	            	levelObject = new Cruiser(x, y, vbom, camera, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
+	    	            	levelObject = new Cruiser(x, y, vbom, physicsWorld, ActiveEnemyType.RIGHT, id, GameScene.this);
 	    	            } else {
 	    	            	levelObject = null;
 	    	            }
@@ -733,7 +733,7 @@ public class GameScene extends BaseScene {
 		if (isPaused) {
 			return;
 		}
-		GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, type, missileCounter);
+		GameObject missile = new Missile(x, y, vbom, physicsWorld, type, missileCounter);
 		missile.setCullingEnabled(true);
 		attachChild(missile);
 		synchronized (gameObjects) {

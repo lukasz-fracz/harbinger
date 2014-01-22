@@ -1,6 +1,5 @@
 package com.project.harbinger.gameObject;
 
-import org.andengine.engine.camera.Camera;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
@@ -9,22 +8,42 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.manager.ResourcesManager;
 
+/**
+ * Klasa reprezentująca wystrzał (statku gracza lub przeciwnika)
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class Missile extends GameObject {
 	
+	/**Oznaczenie identyfikujące wystrzał*/
 	public static final String MISSILE_USER_DATA = "missile";
+	/**Oznaczenie identyfikujące wystrzał wystrzelony przez drugiego gracza*/
 	public static final String MISSILE_PLAYER2_USER_DATA = "missile2";
-
+	/**Typ wystzrału*/
 	private MissileType type;
 	
-	public Missile(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
+	/**Konstruktor wystrzału.
+	 * 
+	 * @param pX Współrzędna x
+	 * @param pY Wspołrzędna y
+	 * @param vbo Menadżer obiektów
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować
+	 * @param type Typ wystrzału
+	 * @param id Numer id obiektu.
+	 */
+	public Missile(float pX, float pY, VertexBufferObjectManager vbo, PhysicsWorld physicsWorld,
 			MissileType type, int id) {
         super(pX, pY, ResourcesManager.getInstance().getMissileRegion(), vbo, id);
         
         this.type = type;
-        createPhysics(camera, physicsWorld);
+        createPhysics(physicsWorld);
     }
 	
-	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
+	/**Tworzy fizykę obiektu.
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować.
+	 */
+	private void createPhysics(PhysicsWorld physicsWorld) {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
@@ -48,5 +67,16 @@ public class Missile extends GameObject {
 	    });
 	}
 	
-	public enum MissileType { PLAYER1, PLAYER2, ENEMY }
+	/**Typ wystrzału. Konieczny by odpowiednio ustawić oznacznie i prędkość.
+	 * @author lukaszSA
+	 *
+	 */
+	public enum MissileType { 
+		/**Wystrzelony przez pierwszego gracza*/
+		PLAYER1, 
+		/**Wystrzelony przez drugiego gracza*/
+		PLAYER2, 
+		/**Wystrzelony przez przeciwnika*/
+		ENEMY
+	}
 }

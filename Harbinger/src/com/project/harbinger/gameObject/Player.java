@@ -1,28 +1,46 @@
 package com.project.harbinger.gameObject;
 
-import org.andengine.engine.camera.Camera;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.util.debug.Debug;
 
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.scene.GameScene;
 
+/**Klasa reprezentująca gracza
+ * @author Łukasz Frącz
+ *
+ */
 public class Player extends GameObject {
 
+	/**Oznaczenie identyfikujące gracza*/
 	public static final String PLAYER_USER_DATA = "player";
+	/**Oznaczenie identyfikujące nieśmiertelnego gracza*/
 	public static final String PLAYER_IMMORTAL_DATA = "haha";
 	
-	private boolean fire, killed, canShoot;
+	/**Czy chce strzelić*/
+	private boolean fire;
+	/**Czy został niedawno zabity*/
+	private boolean killed;
+	/**Czy może strzelać*/
+	private boolean canShoot;
+	/**Scena gry*/
 	private GameScene gameScene;
 	
-	public Player(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld, GameScene gameScene) {
+	/**Konstruktor gracza.
+	 * 
+	 * @param pX Współrzędna x
+	 * @param pY Wspołrzędna y
+	 * @param vbo Menadżer obiektów
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować
+	 * @param gameScene Scena gry
+	 */
+	public Player(float pX, float pY, VertexBufferObjectManager vbo, PhysicsWorld physicsWorld, GameScene gameScene) {
         super(pX, pY, ResourcesManager.getInstance().getPlayerRegion(), vbo, 1);
-        createPhysics(camera, physicsWorld);
+        createPhysics(physicsWorld);
         
         this.gameScene = gameScene;
         
@@ -30,7 +48,10 @@ public class Player extends GameObject {
         canShoot = true;
     }
 	
-	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
+	/**Tworzy fizykę obiektu.
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować.
+	 */
+	private void createPhysics(PhysicsWorld physicsWorld) {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		
@@ -71,6 +92,10 @@ public class Player extends GameObject {
 	    });
 	}
 	
+	/**Ustawia prędkość gracza
+	 * @param dx Prędkość w płaszczyźnie x
+	 * @param dy Prędkość w płaszczyźnie y
+	 */
 	public void setVelocity(float dx, float dy) {
 		if (killed) {
 			return;
@@ -78,10 +103,17 @@ public class Player extends GameObject {
 		body.setLinearVelocity(dx, dy);
 	}
 	
+	/**
+	 * Ustawia chęc oddania strzału
+	 */
 	public void fire() {
 		fire = true;
 	}
 	
+	/**
+	 * Ustawia gracza jako nieśmiertlenego.
+	 * Nieśmiertelny gracz nie może się poruszać i strzelać. Nie może też zginąć.
+	 */
 	public void setToImmortal() {
 		body.setUserData(PLAYER_IMMORTAL_DATA);
 		setVisible(false);

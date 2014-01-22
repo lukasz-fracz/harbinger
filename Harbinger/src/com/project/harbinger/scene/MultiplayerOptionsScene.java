@@ -161,13 +161,20 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 
 				@Override
 				public void run() {
-					menuChildScene.detachChild(hostItem);
-					menuChildScene.detachChild(joinItem);
-					menuChildScene.unregisterTouchArea(hostItem);
-					menuChildScene.unregisterTouchArea(joinItem);
+					activity.runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							menuChildScene.detachChild(hostItem);
+							menuChildScene.detachChild(joinItem);
+							menuChildScene.unregisterTouchArea(hostItem);
+							menuChildScene.unregisterTouchArea(joinItem);
+						}				
+					});
 					
 					try {
 						BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
+						activity.stopService(discoverableIntent);
 					} catch (IOException e) {
 						try {
 							detachChild(statusIcon);
@@ -272,7 +279,6 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	public void onStart() {
 		discoverableIntent = new
 				Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-		//discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
 		activity.startActivity(discoverableIntent);
 		
 		mBluetoothAdapter.enable();
@@ -295,14 +301,13 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			}
 			
 		});
-		
-		/*try {
-			mBluetoothAdapter.cancelDiscovery();
-        	activity.unregisterReceiver(mReceiver);
-		} catch (Exception e) {}*/
 	}
 	
 	public void disableBluetooth() {
-		mBluetoothAdapter.disable();
+		try {
+			mBluetoothAdapter.disable();
+		} catch (Exception e) {
+			Debug.e("Dupa");
+		}
 	}
 }

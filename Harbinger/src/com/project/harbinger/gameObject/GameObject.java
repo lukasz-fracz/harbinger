@@ -7,35 +7,36 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import com.badlogic.gdx.physics.box2d.Body;
 
 /**
- * A class that represent all game objects. 
- * All specific game objects classes extends this class.
+ * Klasa reprezentująca obiekty występujące w grze.
+ * Każda specjalistyczna klasa (przeciwnicy, wystrzały, statek gracza) dziedziczy po tej klasie.
  * 
  * @author Łukasz Frącz
  *
  */
 public class GameObject extends Sprite {
 
-	/**Object was detroyed by player.*/
+	/**Oznaczenie informujące o tym, że obiekt został zniszczony, a gracz powinien dostać punkty*/
 	public static final String DESTROY_USER_DATA = "destroy";
-	/**Object was destroyed, but player should not receive points. Use when object collides with bottom wall, or with player.*/
+	/**Oznaczenie informujące o tym, że obiekt został zniszczony nie przez gracza, więc gracz nie powinien dostać punktów.*/
 	public static final String DESTROY_BY_WALL_USER_DATA = "destroy1";
-	/**Object was destroyed by second player (use only in multiplayer game).*/
+	/**Oznaczenie informujące o tym, że obiekt został zniszczony przez drugiego gracza (w trybie wieloosobowym).
+	 * Hostujący grę powinien wysłać punkt drugiemu graczowi/*/
 	public static final String DESTROY_BY_SECOND_PLAYER = "destroy2";
 	
-	/**Object's body*/
+	/**Ciało reprezentujące obiekt w świecie.*/
 	Body body;
-	/**How many points player gets for destroying that object*/
+	/**Ilość punktów, jakie gracz otrzymuje za zestrzelenie obiektu*/
 	int score;
-	/**Object's id. Use in multiplayer*/
+	/**Numer identyfikujący obiekt na planszy. Używane w trybie wieloosobowym.*/
 	int id;
 	
-	/**Object's contructor. 
+	/**Konstruktor obiektu
 	 * 
-	 * @param pX 
-	 * @param pY
-	 * @param region
-	 * @param vbo
-	 * @param id Object's id
+	 * @param pX Współżędna x
+	 * @param pY Współżędna y
+	 * @param region Tekstura obiektu
+	 * @param vbo Menadżer obiektów
+	 * @param id Numer id obiektu
 	 */
 	public GameObject(float pX, float pY, ITextureRegion region, VertexBufferObjectManager vbo, int id) {
 		super(pX, pY, region, vbo);
@@ -44,21 +45,21 @@ public class GameObject extends Sprite {
 	}
 	
 	/**
-	 * @return Object's body
+	 * @return Ciało reprezentujące obiekt.
 	 */
 	public Body getBody() {
 		return body;
 	}
 	
 	/**
-	 * @return How many points player gets for destroying this object
+	 * @return Ilość punktów przysługujących graczowi za zestrzelenie obiektu.
 	 */
 	public int getScore() {
 		return score;
 	}
 	
 	/**
-	 * @return Object's id.
+	 * @return Numer id obiektu.
 	 */
 	public int getId() {
 		return id;

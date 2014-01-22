@@ -14,18 +14,21 @@ import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.scene.MultiplayerOptionsScene;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 
+/**Klasa obsługująca połączenie bluetooth od strony klienta. Potrzebna jest tylko dlatego, że 
+ * protokół TCP opiera się na modelu serwer-klient.
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class BluetoothClient extends BluetoothConnection {
 	
-	private BluetoothDevice device;
-	private BluetoothSocket socket;
-	private Engine mEngine;
-	
-	
+	/**Konstruktor obiektu.
+	 * @param device obiekt BluetoothDevice
+	 * @param mEngine Silnik obsługujący aplikację
+	 * @throws IOException Gdy pojawi się problem z połączeniem
+	 */
 	public BluetoothClient(BluetoothDevice device, Engine mEngine) throws IOException {
-		this.device = device;
-		this.mEngine = mEngine;
 		
 		try {
 			socket = device.createRfcommSocketToServiceRecord(UUID.fromString("6D2DF50E-06EF-C21C-7DB0-345099A5F64E"));
@@ -55,10 +58,12 @@ public class BluetoothClient extends BluetoothConnection {
 			Debug.e(e);
 		}
 		
-		//SceneManager.getInstance().loadMultiplayerClientGameScene(mEngine);
 		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, true);
 	}
 	
+	/* Metoda run() wątku
+	 * @see com.project.harbinger.multiplayer.BluetoothConnection#run()
+	 */
 	public void run() {
 		super.run();
 	}

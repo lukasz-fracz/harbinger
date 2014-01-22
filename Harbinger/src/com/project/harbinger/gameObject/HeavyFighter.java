@@ -1,6 +1,5 @@
 package com.project.harbinger.gameObject;
 
-import org.andengine.engine.camera.Camera;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
@@ -9,12 +8,27 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
-import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.scene.GameScene;
 
+/**
+ * Klasa reprezentująca ciężki myśliwiec.
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class HeavyFighter extends ActiveEnemy {
 
-	public HeavyFighter(float pX, float pY, VertexBufferObjectManager vbo, Camera camera, PhysicsWorld physicsWorld,
+	/**Konstruktor ciężkiego myśliwca.
+	 * 
+	 * @param pX Współrzędna x
+	 * @param pY Wspołrzędna y
+	 * @param vbo Menadżer obiektów
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować
+	 * @param type Typ aktywnego przeciwnika (lewy lub prawy)
+	 * @param id Numer id obiektu.
+	 * @param gameScene Scena gry
+	 */
+	public HeavyFighter(float pX, float pY, VertexBufferObjectManager vbo, PhysicsWorld physicsWorld,
 			ActiveEnemyType type, int id, GameScene gameScene) {
         super(pX, pY, ResourcesManager.getInstance().getHeavyFighterRegion(), vbo, id, gameScene);
         
@@ -23,10 +37,13 @@ public class HeavyFighter extends ActiveEnemy {
         
         yVelocity = 5f;
         xVelocity = 0;
-        createPhysics(camera, physicsWorld);
+        createPhysics(physicsWorld);
     }
 	
-	private void createPhysics(final Camera camera, PhysicsWorld physicsWorld) {
+	/**Tworzy fizykę obiektu.
+	 * @param physicsWorld Świat w którym obiekt ma się znajdować.
+	 */
+	private void createPhysics(PhysicsWorld physicsWorld) {
 		body = PhysicsFactory.createBoxBody(physicsWorld, 
 				this, BodyType.DynamicBody, PhysicsFactory.createFixtureDef(0, 0, 0));
 		

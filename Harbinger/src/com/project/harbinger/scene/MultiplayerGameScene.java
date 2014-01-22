@@ -542,7 +542,7 @@ public class MultiplayerGameScene extends GameScene {
 	private void addMissiles() {
 		synchronized (missilesToAdd) {
 			for (PreMissile pm : missilesToAdd) {
-				Missile m = new Missile(pm.x, pm.y, vbom, camera, physicsWorld, MissileType.PLAYER2, pm.id);
+				Missile m = new Missile(pm.x, pm.y, vbom, physicsWorld, MissileType.PLAYER2, pm.id);
 				m.setCullingEnabled(true);
 				attachChild(m);
 				synchronized (gameObjects) {
