@@ -6,62 +6,70 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.andengine.engine.camera.hud.HUD;
-import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
-import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
-import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.andengine.engine.handler.IUpdateHandler;
-import org.andengine.entity.IEntity;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
-import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.util.HorizontalAlign;
-import org.andengine.util.SAXUtils;
 import org.andengine.util.color.Color;
-import org.andengine.util.debug.Debug;
-import org.andengine.util.level.IEntityLoader;
-import org.andengine.util.level.LevelLoader;
-import org.xml.sax.Attributes;
 
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.project.harbinger.gameObject.ActiveEnemy;
-import com.project.harbinger.gameObject.Bullet;
-import com.project.harbinger.gameObject.Cruiser;
 import com.project.harbinger.gameObject.Enemy;
 import com.project.harbinger.gameObject.GameObject;
-import com.project.harbinger.gameObject.HeavyFighter;
-import com.project.harbinger.gameObject.LightFighter;
-import com.project.harbinger.gameObject.Meteor;
 import com.project.harbinger.gameObject.Missile;
 import com.project.harbinger.gameObject.Player;
 import com.project.harbinger.gameObject.StaticEnemy;
-import com.project.harbinger.gameObject.ActiveEnemy.ActiveEnemyType;
 import com.project.harbinger.gameObject.Missile.MissileType;
 import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.multiplayer.BluetoothConnection;
 
+/**Scena na której rozgrywa się gra w trybie wieloosobowym.<br/>
+ * Obsługuje całą logikę gry wieloosobowej (reszte obsłguje scena gry, po której ta scena dziedziczy).
+ * <br/>
+ * Scena zachowuje się w pewnych miejscach inaczej w zależności od tego, czy obsługuje grę hosta czy klienta.
+ * @author Łukasz Frącz
+ *
+ */
 public class MultiplayerGameScene extends GameScene {
 
+	/**Obiekt obsługujący połączenie bluetooth*/
 	private BluetoothConnection bluetoothConnection;
-	private boolean isClient, opponentReady, iAmReady, pausedBySecondPlayer;
+	/**Określa czy scena obsługuje grę klienta czy hosta*/
+	private boolean isClient;
+	/**Określa czy drugi gracz załadował planszę*/
+	private boolean opponentReady;
+	/**Określa czy plansza została załadowana*/
+	private boolean iAmReady;
+	/**Określa czy gra została zatrzymana przez drugiego gracza*/
+	private boolean pausedBySecondPlayer;
+	/**Statek drugiego gracza*/
 	private Sprite player2;
+	/**Wynik drugiego gracza*/
 	private int opponentScore;
-	private Sprite noButton, yesButton;
-	private Text partnerDeadText, questionText;
+	/**Przycisk "no"*/
+	private Sprite noButton;
+	/**Przycisk "yesy"*/
+	private Sprite yesButton;
+	/**Tekst informujący o śmierci partnera*/
+	private Text partnerDeadText;
+	/**Tekst z pytaniem o pożyczenie życia partnerowi*/
+	private Text questionText;
 
+	/**Konstruktor sceny
+	 * @param bluetoothConnection Obiekt obsługujący połączenie bluetooth
+	 * @param isClient True jeśli scenę tworzy klient, False gdy host
+	 */
 	public MultiplayerGameScene(BluetoothConnection bluetoothConnection, boolean isClient) {
 		super();
 		
@@ -80,6 +88,9 @@ public class MultiplayerGameScene extends GameScene {
 		missilesToAdd = Collections.synchronizedList(new ArrayList<PreMissile>());
 	}
 	
+	/**Metoda wywoływana przy aktualizacji sceny
+	 * @see com.project.harbinger.scene.GameScene#onManagedUpdate(float)
+	 */
 	public void onManagedUpdate(float pSecondsElapsed) {
 		if (isPaused) {
 			super.onManagedUpdate(0);
@@ -99,20 +110,17 @@ public class MultiplayerGameScene extends GameScene {
 				}
 				
 			});
-			/*addMissiles();
-			deleteObjectsForDestroy();
-			updateActiveEnemies();
-			if (enemies == 0) {
-				loadNextLevel(30);
-			}*/
 		}
 	}
 	
+	/**Tworzy scenę
+	 * @see com.project.harbinger.scene.GameScene#createScene()
+	 */
 	@Override
 	public void createScene() {
 		score = 0;
 		currentLevel = 0;
-		lifes = 5;
+		live = 5;
 		isPaused = false;
 		
 		createBackground();
@@ -120,11 +128,18 @@ public class MultiplayerGameScene extends GameScene {
 		createPartnerDeadMenu();
 	}
 	
+	/**
+	 * @see com.project.harbinger.scene.GameScene#getSceneType()
+	 * @return Typ sceny (gra wieloosobowa)
+	 */
 	@Override
 	public SceneType getSceneType() {
 		return SceneType.SCENE_MULTIPLAYER_GAME;
 	}
 	
+	/**Tworzy menu pauzy
+	 * @see com.project.harbinger.scene.GameScene#createPauseMenu()
+	 */
 	void createPauseMenu() {
 		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
 				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
@@ -154,6 +169,9 @@ public class MultiplayerGameScene extends GameScene {
 	    };
 	}
 	
+	/**
+	 * Tworzy menu z pytaniem o pożyczenie życia partnerowi.
+	 */
 	private void createPartnerDeadMenu() {
 		partnerDeadText = new Text(10, 10, resourcesManager.getFont(),
 				"Partner's dead", new TextOptions(HorizontalAlign.LEFT), vbom);
@@ -182,7 +200,7 @@ public class MultiplayerGameScene extends GameScene {
 	        		
 	        	});
 	            bluetoothConnection.sendYes();
-	            lifes--;
+	            live--;
 	            updateScore();
 	            isPaused = false;
 	            pausedBySecondPlayer = false;
@@ -198,6 +216,9 @@ public class MultiplayerGameScene extends GameScene {
 	    };
 	}
 	
+	/**
+	 * Wyświetla menu z pytaniem o pożyczenie życia partnerowi
+	 */
 	private void showPartnerDeadMenu() {
 		isPaused = true;
 		pausedBySecondPlayer = true;
@@ -216,6 +237,9 @@ public class MultiplayerGameScene extends GameScene {
 		});
 	}
 	
+	/**Wyświetla napis "level completed"
+	 * @see com.project.harbinger.scene.GameScene#showLevelCompleted()
+	 */
 	void showLevelCompleted() {
 		gameHUD.attachChild(levelCompletedText);
 		setOnSceneTouchListener(new IOnSceneTouchListener() {
@@ -235,6 +259,9 @@ public class MultiplayerGameScene extends GameScene {
 		});
 	}
 	
+	/**Metoda wywoływana po naciśnięciu przycisku "back". Zatrzymuje/wznawia grę (o ile jest to możliwe)
+	 * @see com.project.harbinger.scene.GameScene#onBackKeyPressed()
+	 */
 	@Override
 	public void onBackKeyPressed() {
 		if (pausedBySecondPlayer) {
@@ -243,7 +270,7 @@ public class MultiplayerGameScene extends GameScene {
 		
 		super.onBackKeyPressed();
 		
-		if (lifes == 0) {
+		if (live == 0) {
 			return;
 		}
 		
@@ -254,12 +281,18 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**
+	 * Tworzy fizykę świata gry
+	 */
 	void createPhysics() {
 		super.createPhysics(30);
 		
 		registerUpdateHandler(createMultiplayerUpdateHandler());
 	}
 	
+	/**
+	 * @return Interfejs obsługjący zmianę położenia gracza. Gdy gracz zmieni położenie, drugi gracz otrzymuje o tym infromacje
+	 */
 	IUpdateHandler createMultiplayerUpdateHandler() {
 		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
 
@@ -292,6 +325,10 @@ public class MultiplayerGameScene extends GameScene {
 		return iUpdateHandler;
 	}
 	
+	/**
+	 * @see com.project.harbinger.scene.GameScene#createContactListener()
+	 * @return Interfejs obsługujący kolizje obiektów
+	 */
 	ContactListener createContactListener() {
 		ContactListener contactListener;
 		if (!isClient) {
@@ -437,6 +474,9 @@ public class MultiplayerGameScene extends GameScene {
 		return contactListener;		
 	}
 	
+	/**Usuwa obiekty, które mają być usunięte. W przypadku hosta wysyła też infromacje o usunięciu obiektu drugiemu graczowi.
+	 * @see com.project.harbinger.scene.GameScene#deleteObjectsForDestroy()
+	 */
 	void deleteObjectsForDestroy() {
 		if (isClient) {
 			super.deleteObjectsForDestroy();
@@ -478,14 +518,6 @@ public class MultiplayerGameScene extends GameScene {
 							physicsWorld.unregisterPhysicsConnector(physicsConnector);
 							next.getBody().setActive(false);
 							physicsWorld.destroyBody(next.getBody());
-							/*activity.runOnUpdateThread(new Runnable() {
-
-								@Override
-								public void run() {
-									detachChild(next);	
-								}
-								
-							});	*/
 							detachChild(next);
 							objects.remove();
 						}
@@ -498,47 +530,63 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**Pokazuje tekst "you are dead"
+	 * @see com.project.harbinger.scene.GameScene#showGameOverText()
+	 */
 	void showGameOverText() {
 		isPaused = true;
 		gameHUD.attachChild(gameOverText);
 		bluetoothConnection.sendDead();
 	}
 	
-	private void showWaitForOtherPlayer() {
-		//gameHUD.attachChild(levelCompletedText);
-		/*setOnSceneTouchListener(new IOnSceneTouchListener() {
-
-			@Override
-			public boolean onSceneTouchEvent(Scene pScene,
-					TouchEvent pSceneTouchEvent) {
-				if (opponentReady) {
-					isPaused = false;
-					opponentReady = false;
-				}
-				
-				return true;
-			}
-			
-		});*/
-	}
-	
+	/**
+	 * Zatrzmuje grę. Metoda wywoływana gdy grę zatrzyma drugi gracz.
+	 */
 	public void pauseGame() {
 		isPaused = true;
 		pausedBySecondPlayer = true;
-		attachChild(gamePausedText);
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				attachChild(gamePausedText);
+			}
+			
+		});
 	}
 	
+	/**
+	 * Wznawia grę zatrzymaną przez drugiego gracza
+	 */
 	public void resumeGame() {
 		isPaused = false;
 		pausedBySecondPlayer = false;
-		detachChild(gamePausedText);
+		activity.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				detachChild(gamePausedText);
+			}
+			
+		});
+
 	}
 	
+	/**Przemieszcza na ekranie statek drugiego gracza
+	 * @param x Nowa współrzędna x
+	 * @param y Nowa współrzędna y
+	 */
 	public void movePlayer2(float x, float y) {
 		player2.setX(x);
 		player2.setY(y);
 	}
 
+	/**Lista wystrzałów do dodania*/
+	private List<PreMissile> missilesToAdd;
+	
+	/**
+	 * Dodaje do gry wystrzały. Obiekty nie mogą być dodawane w dowolnej chwili, więc trzeba je kolejkować.
+	 */
 	private void addMissiles() {
 		synchronized (missilesToAdd) {
 			for (PreMissile pm : missilesToAdd) {
@@ -549,28 +597,24 @@ public class MultiplayerGameScene extends GameScene {
 					gameObjects.add(m);
 				}
 			}
-			
-			//missilesToadd.clear();
 			missilesToAdd.clear();
 		}
 	}
 	
-	List<PreMissile> missilesToAdd;
-	
+	/**Dodaje nowy wystrzał do kolejki.
+	 * @param x Współrzędna x
+	 * @param y Współrzędna y
+	 * @param id Numer id wystrzału
+	 */
 	public void addMissile(float x, float y, int id) {
 		synchronized (missilesToAdd) {
-			//missilesToadd.add(new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id));
 			missilesToAdd.add(new PreMissile(x, y, id));
 		}
-		
-		/*GameObject missile = new Missile(x, y, vbom, camera, physicsWorld, MissileType.PLAYER2, id);
-		missile.setCullingEnabled(true);
-		attachChild(missile);
-		synchronized (gameObjects) {
-			gameObjects.add(missile);
-		}*/
 	}
 	
+	/**Ustawia odpowiedni obiekt jako przeznaczony do zniszczenia.
+	 * @param id Numer id obiektu do zniszczenia
+	 */
 	public void setToDestroy(int id) {
 		synchronized (gameObjects) {
 			for (GameObject gobj : gameObjects) {
@@ -582,17 +626,27 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**Uaktualnia wynik gracza
+	 * @param score O ile należy zwiększyć licznik punktów
+	 */
 	public void addScore(int score) {
 		this.score += score;
 		updateScore();
 	}
 	
+	/**Uaktualnia wynik przeciwnika
+	 * @param opponentScore Wynik przeciwnika
+	 */
 	public void updateOpponentScore(int opponentScore) {
 		this.opponentScore = opponentScore;
 	}
 	
+	/**
+	 * Metoda wywoływana po śmierci drugiego gracza. Gdy gracz ma więcej niż 1 życie pojawia się pytanie o pożyczenie życia partnerowi.
+	 * W przeciwnym wypadku gra kończy się.
+	 */
 	public void partnerDead() {
-		if (lifes > 1) {
+		if (live > 1) {
 			showPartnerDeadMenu();
 		} else {
 			bluetoothConnection.sendNo();
@@ -600,9 +654,12 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**
+	 * Metoda wywoływana gdy drugi gracz zdecyduje się na oddanie swojego życia.
+	 */
 	public void takeLife() {
 		gameHUD.detachChild(gameOverText);
-		lifes++;
+		live++;
 		float width = player.getWidth() / 2;
         float heigh = player.getHeight() / 2;
         float angle = player.getBody().getAngle();
@@ -613,10 +670,16 @@ public class MultiplayerGameScene extends GameScene {
 		isPaused = false;
 	}
 	
+	/**
+	 * Metoda wywoływana gdy drugi gracz zakończył grę (nie pożyczył życia)
+	 */
 	public void screwYou() {
 		gameFinished();
 	}
 	
+	/**Tworzy nowy wystrzał wystrzelony przez gracza lub przeciwnika
+	 * @see com.project.harbinger.scene.GameScene#creteMissile(float, float, com.project.harbinger.gameObject.Missile.MissileType)
+	 */
 	public void creteMissile(float x, float y, MissileType type) {
 		synchronized (gameObjects) {
 			super.creteMissile(x, y, type);
@@ -631,6 +694,9 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**
+	 * Metoda wywoływana gdy drugi gracz wczyta planszę
+	 */
 	public void opponentIsReady() {
 		opponentReady = true;
 		if (iAmReady) {
@@ -638,6 +704,9 @@ public class MultiplayerGameScene extends GameScene {
 		}
 	}
 	
+	/**Metoda ładująca kolejną planszę
+	 * @see com.project.harbinger.scene.GameScene#loadLevel(int)
+	 */
 	void loadLevel(int levelID) throws IOException {
 		super.loadLevel(levelID);
 		
@@ -647,9 +716,7 @@ public class MultiplayerGameScene extends GameScene {
 		iAmReady = true;
 		isPaused = true;
 		
-		if (!opponentReady) {
-			showWaitForOtherPlayer();
-		} else {
+		if (opponentReady) {
 			opponentReady = false;
 			isPaused = false;
 			iAmReady = false;
@@ -667,11 +734,18 @@ public class MultiplayerGameScene extends GameScene {
 		attachChild(player2);
 	}
 	
+	/**Metoda zakańczająca grę
+	 * @see com.project.harbinger.scene.GameScene#gameFinished()
+	 */
 	void gameFinished() {
 		bluetoothConnection.stopConnection();
-		SceneManager.getInstance().loadMultiplayerGameCompletedScene(engine, score, opponentScore);
+		SceneManager.getInstance().loadMultiplayerGameCompletedScene(score, opponentScore);
 	}
 	
+	/**Robocza klasa przeznaczona do pamiętania podstawowych informacji o wystrzale (obiekty tej klasy dodawane są do kolejki)
+	 * @author Łukasz Frącz
+	 *
+	 */
 	private class PreMissile {
 		private float x, y;
 		private int id;

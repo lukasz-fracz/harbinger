@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.UUID;
 
-import org.andengine.engine.Engine;
 import org.andengine.util.debug.Debug;
 
 import com.project.harbinger.manager.SceneManager;
@@ -25,10 +24,9 @@ public class BluetoothClient extends BluetoothConnection {
 	
 	/**Konstruktor obiektu.
 	 * @param device obiekt BluetoothDevice
-	 * @param mEngine Silnik obsługujący aplikację
 	 * @throws IOException Gdy pojawi się problem z połączeniem
 	 */
-	public BluetoothClient(BluetoothDevice device, Engine mEngine) throws IOException {
+	public BluetoothClient(BluetoothDevice device) throws IOException {
 		
 		try {
 			socket = device.createRfcommSocketToServiceRecord(UUID.fromString("6D2DF50E-06EF-C21C-7DB0-345099A5F64E"));
@@ -58,10 +56,10 @@ public class BluetoothClient extends BluetoothConnection {
 			Debug.e(e);
 		}
 		
-		SceneManager.getInstance().loadMultiplayerGameScene(mEngine, this, true);
+		SceneManager.getInstance().loadMultiplayerGameScene(this, true);
 	}
 	
-	/* Metoda run() wątku
+	/** Metoda run() wątku
 	 * @see com.project.harbinger.multiplayer.BluetoothConnection#run()
 	 */
 	public void run() {

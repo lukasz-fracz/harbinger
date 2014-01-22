@@ -6,17 +6,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.andengine.engine.camera.Camera;
 import org.andengine.engine.camera.hud.HUD;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl;
 import org.andengine.engine.camera.hud.controls.AnalogOnScreenControl.IAnalogOnScreenControlListener;
 import org.andengine.engine.camera.hud.controls.BaseOnScreenControl;
-import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
-import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
@@ -26,16 +23,12 @@ import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.util.GLState;
 import org.andengine.util.HorizontalAlign;
 import org.andengine.util.SAXUtils;
 import org.andengine.util.color.Color;
-import org.andengine.util.debug.Debug;
 import org.andengine.util.level.IEntityLoader;
 import org.andengine.util.level.LevelLoader;
 import org.xml.sax.Attributes;
-
-import android.view.MotionEvent;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -44,7 +37,6 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.project.harbinger.gameObject.ActiveEnemy;
 import com.project.harbinger.gameObject.ActiveEnemy.ActiveEnemyType;
@@ -63,22 +55,50 @@ import com.project.harbinger.manager.ResourcesManager;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 
+/**Scena na której toczy się gra dla jednego gracza.<br/>
+ * Obsługuje całą logikę gry.
+ * @author Łukasz Frącz
+ *
+ */
 public class GameScene extends BaseScene {
 
+	/**HUD gry*/
 	HUD gameHUD;
-	Text scoreText, gameOverText, levelCompletedText, gamePausedText;
+	/**Tekst z wynikiem gracza*/
+	Text scoreText;
+	/**Tekst "you are dead"*/
+	Text gameOverText;
+	/**Tekst "level completed"*/
+	Text levelCompletedText;
+	/**Tekst "game paused"*/
+	Text gamePausedText;
+	/**Świat gry*/
 	PhysicsWorld physicsWorld;
-	//private Text debugPlayerCoordinates;
-	int score, lifes, currentLevel, enemies;
+	/**Wynik gracza*/
+	int score;
+	/**Licznik żyć gracza*/
+	int live;
+	/**Numer aktualnej planszy*/
+	int currentLevel;
+	/**Licznik przeciwników*/
+	int enemies;
+	/**Status gry. True gdy działa, false gdy jest zatrzymana*/
 	boolean isPaused;
-	Sprite backButton, resumeButton;
+	/**Przycisk "back to menu"*/
+	Sprite backButton;
+	/**Przycisk "resume game"*/
+	Sprite resumeButton;
+	/**Licznik wystrzałów*/
 	int missileCounter;
 	
+	/**Tworzy scenę
+	 * @see com.project.harbinger.scene.BaseScene#createScene()
+	 */
 	@Override
 	public void createScene() {
 		score = 0;
 		currentLevel = 0;
-		lifes = 5;
+		live = 5;
 		isPaused = false;
 		
 		createBackground();
@@ -89,8 +109,11 @@ public class GameScene extends BaseScene {
 		} catch (IOException e) {}
 	}
 
+	/**
+	 * Wyświetla menu pauzy
+	 */
 	private void showPauseMenu() {
-		activity.runOnUpdateThread(new Runnable() {
+		activity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -105,20 +128,26 @@ public class GameScene extends BaseScene {
 		});
 	}
 	
+	/**Metoda wywoływana po naciśnięciu przycisku "home" (lub gdy zadzwoni telefon). Zatrzymuje grę.
+	 * @see com.project.harbinger.scene.BaseScene#onHomeKeyPressed()
+	 */
 	public void onHomeKeyPressed() {
 		if (!isPaused) {
 			onBackKeyPressed();
 		}
 	}
 	
+	/**Metoda wywoływana po naciśnięciu przycisku "back". Zatrzymuje/wznawia grę.
+	 * @see com.project.harbinger.scene.BaseScene#onBackKeyPressed()
+	 */
 	@Override
 	public void onBackKeyPressed() {
 		if (isPaused) {
-			if (lifes == 0) {
+			if (live == 0) {
 				return;
 			}
 			isPaused = false;
-			activity.runOnUpdateThread(new Runnable() {
+			activity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
@@ -141,11 +170,18 @@ public class GameScene extends BaseScene {
 		showPauseMenu();
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#getSceneType()
+	 * @return Typ sceny (gra dla jednego gracza)
+	 */
 	@Override
 	public SceneType getSceneType() {
 		return SceneType.SCENE_GAME;
 	}
 
+	/**Niszczy scenę
+	 * @see com.project.harbinger.scene.BaseScene#disposeScene()
+	 */
 	@Override
 	public void disposeScene() {
 		camera.setHUD(null);
@@ -153,13 +189,18 @@ public class GameScene extends BaseScene {
 		camera.setChaseEntity(null);
 	}
 
+	/**
+	 * Tworzy tło
+	 */
 	void createBackground() {
-		//setBackground(new Background(Color.BLACK));
 		AnimatedSprite background = new AnimatedSprite(0, 0, resourcesManager.getBackgroundRegion(), vbom);
 		attachChild(background);
 		background.animate(1000);
 	}
 	
+	/**Ładuje kolejną planszę
+	 * @param fps pożądana ilość klatek na sekundę (bez znaczenia)
+	 */
 	void loadNextLevel(int fps) {
 		isPaused = true;
 		showLevelCompleted();
@@ -174,6 +215,9 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
+	/**
+	 * Pokazuje napis "level completed" po zakończeniu planszy
+	 */
 	void showLevelCompleted() {
 		gameHUD.attachChild(levelCompletedText);
 
@@ -193,17 +237,23 @@ public class GameScene extends BaseScene {
 		});
 	}
 	
+	/**
+	 * Kończy grę, ładuje ekran zakończenia
+	 */
 	void gameFinished() {
-		SceneManager.getInstance().loadGameCompletedScene(engine, score);
+		SceneManager.getInstance().loadGameCompletedScene(score);
 	}
 	
+	/**
+	 * Tworzy HUD
+	 */
 	void createHUD() {
 		gameHUD = new HUD();
 		
 		scoreText = new Text(20, 240, resourcesManager.getFont(),
 				"Score: 0123456789\nLifes: 0123456789", new TextOptions(HorizontalAlign.LEFT), vbom);
 		scoreText.setPosition(0, 0);
-		scoreText.setText("Score: 0\nLife: " + String.valueOf(lifes));
+		scoreText.setText("Score: 0\nLife: " + String.valueOf(live));
 		gameOverText = new Text(10, 10, resourcesManager.getFont(),
 				"You're dead...", new TextOptions(HorizontalAlign.LEFT), vbom);
 		gameOverText.setPosition(40, 400);
@@ -215,13 +265,6 @@ public class GameScene extends BaseScene {
 		levelCompletedText.setColor(Color.BLUE);		
 		
 		gameHUD.attachChild(scoreText);
-		
-		/*debugPlayerCoordinates = new Text(10, 10, resourcesManager.getFont(),
-				"x: 1234567890- y: 1234567890-", new TextOptions(HorizontalAlign.LEFT), vbom);
-		debugPlayerCoordinates.setPosition(0, 700);
-		debugPlayerCoordinates.setText("x: y:");
-		debugPlayerCoordinates.setSize(300, 100);
-		gameHUD.attachChild(debugPlayerCoordinates);*/
 		
 		attachChild(new Sprite(0, 590, ResourcesManager.getInstance().getGamepadBackgroundRegion(), vbom));
 
@@ -238,7 +281,6 @@ public class GameScene extends BaseScene {
 			public void onControlClick(final AnalogOnScreenControl pAnalogOnScreenControl) {
 			}
 		});
-		//analogOnScreenControl.getControlBase().setBlendFunction(2, 4);
 		analogOnScreenControl.getControlBase().setAlpha(0.5f);
 		analogOnScreenControl.getControlBase().setScaleCenter(0, 128);
 		analogOnScreenControl.getControlBase().setScale(1.25f);
@@ -256,7 +298,6 @@ public class GameScene extends BaseScene {
 	        	if (touchEvent.getAction() == TouchEvent.ACTION_DOWN) {
 	        		player.fire();
 	        	}
-	            //creteMissile(player.getX() + 10, player.getY() - 35, MissileType.PLAYER);
 	            return true;
 	        };
 	    };
@@ -269,6 +310,9 @@ public class GameScene extends BaseScene {
 		createPauseMenu();
 	}
 	
+	/**
+	 * Tworzy menu pauzy
+	 */
 	void createPauseMenu() {
 		gamePausedText = new Text(10, 10, resourcesManager.getFont(),
 				"Game paused", new TextOptions(HorizontalAlign.LEFT), vbom);
@@ -278,7 +322,7 @@ public class GameScene extends BaseScene {
 
 		backButton = new Sprite(90, 370, ResourcesManager.getInstance().getBackButtonRegion(), vbom) {
 	        public boolean onAreaTouched(TouchEvent touchEvent, float X, float Y) {
-	            SceneManager.getInstance().loadMenuScene(engine);
+	            SceneManager.getInstance().loadMenuScene();
 	        	
 	            return true;
 	        };
@@ -304,36 +348,40 @@ public class GameScene extends BaseScene {
 			@Override
 			public boolean onSceneTouchEvent(Scene pScene,
 					TouchEvent pSceneTouchEvent) {
-				SceneManager.getInstance().loadMenuScene(engine);
+				SceneManager.getInstance().loadMenuScene();
 				return false;
 			}
 			
 		});
 	}
 	
-	/*public void debugSetPlayerCoordinates(float x, float y) {
-		String xC = "x: " + String.valueOf(x);
-		String yC = "y: " + String.valueOf(y);
-		
-		debugPlayerCoordinates.setText(xC + "\n" + yC);
-	}*/
-	
+	/**
+	 * Uaktualnia licznik punktów i żyć na ekranie
+	 */
 	void updateScore() {
-		scoreText.setText("Score: " + String.valueOf(score) + "\nLife: " + String.valueOf(lifes));
+		scoreText.setText("Score: " + String.valueOf(score) + "\nLife: " + String.valueOf(live));
 	}
 	
+	/**Tworzy świat gry
+	 * @param fps Pożądana liczba klatek na sekundę (bez znaczenia)
+	 */
 	void createPhysics(int fps) {
 		physicsWorld = new FixedStepPhysicsWorld(fps, new Vector2(0, 0), false);
 		registerUpdateHandler(physicsWorld);
 		physicsWorld.setContactListener(createContactListener());
-		//registerUpdateHandler(createIUpdateHandler());
 		createBounds();
 	}
 	
+	/**Oznaczenie określające pionowe ściany*/
 	static final String WALL_VERTICAL_USER_DATA = "wallV";
+	/**Oznaczenie określające górną ścianę*/
 	static final String WALL_TOP_USER_DATA = "WALL-E";
+	/**Oznaczenie określające dolną ścianę*/
 	static final String WALL_BOTTOM_USER_DATA = "EVA";
 	
+	/**
+	 * Tworzy ściany uniemożliwiające ucieczkę z ekranu gry (oraz niszczące przeciwników)
+	 */
 	void createBounds() {
 		Body body;
 		final Rectangle wall_bottom = new Rectangle(0, 590, 480, 10, vbom);
@@ -354,28 +402,9 @@ public class GameScene extends BaseScene {
 	    attachChild(wall_right);
 	}
 	
-	IUpdateHandler createIUpdateHandler() {
-		IUpdateHandler iUpdateHandler = new IUpdateHandler() {
-
-			@Override
-			public void onUpdate(float pSecondsElapsed) {
-				deleteObjectsForDestroy();
-				updateActiveEnemies();
-				if (enemies == 0) {
-					deleteEverything();
-					loadNextLevel(30);
-				}
-			}
-
-			@Override
-			public void reset() {
-			}
-			
-		};
-		
-		return iUpdateHandler;
-	}
-	
+	/**Obsługuje uaktualnienie sceny. Usuwa obiekty i decyduje czy należy wczytać kolejną planszę.
+	 * @see org.andengine.entity.scene.Scene#onManagedUpdate(float)
+	 */
 	public void onManagedUpdate(float pSecondsElapsed) {
 		if (isPaused) {
 			super.onManagedUpdate(0);
@@ -390,6 +419,9 @@ public class GameScene extends BaseScene {
 		}
 	}
 
+	/**
+	 * @return Interfejs obsługjący kolizje między obiektami
+	 */
 	ContactListener createContactListener() {
 		ContactListener contactListener = new ContactListener() {
 
@@ -432,31 +464,6 @@ public class GameScene extends BaseScene {
 					second.getBody().setUserData(ActiveEnemy.ACTIVE_TURN);
 					return;
 				}
-				
-				// missile hit something
-				/*if (firstUD.equals(Missile.MISSILE_USER_DATA) || firstUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
-					if (!secondUD.equals(WALL_BOTTOM_USER_DATA) && !secondUD.equals(WALL_TOP_USER_DATA)) {
-						if (firstUD.equals(Missile.MISSILE_USER_DATA)) {
-							second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						} else {
-							second.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
-						}
-					}
-					first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-					return;
-				}
-				
-				if (secondUD.equals(Missile.MISSILE_USER_DATA) || secondUD.equals(Missile.MISSILE_PLAYER2_USER_DATA)) {
-					if (!firstUD.equals(WALL_BOTTOM_USER_DATA) && !firstUD.equals(WALL_TOP_USER_DATA)) {
-						if (secondUD.equals(Missile.MISSILE_USER_DATA)) {
-							first.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-						} else {
-							first.getBody().setUserData(GameObject.DESTROY_BY_SECOND_PLAYER);
-						}
-					}
-					second.getBody().setUserData(GameObject.DESTROY_USER_DATA);
-					return;
-				}*/
 				
 				// handling player collision with enemies, the player has to respawn, and the client has to inform server
 				
@@ -563,11 +570,14 @@ public class GameScene extends BaseScene {
 		return contactListener;		
 	}
 	
+	/**
+	 * Metoda uruchamiana po śmierci gracza. Wskrzesza go lub kończy grę (gdy nie ma już żyć).
+	 */
 	void respawnPlayer() {
-		lifes--;
+		live--;
 		updateScore();
 		
-		if (lifes == 0) {
+		if (live == 0) {
 			showGameOverText();
 			return;
 		}	
@@ -580,6 +590,9 @@ public class GameScene extends BaseScene {
         player.setVelocity(0, 0);
 	}
 	
+	/**
+	 * Usuwa obiekty przeznaczone do usunięcia
+	 */
 	void deleteObjectsForDestroy() {
 		if (physicsWorld != null) {
 			synchronized (gameObjects) {
@@ -618,6 +631,9 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
+	/**
+	 * Usuwa wszystkie obiekty (po skończeniu planszy)s
+	 */
 	void deleteEverything() {
 		synchronized (gameObjects) {
 			for (GameObject gobj : gameObjects) {
@@ -632,6 +648,9 @@ public class GameScene extends BaseScene {
 		}
 	}
 	
+	/**
+	 * Uaktualnia stan aktywnych przeciwników (aktywuje je lub zmienia ich kierunek)
+	 */
 	void updateActiveEnemies() {
 		synchronized (gameObjects) {
 			for (GameObject object : gameObjects) {
@@ -645,30 +664,52 @@ public class GameScene extends BaseScene {
 	}
 	
 	// level loading
+	/**Tag w pliku XML oznaczający ilość przeciwników na planszy*/
 	private static final String TAG_LEVEL_ATTRIBUTE_ENEMIES = "enemies";
+	/**Tag w pliku XML oznaczający współrzędną x*/
 	private static final String TAG_ENTITY_ATTRIBUTE_X = "x";
+	/**Tag w pliku XML oznaczający współrzędną y*/
 	private static final String TAG_ENTITY_ATTRIBUTE_Y = "y";
+	/**Tag w pliku XML oznaczający typ przeciwnika*/
 	private static final String TAG_ENTITY_ATTRIBUTE_TYPE = "type";
+	/**Tag w pliku XML oznaczający id obiektu*/
 	private static final String TAG_ENTITY_ATTRIBUTE_ID = "id";
+	/**Tag w pliku XML oznaczający obiekt*/
 	private static final String TAG_ENTITY = "entity";
 	
+	/**Tag w pliku XML oznaczający gracza*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_PLAYER = "player";
+	/**Tag w pliku XML oznaczający meteor*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_METEOR = "meteor";
+	/**Tag w pliku XML oznaczający pocisk*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_BULLET = "bullet";
+	/**Tag w pliku XML oznaczający lewy lekki myśliwiec*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_LIGHT_FIGHTER = "left-light-fighter";
+	/**Tag w pliku XML oznaczający prawy lekki myśliwiec*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_LIGHT_FIGHTER = "right-light-fighter";
+	/**Tag w pliku XML oznaczający lewy ciężki myśliwiec*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_HEAVY_FIGHTER = "left-heavy-fighter";
+	/**Tag w pliku XML oznaczający prawy ciężki myśliwiec*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_HEAVY_FIGHTER = "right-heavy-fighter";
+	/**Tag w pliku XML oznaczający lewy krążownik*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_LEFT_CRUISER = "left-cruiser";
+	/**Tag w pliku XML oznaczający prawy krążownik*/
 	private static final Object TAG_ENTITY_ATTRIBUTE_TYPE_VALUE_RIGHT_CRUISER = "right-cruiser";
 	
-	
+	/**Gracz*/
 	Player player;
+	/**Lista obiektów*/
 	List<GameObject> gameObjects;
-	int startX, startY;
+	/**Początkowa współrzędna gracza x*/
+	int startX;
+	/**Początkowa współrzędna gracza y*/
+	int startY;
 	
+	/**Metoda wczytująca planszę
+	 * @param levelID Numer planszy do wczytania
+	 * @throws IOException Gdy pojawi się błąd w pliku z planszą, lub plansza nie istnieje
+	 */
 	void loadLevel(int levelID) throws IOException {
-		//gameObjects = new ArrayList<GameObject>();
 		gameObjects = Collections.synchronizedList(new ArrayList<GameObject>());
 		missileCounter = -1;
 		
@@ -729,6 +770,11 @@ public class GameScene extends BaseScene {
 	    levelLoader.loadLevelFromAsset(activity.getAssets(), "levels/" + currentLevel + ".lvl");
 	}
 	
+	/**Tworzy wystrzał wystrzelony przez gracza lub przeciwnika
+	 * @param x Współrzędna x
+	 * @param y Współrzędna y
+	 * @param type Typ wystrzału
+	 */
 	public void creteMissile(float x, float y, MissileType type) {
 		if (isPaused) {
 			return;

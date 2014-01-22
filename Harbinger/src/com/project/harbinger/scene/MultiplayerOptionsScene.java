@@ -30,19 +30,47 @@ import com.project.harbinger.manager.SceneManager.SceneType;
 import com.project.harbinger.multiplayer.BluetoothClient;
 import com.project.harbinger.multiplayer.BluetoothServer;
 
+/**Menu trybu wieloosobowego.
+ * @author Łukasz Frącz
+ *
+ */
 public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemClickListener {
 
+	/**Adapter bluetooth*/
 	private BluetoothAdapter mBluetoothAdapter;
+	/**Urządzenie bluetooth*/
 	private BluetoothDevice device;
+	/**Scena dziecko zawierająca przyciski*/
 	private MenuScene menuChildScene;
-	private IMenuItem hostItem, joinItem, backItem;
+	/**Przycisk "host game"*/
+	private IMenuItem hostItem;
+	/**Przycisk "join game"*/
+	private IMenuItem joinItem; 
+	/**Przycisk "back"*/
+	private IMenuItem backItem;
+	/**Ikona statusu*/
 	private Sprite statusIcon;
+	/**Tekst informujący o tym, co aktualnie robi połączenie bluetooth*/
 	private Text actionText;
+	/***/
 	private Intent discoverableIntent;
 	
-	private static final short HOST = 0, JOIN = 1, BACK = 2;
-	public static final short WAIT = 3, FOUND_SOMETHING = 4, FOUND = 5;
+	/**Identyfikacja przycisku "host game"*/
+	private static final short HOST = 0;
+	/**Identyfikacja przycisku "join game"*/
+	private static final short JOIN = 1;
+	/**Identyfikacja przycisku "back"*/
+	private static final short BACK = 2;
+	/**Akcja - czekaj*/
+	public static final short WAIT = 3;
+	/**Akcja - coś znalazłem*/
+	public static final short FOUND_SOMETHING = 4;
+	/**Akcja - znalazłem grę*/
+	public static final short FOUND = 5;
 	
+	/**
+	 * Obiekt wyszukujący urządzenia bluetooth
+	 */
 	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
 	        String action = intent.getAction();
@@ -53,7 +81,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	        	device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE); 	
 	            BluetoothClient client;
 	            try {
-	            	client = new BluetoothClient(device, activity.getEngine());
+	            	client = new BluetoothClient(device);
 	            } catch (IOException e) {
 	            	setStatus(WAIT);
 	            	return;
@@ -66,6 +94,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 	    }
 	};
 
+	/** Tworzy scenę
+	 * @see com.project.harbinger.scene.BaseScene#createScene()
+	 */
 	@Override
 	public void createScene() {
 		createBackground();
@@ -107,6 +138,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		statusIcon = new Sprite(0, 0, ResourcesManager.getInstance().getWaitIconRegion(), vbom);
 	}
 
+	/**Metoda wywoływana po naciśnięciu przycisku "back". Wyłącza bluetooth, restartuje menu i powraca do menu głównego.
+	 * @see com.project.harbinger.scene.BaseScene#onBackKeyPressed()
+	 */
 	@Override
 	public void onBackKeyPressed() {
 		activity.runOnUpdateThread(new Runnable() {
@@ -135,28 +169,39 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		SceneManager.getInstance().backToMenu();
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#getSceneType()
+	 * @return Typ sceny (menu trybu wieloosobowego)
+	 */
 	@Override
 	public SceneType getSceneType() {
 		return SceneType.SCENE_MULTIPLAYER_OPTIONS;
 	}
 
+	/**Niszczy scenę
+	 * @see com.project.harbinger.scene.BaseScene#disposeScene()
+	 */
 	@Override
 	public void disposeScene() {
 		detachSelf();
 		dispose();
 	}
 	
+	/**
+	 * Tworzy tło
+	 */
 	private void createBackground() {
 		setBackground(new Background(Color.BLACK));
 	}
 
+	/**Interfejs uruchamiany po naciśnięciu przycisku w menu
+	 * @see org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener#onMenuItemClicked(org.andengine.entity.scene.menu.MenuScene, org.andengine.entity.scene.menu.item.IMenuItem, float, float)
+	 */
 	@Override
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
 			float pMenuItemLocalX, float pMenuItemLocalY) {
 		switch (pMenuItem.getID()) {
-		case HOST:
-			actionText.setText("Looking for player...");
-			attachChild(actionText);
+		case HOST:			
 			(new Thread() {
 
 				@Override
@@ -165,6 +210,8 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 
 						@Override
 						public void run() {
+							actionText.setText("Looking for player...");
+							attachChild(actionText);
 							menuChildScene.detachChild(hostItem);
 							menuChildScene.detachChild(joinItem);
 							menuChildScene.unregisterTouchArea(hostItem);
@@ -173,7 +220,7 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 					});
 					
 					try {
-						BluetoothServer server = new BluetoothServer(mBluetoothAdapter, activity.getEngine());
+						BluetoothServer server = new BluetoothServer(mBluetoothAdapter);
 						activity.stopService(discoverableIntent);
 					} catch (IOException e) {
 						try {
@@ -200,13 +247,12 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 			}).start();
 			return true;
 		case JOIN:
-			actionText.setText("Looking for game...");
-			attachChild(actionText);
-			
 			activity.runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
+					actionText.setText("Looking for game...");
+					attachChild(actionText);
 					menuChildScene.detachChild(hostItem);
 					menuChildScene.detachChild(joinItem);
 					menuChildScene.unregisterTouchArea(hostItem);
@@ -227,6 +273,9 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		}
 	} 
 	
+	/**Zmienia ikonkę statusu poszukiwań gry.
+	 * @param status Aktualny status (odpowiednie wartości są polami statycznymi)
+	 */
 	public void setStatus(short status) {
 		switch (status) {
 		case WAIT:
@@ -276,6 +325,10 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		}
 	}
 	
+	/**
+	 * Metoda wywoływana przy przełączaniu sceny. Uruchamia bluetooth i prosi o pozwolenie na stanie
+	 * się widzialnym dla innych urządzeń.
+	 */
 	public void onStart() {
 		discoverableIntent = new
 				Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
@@ -284,6 +337,10 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		mBluetoothAdapter.enable();
 	}
 	
+	/**
+	 * Metoda wywoływana przy opuszczaniu sceny. Restartuje menu i zaprzestaje poszukiwania urządzeń bluetooth
+	 * (jeśli były poszukiwane)
+	 */
 	public void onStop() {
 		activity.runOnUpdateThread(new Runnable() {
 
@@ -303,11 +360,14 @@ public class MultiplayerOptionsScene extends BaseScene implements IOnMenuItemCli
 		});
 	}
 	
+	/**
+	 * Wyłącza bluetooth
+	 */
 	public void disableBluetooth() {
 		try {
 			mBluetoothAdapter.disable();
 		} catch (Exception e) {
-			Debug.e("Dupa");
+			Debug.e(e);
 		}
 	}
 }

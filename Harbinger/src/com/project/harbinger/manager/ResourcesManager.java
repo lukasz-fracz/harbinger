@@ -22,30 +22,30 @@ import android.graphics.Color;
 import com.project.harbinger.MainMenuActivity;
 
 /**
- * A class that contains all of game's resources (grphics in this case).
+ * Klasa zawierająca wszystkie zasoby potrzebne w grze. Zaprojektowana jako singleton, więc dostęp do niej można uzyskać z każdeg miejsca.
  * 
  * @author Łukasz Frącz
  *
  */
 public class ResourcesManager {
 
-	/**An instance of class. */
+	/**Instancja klasy. */
 	private static final ResourcesManager INSTANCE = new ResourcesManager();
 	
 	/**
-	 * @return Instance of class
+	 * @return Instancję klasy
 	 */
 	public static ResourcesManager getInstance() {
 		return INSTANCE;
 	}
 	
 	/**
-	 * Method that prepre object, so it can be use later.
+	 * Metoda przygotowująca menadżer
 	 * 
-	 * @param engine Game's engine
-	 * @param activity Main activity
-	 * @param camera Game's camera
-	 * @param vbom 
+	 * @param engine Silnik gry
+	 * @param activity Referencja do activity
+	 * @param camera Kamera obsługująca grę
+	 * @param vbom Menadżer objektów
 	 */
 	public static void prepareManager(Engine engine, MainMenuActivity activity, 
 			Camera camera, VertexBufferObjectManager vbom) {
@@ -57,15 +57,24 @@ public class ResourcesManager {
 	
 	// --------
 	
+	/**Silnik aplikacji*/
 	private Engine engine;
+	/**Acitivity aplikacji*/
 	private MainMenuActivity activity;
+	/**Kamera w grze*/
 	private Camera camera;
+	/**Menadżer objektów*/
 	private VertexBufferObjectManager vbom;
 	
 	// splash
+	/**Tekstura występująca na splash screenie*/
 	private ITextureRegion splashRegion;
+	/**Atlas tekstur występujących na splash screenie*/
 	private BitmapTextureAtlas splashTextureAtlas;
 	
+	/**
+	 * Ładuje zasoby dla potrzeb splash screenu
+	 */
 	public void loadSplashScreen() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 		splashTextureAtlas = new BitmapTextureAtlas(activity.getTextureManager(),
@@ -76,69 +85,127 @@ public class ResourcesManager {
 		splashTextureAtlas.load();
 	}
 	
+	/**
+	 * Usuwa z pamięci zasoby użytw w splash screenie.
+	 */
 	public void unloadSplashScreen() {
 		splashTextureAtlas.unload();
 		splashRegion = null;
 	}
 	
+	/**
+	 * @return Tekstura występująca na splash screenie
+	 */
+	public ITextureRegion getSplashRegion() {
+		return splashRegion;
+	}
+	
 	// menu
+	/**Tekstura tła w menu*/
 	private ITextureRegion menuBackgroundRegion;
+	/**Tekstura przycisku "single player"*/
 	private ITextureRegion singleButtonRegion;
+	/**Tekstura przycisku "multi player"*/
 	private ITextureRegion multiButtonRegion;
+	/**Tekstura przycisku "start"*/
 	private ITextureRegion startButtonRegion;
+	/**Tekstura przycisku "back"*/
 	private ITextureRegion backMenuButtonRegion;
+	/**Tekstura przycisku "high scores"*/
 	private ITextureRegion highScoresButtonRegion;
+	/**Tekstura przycisku "host game"*/
 	private ITextureRegion hostButtonRegion;
+	/**Tekstura przycisku "join game"*/
 	private ITextureRegion joinButtonRegion;
+	/**Tekstura ikony oczekiwania*/
 	private ITextureRegion waitIconRegion;
+	/**Tekstura ikony znalezienia czegoś*/
 	private ITextureRegion haveSomethingIconRegion;
+	/**Teksura ikony startu*/
 	private ITextureRegion goIconRegion;
+	/**Atlas tekstur używanych w menu głównym*/
 	private BuildableBitmapTextureAtlas menuTextureAtlas;
 	
+	/**
+	 * @return Tekstura tła w menu
+	 */
 	public ITextureRegion getMenuBackgroundRegion() {
 		return menuBackgroundRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "single player"
+	 */
 	public ITextureRegion getSingleButtonRegion() {
 		return singleButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "multi player"
+	 */
 	public ITextureRegion getMultiButtonRegion() {
 		return multiButtonRegion;
 	}
-	
+	 
+	/**
+	 * @return Tekstura przycisku "start"
+	 */
 	public ITextureRegion getStartButtonRegion() {
 		return startButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "back"
+	 */
 	public ITextureRegion getBackMenuButtonRegion() {
 		return backMenuButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "high scores"
+	 */
 	public ITextureRegion getHighScoresButtonRegion() {
 		return highScoresButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "host game"
+	 */
 	public ITextureRegion getHostButtonRegion() {
 		return hostButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "join game"
+	 */
 	public ITextureRegion getJoinButtonRegion() {
 		return joinButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura ikony oczekiwania
+	 */
 	public ITextureRegion getWaitIconRegion() {
 		return waitIconRegion;
 	}
 	
+	/**
+	 * @return Tekstura ikony znalezienia czegoś
+	 */
 	public ITextureRegion getHaveSomethingIconRegion() {
 		return haveSomethingIconRegion;
 	}
 	
+	/**
+	 * @return Teksura ikony startu
+	 */
 	public ITextureRegion getGoIconRegion() {
 		return goIconRegion;
 	}
 	
+	/**
+	 * Przygotowuje zasoby dla potrzeb menu głównego
+	 */
 	private void loadMenuGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/menu/");
 		menuTextureAtlas = new BuildableBitmapTextureAtlas(activity.getTextureManager(),
@@ -175,18 +242,34 @@ public class ResourcesManager {
 		}
 	}
 	
+	/**
+	 * Kasuje z pamięci zasoby użyte w menu głównym
+	 */
 	public void unloadMenuTextures() {
 		menuTextureAtlas.unload();
 	}
 	
+	/**
+	 * Ładuje do pamięci zasoby potrzebne w menu głównym
+	 */
 	public void loadMenuTextures() {
 		menuTextureAtlas.load();
 	}
 	
-	// loading
-	private Font font;
-	private Font fontSmall;
+	/**
+	 * Przygotowuje wszystkie zasoby potrzebne w menu głównym
+	 */
+	public void loadMenuResources() {
+		loadMenuGraphics();
+		loadMenuFonts();
+	}
 	
+	/**Czcionka używana w grze*/
+	private Font font;
+	
+	/**
+	 * Ładuje czcionkę używaną w grze
+	 */
 	private void loadMenuFonts() {
 		FontFactory.setAssetBasePath("fonts/");
 		ITexture mainFontTexture = new BitmapTextureAtlas(activity.getTextureManager(),
@@ -196,115 +279,182 @@ public class ResourcesManager {
 				mainFontTexture, activity.getAssets(), "7TH.ttf", 30, true,
 				Color.WHITE, 2, Color.BLACK);
 		font.load();
-		
-		fontSmall = FontFactory.createStrokeFromAsset(activity.getFontManager(),
-				mainFontTexture, activity.getAssets(), "7TH.ttf", 40, true,
-				Color.WHITE, 2, Color.BLACK);
-		fontSmall.load();
 	}
 	
+	/**
+	 * @return Czcionka używana w grze
+	 */
 	public Font getFont() {
 		return font;
 	}
 	
-	public Font getFontSmall() {
-		return fontSmall;
-	}
-	
 	// game
+	/**Atlas tekstur obiektów występujących na ekranie gry*/
 	private BuildableBitmapTextureAtlas gameTextureAtlas;
+	/**Tekstura gracza*/
 	private ITextureRegion playerRegion;
+	/**Tekstura drugiego gracza*/
 	private ITextureRegion player2Region;
+	/**Tekstura meteoru*/
 	private ITextureRegion meteorRegion;
+	/**Tekstura wystrzału*/
 	private ITextureRegion missileRegion;
+	/**Tekstura pocisku*/
 	private ITextureRegion bulletRegion;
+	/**Tekstura lekkiego myśliwca*/
 	private ITextureRegion lightFighterRegion;
+	/**Tekstura ciężkiego myśliwca*/
 	private ITextureRegion heavyFighterRegion;
+	/**Tekstura krążownika*/
 	private ITextureRegion cruiserRegion;
+	/**Tekstura gałki analogowej*/
 	private ITextureRegion analogRegion;
+	/**Tekstura tła gałki analogowej*/
 	private ITextureRegion analogBackgroundRegion;
+	/**Tekstura przycisku wystrzału*/
 	private ITextureRegion fireButtonRegion;
+	/**Tekstura przycisku "resume"*/
 	private ITextureRegion resumeButtonRegion;
+	/**Tekstura przycisku "back to menu"*/
 	private ITextureRegion backButtonRegion;
+	/**Tekstura przycisku "yes"*/
 	private ITextureRegion yesButtonRegion;
+	/**Tekstura przycisku "no"*/
 	private ITextureRegion noButtonRegion;
+	/**Tekstura tła panelu kontrolnego*/
 	private ITextureRegion gamepadBackgroundRegion;
 	
+	/**Atlas tekstur tła*/
 	private BitmapTextureAtlas backgroundAtlas;
+	/**Tekstury tła*/
 	private TiledTextureRegion backgroundRegion;
 	
 	public BuildableBitmapTextureAtlas getGameTextureAtlas() {
 		return gameTextureAtlas;
 	}
 	
+	/**
+	 * @return Tekstura gracza
+	 */
 	public ITextureRegion getPlayerRegion() {
 		return playerRegion;
 	}
 	
+	/**
+	 * @return Tekstura drugiego gracza
+	 */
 	public ITextureRegion getPlayer2Region() {
 		return player2Region;
 	}
 	
+	/**
+	 * @return Tekstura meteoru
+	 */
 	public ITextureRegion getMeteorRegion() {
 		return meteorRegion;
 	}
 	
+	/**
+	 * @return Tekstura wystrzału
+	 */
 	public ITextureRegion getMissileRegion() {
 		return missileRegion;
 	}
 	
+	/**
+	 * @return Tekstura pocisku
+	 */
 	public ITextureRegion getBulletRegion() {
 		return bulletRegion;
 	}
 	
+	/**
+	 * @return Tekstura lekkiego myśliwca
+	 */
 	public ITextureRegion getLightFighterRegion() {
 		return lightFighterRegion;
 	}
 	
+	/**
+	 * @return Tekstura ciężkiego myśliwca
+	 */
 	public ITextureRegion getHeavyFighterRegion() {
 		return heavyFighterRegion;
 	}
 	
+	/**
+	 * @return Tekstura krążownika
+	 */
 	public ITextureRegion getCruiserRegion() {
 		return cruiserRegion;
 	}
 	
+	/**
+	 * @return Tekstura gałki analogowej
+	 */
 	public ITextureRegion getAnalogRegion() {
 		return analogRegion;
 	}
 	
+	/**
+	 * @return Tekstura tła gałki analogowej
+	 */
 	public ITextureRegion getAnalogBackgroundRegion() {
 		return analogBackgroundRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku wystrzału
+	 */
 	public ITextureRegion getFireButtonRegion() {
 		return fireButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "resume"
+	 */
 	public ITextureRegion getResumeButtonRegion() {
 		return resumeButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "back to menu"
+	 */
 	public ITextureRegion getBackButtonRegion() {
 		return backButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "yes"
+	 */
 	public ITextureRegion getYesButtonRegion() {
 		return yesButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura przycisku "no"
+	 */
 	public ITextureRegion getNoButtonRegion() {
 		return noButtonRegion;
 	}
 	
+	/**
+	 * @return Tekstura tła panelu kontrolnego
+	 */
 	public ITextureRegion getGamepadBackgroundRegion() {
 		return gamepadBackgroundRegion;
 	}
 
+	/**
+	 * @return Tekstury tła
+	 */
 	public TiledTextureRegion getBackgroundRegion() {
 		return backgroundRegion;
 	}
 	
+	/**
+	 * Przygotowuje zasoby do użycia w grze
+	 */
 	private void loadGameGraphics() {
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/game/");
 	    gameTextureAtlas = new BuildableBitmapTextureAtlas(
@@ -358,37 +508,46 @@ public class ResourcesManager {
 	    }
 	}
 	
-	public void loadMenuResources() {
-		loadMenuGraphics();
-		loadMenuFonts();
-	}
-	
+	/**
+	 * Ładuje zasoby potrzebne w grze
+	 */
 	public void loadGameResources() {
 		loadGameGraphics();
 	}
 	
+	/**
+	 * Usuwa z pamięci zasoby używane w grze
+	 */
 	public void unloadGameResources() {
 		gameTextureAtlas.unload();
         backgroundAtlas.unload();
 	}
 	
+	/**
+	 * @return Silnik aplikacji
+	 */
 	public Engine getEngine() {
 		return engine;
 	}
 	
+	/**
+	 * @return Activity
+	 */
 	public MainMenuActivity getActivity() {
 		return activity;
 	}
 	
+	/**
+	 * @return Kamera gry
+	 */
 	public Camera getCamera() {
 		return camera;
 	}
 	
+	/**
+	 * @return Menadżer objektów
+	 */
 	public VertexBufferObjectManager getVbom() {
 		return vbom;
-	}
-	
-	public ITextureRegion getSplashRegion() {
-		return splashRegion;
 	}
 }

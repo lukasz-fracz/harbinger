@@ -15,11 +15,20 @@ import org.andengine.util.debug.Debug;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 
+/**Scena z tabelą wyników.
+ * @author Łukasz Frącz
+ *
+ */
 public class HighScoresScene extends BaseScene {
 
+	/**Wyniki wyświetlane na ekranie*/
 	private Text[] scoresText;
+	/**Napis "hisgh scores"*/
 	private Text highScoresText;
 	
+	/**Tworzy scenę
+	 * @see com.project.harbinger.scene.BaseScene#createScene()
+	 */
 	@Override
 	public void createScene() {
 		createBackground();
@@ -40,6 +49,9 @@ public class HighScoresScene extends BaseScene {
 		}
 	}
 	
+	/**
+	 * Uaktualnia tabelę wyników
+	 */
 	public void refresh() {
 		Debug.e("Rereshuje");
 		List<Integer> scores;
@@ -61,22 +73,35 @@ public class HighScoresScene extends BaseScene {
 		}
 	}
 
+	/**Metoda wywoływana po naciśnięciu przycisku "back". Powraca do menu głównego
+	 * @see com.project.harbinger.scene.BaseScene#onBackKeyPressed()
+	 */
 	@Override
 	public void onBackKeyPressed() {
 		SceneManager.getInstance().backToMenu();
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#getSceneType()
+	 * @return Typ sceny (ekran wyników)
+	 */
 	@Override
 	public SceneType getSceneType() {
 		return SceneType.SCENE_HIGH_SCORES;
 	}
 
+	/**Niszczy scenę
+	 * @see com.project.harbinger.scene.BaseScene#disposeScene()
+	 */
 	@Override
 	public void disposeScene() {
 		detachSelf();
 		dispose();
 	}
 
+	/**
+	 * Tworzy tło
+	 */
 	private void createBackground() {
 		setBackground(new Background(Color.BLACK));
 	}

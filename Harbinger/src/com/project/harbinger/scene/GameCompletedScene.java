@@ -21,12 +21,26 @@ import android.content.Context;
 import com.project.harbinger.manager.SceneManager;
 import com.project.harbinger.manager.SceneManager.SceneType;
 
+/**Scena pokazywana po zakończeniu gry dla jednego gracza.
+ * Pokazuje tablicę wyników i wynik gracza (o ile był dostatecznie wysoki)
+ * 
+ * @author Łukasz Frącz
+ *
+ */
 public class GameCompletedScene extends BaseScene {
 
+	/**Napis "game completed"*/
 	private Text gameCompletedText;
+	/**Napisy z poszczególnymi wynikami*/
 	private Text[] scoresText;
+	/**Lista wyników*/
 	private List<Integer> scores;
 	
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#createScene()
+	 * 
+	 * Tworzy scenę
+	 */
 	@Override
 	public void createScene() {
 		createBackground();
@@ -57,12 +71,19 @@ public class GameCompletedScene extends BaseScene {
 		}
 	}
 	
+	/**Przygotowuje scenę
+	 * 
+	 * @param score Wynik gracza
+	 */
 	public void prepareScene(int score) {
 		setScore(score);
 		showHighScores();
 	}
 	
-	public void setScore(int score) {
+	/**Dodaje wynik gracza do listy wyników.
+	 * @param score Wynik gracza
+	 */
+	private void setScore(int score) {
 		Debug.e("Twój wynik: " + String.valueOf(score));
 		if (score < scores.get(9)) {
 			return;
@@ -92,7 +113,10 @@ public class GameCompletedScene extends BaseScene {
 		}
 	}
 	
-	public void showHighScores() {
+	/**
+	 * Wyświetla na ekranie listę wyników
+	 */
+	private void showHighScores() {
 		for (int i = 0; i < 10; i++) {
 			scoresText[i].setColor(Color.WHITE);
 			if (scores.get(i) < 0) {
@@ -113,25 +137,43 @@ public class GameCompletedScene extends BaseScene {
 		}
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#onBackKeyPressed()
+	 * 
+	 * Metoda wywoływana po naciśnięciu przycisku "back"
+	 */
 	@Override
 	public void onBackKeyPressed() {
 		for (int i = 0; i < 10; i++) {
 			detachChild(scoresText[i]);
 		}
-		SceneManager.getInstance().loadMenuScene(engine);
+		SceneManager.getInstance().loadMenuScene();
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#getSceneType()
+	 * 
+	 * @return Typ sceny
+	 */
 	@Override
 	public SceneType getSceneType() {
 		return SceneType.SCENE_GAME_COMPLETED;
 	}
 
+	/**
+	 * @see com.project.harbinger.scene.BaseScene#disposeScene()
+	 * 
+	 * Metoda wywoływana przy usuwaniu sceny
+	 */
 	@Override
 	public void disposeScene() {
 		detachSelf();
 		dispose();
 	}
 	
+	/**
+	 * Metoda tworząca tło
+	 */
 	private void createBackground() {
 		setBackground(new Background(Color.BLACK));
 	}
